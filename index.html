@@ -692,7 +692,7 @@
                     description: "You need to belong",
                     costs: {time: 30, independence: 1},
                     rewards: {friendship: 2, identity: 1},
-                    requirements: {identity: 1},
+                    requirements: {identity": 1},
                     message: "Finding your tribe means both acceptance and compromise.",
                     repeatable: true,
                     triggerConditions: [{resource: "identity", operator: ">=", value: 1}],
@@ -718,9 +718,31 @@
                     rewards: {experience: 3, pain: 1, regret: 1},
                     requirements: {passion: 2},
                     message: "Some lessons can only be learned through consequences.",
-                    repeatable: true,
-                    triggerConditions: [{resource: "passion", operator: ">=", value: 2}],
-                    hideConditions: []
+                    repeatable": true,
+                    triggerConditions": [{"resource": "passion", "operator": ">=", "value": 2}],
+                    hideConditions": []
+                },
+                {
+                    "id": "choose_artistic_path",
+                    "stageId": "adolescence",
+                    "description": "Dedicate yourself to the unpredictable muse of art.",
+                    "costs": {"time": 100, "stability": 1, "money": 1},
+                    "rewards": {"passion": 3, "experience": 2, "anxiety": 1, "career_path_artistic": 1},
+                    "message": "You choose the artist's uncertain road, rich in passion, fraught with instability.",
+                    "repeatable": false,
+                    "triggerConditions": [{"resource": "identity", "operator": ">=", "value": 2}],
+                    "hideConditions": [{"resource": "career_path_stable", "operator": ">=", "value": 1}]
+                },
+                {
+                    "id": "choose_stable_path",
+                    "stageId": "adolescence",
+                    "description": "Opt for a conventional path, valuing security and predictability.",
+                    "costs": {"time": 100, "passion": 1, "curiosity": 1},
+                    "rewards": {"stability": 3, "money": 2, "contentment": 1, "career_path_stable": 1},
+                    "message": "You choose the well-trodden road, promising security and a measure of peace.",
+                    "repeatable": false,
+                    "triggerConditions": [{"resource": "identity", "operator": ">=", "value": 2}],
+                    "hideConditions": [{"resource": "career_path_artistic", "operator": ">=", "value": 1}]
                 },
 
                 // Adulthood stage problems (~1600 weeks total)
@@ -740,7 +762,7 @@
                     stageId: "adulthood",
                     description: "You need to rest and recover",
                     costs: {time: 20},
-                    rewards: {energy: 2},
+                    rewards: {energy": 2},
                     requirements: {},
                     message: "Taking time to rest restores your energy.",
                     repeatable: true,
@@ -755,7 +777,7 @@
                     rewards: {independence: 2},
                     requirements: {},
                     message: "Setting boundaries helps establish your independence.",
-                    repeatable: true,
+                    repeatable": true,
                     triggerConditions: [],
                     hideConditions: []
                 },
@@ -767,7 +789,7 @@
                     rewards: {vulnerability: 2},
                     requirements: {},
                     message: "Sharing your true self creates opportunities for deeper connections.",
-                    repeatable: true,
+                    repeatable": true,
                     triggerConditions: [],
                     hideConditions: []
                 },
@@ -779,9 +801,9 @@
                     rewards: {stability: 2, purpose: 1},
                     requirements: {},
                     message: "You plant roots, establishing foundations that both support and constrain.",
-                    repeatable: false,
+                    repeatable": false,
                     triggerConditions: [],
-                    hideConditions: []
+                    hideConditions": []
                 },
                 {
                     id: "provide",
@@ -791,9 +813,9 @@
                     rewards: {money: 3, stress: 1},
                     requirements: {stability: 2},
                     message: "Resources must be secured. The world demands payment for existence.",
-                    repeatable: true,
+                    repeatable": true,
                     triggerConditions: [{resource: "stability", operator: ">=", value: 2}],
-                    hideConditions: []
+                    hideConditions": []
                 },
                 {
                     id: "achieve",
@@ -803,12 +825,95 @@
                     rewards: {success: 2, stress: 1},
                     requirements: {purpose: 1, money: 3},
                     message: "Ambitions materialize through persistent effort, though never exactly as imagined.",
-                    repeatable: true,
+                    repeatable": true,
                     triggerConditions: [
                         {resource: "purpose", operator: ">=", value: 1},
                         {resource: "money", operator: ">=", value: 3}
                     ],
-                    hideConditions: []
+                    hideConditions": []
+                },
+                {
+                    "id": "question_tapestry",
+                    "stageId": "adulthood",
+                    "description": "The intricate weave of your life suddenly feels alien. Was this the pattern you meant to create? Question the threads.",
+                    "costs": {"time": 70, "energy": 1, "stability": 1},
+                    "rewards": {"perspective": 2, "wisdom": 1, "regret": 1},
+                    "message": "You gaze upon your life's work, its flaws and beauties intertwined. Some choices now seem inevitable, others, a mystery. A deeper understanding settles.",
+                    "repeatable": false,
+                    "triggerConditions": [{"resource": "stress", "operator": ">=", "value": 3}, {"resource": "purpose", "operator": ">=", "value": 1}],
+                    "hideConditions": []
+                },
+                {
+                    "id": "midlife_artistic_struggle",
+                    "stageId": "adulthood",
+                    "description": "Years into your artistic path, doubt and financial insecurity test your resolve.",
+                    "costs": {"time": 80, "energy": 2, "joy": 1},
+                    "rewards": {"wisdom": 2, "pain": 1, "resilience": 1},
+                    "message": "The path of passion demands its price, yet resilience is forged in the fires of uncertainty.",
+                    "repeatable": false,
+                    "triggerConditions": [{"resource": "career_path_artistic", "operator": ">=", "value": 1}, {"resource": "time", "operator": "<=", "value": 1800}],
+                    "hideConditions": []
+                },
+                {
+                    "id": "midlife_stable_reflection",
+                    "stageId": "adulthood",
+                    "description": "Your stable career provided security, but a quiet longing for unpursued passions surfaces.",
+                    "costs": {"time": 80, "energy": 1, "contentment": 1},
+                    "rewards": {"perspective": 2, "regret": 1, "wisdom": 1},
+                    "message": "Security has its comforts, yet the ghosts of abandoned dreams whisper in quiet moments.",
+                    "repeatable": false,
+                    "triggerConditions": [{"resource": "career_path_stable", "operator": ">=", "value": 1}, {"resource": "time", "operator": "<=", "value": 1800}],
+                    "hideConditions": []
+                },
+                {
+                    "id": "pursue_lost_passion",
+                    "stageId": "adulthood",
+                    "description": "Act on your reflections: dedicate time to a long-neglected passion or a new dream.",
+                    "costs": {"time": 150, "money": 2, "stability": 2, "stress": 1},
+                    "rewards": {"fulfillment": 3, "joy": 2, "anxiety": 1, "rekindled_passion_project": 1},
+                    "message": "You divert your river. The new channel is uncertain, yet vibrant with rediscovered energy.",
+                    "repeatable": false,
+                    "triggerConditions": [
+                        {"resource": "perspective", "operator": ">=", "value": 2}, 
+                        {"resource": "wisdom", "operator": ">=", "value": 1}
+                    ],
+                    "hideConditions": [{"resource": "doubled_down_on_commitments", "operator": ">=", "value": 1}]
+                },
+                {
+                    "id": "reaffirm_commitments",
+                    "stageId": "adulthood",
+                    "description": "Act on your reflections: deepen your focus on your current commitments and responsibilities.",
+                    "costs": {"time": 120, "energy": 2, "joy": 1},
+                    "rewards": {"stability": 3, "purpose": 2, "contentment": 1, "doubled_down_on_commitments": 1},
+                    "message": "You choose to tend the garden you've planted. There is a quiet strength in reaffirming your chosen path.",
+                    "repeatable": false,
+                    "triggerConditions": [
+                        {"resource": "perspective", "operator": ">=", "value": 2}, 
+                        {"resource": "wisdom", "operator": ">=", "value": 1}
+                    ],
+                    "hideConditions": [{"resource": "rekindled_passion_project", "operator": ">=", "value": 1}]
+                },
+                {
+                    "id": "late_bloom_fulfillment",
+                    "stageId": "adulthood",
+                    "description": "Your late pursuit of passion, though challenging, brings unexpected fulfillment.",
+                    "costs": {"time": 70, "money": 1},
+                    "rewards": {"meaning": 2, "joy": 2, "wisdom": 1},
+                    "message": "It was not easy, but the soul sings a song long silenced.",
+                    "repeatable": false,
+                    "triggerConditions": [{"resource": "rekindled_passion_project", "operator": ">=", "value": 1}],
+                    "hideConditions": []
+                },
+                {
+                    "id": "quiet_depth_in_routine",
+                    "stageId": "adulthood",
+                    "description": "Recommitting to your path reveals deeper layers of meaning and connection within it.",
+                    "costs": {"time": 70, "energy": 1},
+                    "rewards": {"purpose": 2, "contentment": 2, "wisdom": 1},
+                    "message": "Familiar paths, walked with intention, can lead to profound discoveries.",
+                    "repeatable": false,
+                    "triggerConditions": [{"resource": "doubled_down_on_commitments", "operator": ">=", "value": 1}],
+                    "hideConditions": []
                 },
                 {
                     id: "love",
@@ -818,7 +923,7 @@
                     rewards: {connection: 2, meaning: 1},
                     requirements: {},
                     message: "To love is to risk, to grow, to become.",
-                    repeatable: true,
+                    repeatable": true,
                     triggerConditions: []
                 },
                 {
@@ -829,9 +934,9 @@
                     rewards: {love: 3, hurt: 1},
                     requirements: {},
                     message: "Meaningful bonds require exposure of your truest self, for better or worse.",
-                    repeatable: false,
+                    repeatable": false,
                     triggerConditions: [],
-                    hideConditions: []
+                    hideConditions": []
                 },
                 {
                     id: "nurture",
@@ -841,175 +946,241 @@
                     rewards: {fulfillment: 3, exhaustion: 2},
                     requirements: {love: 3},
                     message: "Giving of yourself creates both profound meaning and profound depletion.",
-                    repeatable: true,
+                    repeatable": true,
                     triggerConditions: [{resource: "love", operator: ">=", value: 3}],
-                    hideConditions: []
+                    hideConditions": []
                 },
                 {
                     id: "balance",
-                    stageId: "adulthood",
+                    stageId": "adulthood",
                     description: "You need to find balance",
                     costs: {time: 120, success: 1, money: 1},
                     rewards: {wisdom: 2, contentment: 1},
                     requirements: {stress: 2, exhaustion: 2},
                     message: "The pursuit of everything results in mastery of nothing. Choices become necessary.",
-                    repeatable: false,
-                    triggerConditions: [
+                    repeatable": false,
+                    triggerConditions": [
                         {resource: "stress", operator: ">=", value: 2},
                         {resource: "exhaustion", operator: ">=", value: 2}
                     ],
-                    hideConditions: []
+                    hideConditions": []
                 },
 
                 // Old Age stage problems (~700 weeks total)
                 {
                     id: "rest_old_age",
-                    stageId: "old_age",
+                    stageId": "old_age",
                     description: "You need to rest your weary bones",
                     costs: {time: 20},
                     rewards: {energy: 1},
                     requirements: {},
                     message: "A long rest restores some of your diminishing energy.",
-                    repeatable: true,
+                    repeatable": true,
                     solveTime: 20000,
                     triggerConditions: [],
-                    hideConditions: []
+                    hideConditions": []
                 },
                 {
                     id: "manage_time",
-                    stageId: "old_age",
+                    stageId": "old_age",
                     description: "You need to manage your time carefully",
                     costs: {time: 30, energy: 1},
                     rewards: {time: 2},
                     requirements: {},
                     message: "Through careful planning, you make the most of your limited energy.",
-                    repeatable: true,
-                    solveTime: 2000,
-                    triggerConditions: [],
-                    hideConditions: []
+                    repeatable": true,
+                    solveTime": 2000,
+                    triggerConditions": [],
+                    hideConditions": []
                 },
                 {
                     id: "reflect",
-                    stageId: "old_age",
+                    stageId": "old_age",
                     description: "You need to reflect on your life",
                     costs: {time: 50, energy: 1},
                     rewards: {perspective: 3, regret: 1},
                     requirements: {},
                     message: "The patterns of your life reveal themselves only in retrospect.",
-                    repeatable: false,
-                    triggerConditions: [],
-                    hideConditions: []
+                    repeatable": false,
+                    triggerConditions": [],
+                    hideConditions": []
                 },
                 {
                     id: "take_pride",
-                    stageId: "old_age",
+                    stageId": "old_age",
                     description: "You need to take pride in your achievements",
                     costs: {time: 40, energy: 1},
                     rewards: {pride: 2},
                     requirements: {perspective: 2},
                     message: "Looking back at your accomplishments, you feel a sense of pride.",
-                    repeatable: true,
-                    triggerConditions: [{resource: "perspective", operator: ">=", value: 2}],
-                    hideConditions: []
+                    repeatable": true,
+                    triggerConditions": [{"resource": "perspective", "operator": ">=", "value": 2}],
+                    hideConditions": []
+                },
+                {
+                    "id": "share_wisdom",
+                    "stageId": "old_age",
+                    "description": "Your cup of experience overflows. Share your stories, your insights, with those who walk behind you.",
+                    "costs": {"time": 60, "energy": 1, "pride": 1},
+                    "rewards": {"meaning": 2, "serenity": 1, "connection": 1},
+                    "message": "Your words find fertile ground, planting seeds of understanding in younger souls. A quiet sense of continuity warms you.",
+                    "repeatable": false,
+                    "triggerConditions": [{"resource": "wisdom", "operator": ">=", "value": 2}, {"resource": "perspective", "operator": ">=", "value": 3}],
+                    "hideConditions": []
+                },
+                {
+                    "id": "choose_solitude_late",
+                    "stageId": "old_age",
+                    "description": "Withdraw from worldly demands to focus on inner peace and quiet reflection.",
+                    "costs": {"time": 100, "friendship": 2, "connection": 1},
+                    "rewards": {"serenity": 3, "perspective": 2, "peace": 1, "embraced_solitude_late": 1},
+                    "message": "In quiet solitude, the universe within unfolds its subtle landscapes.",
+                    "repeatable": false,
+                    "triggerConditions": [
+                        {"resource": "meaning", "operator": ">=", "value": 2},
+                        {"resource": "serenity", "operator": ">=", "value": 1}
+                    ],
+                    "hideConditions": [{"resource": "strengthened_community_ties_late", "operator": ">=", "value": 1}]
+                },
+                {
+                    "id": "choose_community_late",
+                    "stageId": "old_age",
+                    "description": "Devote your remaining energy to nurturing bonds with family, friends, and community.",
+                    "costs": {"time": 100, "energy": 2, "serenity": 1},
+                    "rewards": {"fulfillment": 3, "connection": 2, "love": 1, "strengthened_community_ties_late": 1},
+                    "message": "The warmth of shared stories and mutual support illuminates your twilight years.",
+                    "repeatable": false,
+                    "triggerConditions": [
+                        {"resource": "meaning", "operator": ">=", "value": 2},
+                        {"resource": "serenity", "operator": ">=", "value": 1}
+                    ],
+                    "hideConditions": [{"resource": "embraced_solitude_late", "operator": ">=", "value": 1}]
+                },
+                {
+                    "id": "serene_hermitage",
+                    "stageId": "old_age",
+                    "description": "Your chosen solitude brings a profound, unshakable peace.",
+                    "costs": {"time": 50},
+                    "rewards": {"transcendence": 1, "peace": 2},
+                    "message": "The world recedes, and in its place, a quiet hum of cosmic belonging.",
+                    "repeatable": false,
+                    "triggerConditions": [{"resource": "embraced_solitude_late", "operator": ">=", "value": 1}],
+                    "hideConditions": []
+                },
+                {
+                    "id": "golden_gatherings",
+                    "stageId": "old_age",
+                    "description": "Your investment in community yields a rich harvest of shared joy and support.",
+                    "costs": {"time": 50},
+                    "rewards": {"joy": 2, "love": 2},
+                    "message": "Surrounded by loved ones, your life feels like a tapestry woven with shared threads of gold.",
+                    "repeatable": false,
+                    "triggerConditions": [{"resource": "strengthened_community_ties_late", "operator": ">=", "value": 1}],
+                    "hideConditions": []
                 },
                 {
                     id: "accept",
-                    stageId: "old_age",
+                    stageId": "old_age",
                     description: "You need to accept your limitations",
-                    costs: {time: 60, pride: 2},
-                    rewards: {serenity: 2, frustration: 1},
-                    requirements: {perspective: 3},
+                    costs": {"time": 60, "pride": 2},
+                    rewards": {"serenity": 2, "frustration": 1},
+                    requirements": {"perspective": 3},
                     message: "The body betrays, the mind falters, but acceptance brings its own peace.",
-                    repeatable: false,
-                    triggerConditions: [{resource: "perspective", operator: ">=", value: 3}],
-                    hideConditions: []
+                    repeatable": false,
+                    triggerConditions": [{"resource": "perspective", "operator": ">=", "value": 3}],
+                    hideConditions": []
                 },
                 {
                     id: "preserve",
-                    stageId: "old_age",
+                    stageId": "old_age",
                     description: "You need to preserve your legacy",
-                    costs: {time: 80, energy: 2},
-                    rewards: {meaning: 3, anxiety: 1},
-                    requirements: {},
+                    costs": {"time": 80, "energy": 2},
+                    rewards": {"meaning": 3, "anxiety": 1},
+                    requirements": {},
                     message: "What will remain when you are gone? The question becomes unavoidable.",
-                    repeatable: false,
-                    triggerConditions: [],
-                    hideConditions: []
+                    repeatable": false,
+                    triggerConditions": [],
+                    hideConditions": []
                 },
                 {
                     id: "release",
-                    stageId: "old_age",
+                    stageId": "old_age",
                     description: "You need to release your attachments",
-                    costs: {time: 40, energy: 1},
-                    rewards: {transcendence: 2, serenity: 1},
-                    requirements: {},
+                    costs": {"time": 40, "energy": 1},
+                    rewards": {"transcendence": 2, "serenity": 1},
+                    requirements": {},
                     message: "Letting go becomes both necessity and choice, painful and liberating.",
-                    repeatable: false,
-                    triggerConditions: [{resource: "serenity", operator: ">=", value: 2}],
-                    hideConditions: []
+                    repeatable": false,
+                    triggerConditions": [{"resource": "serenity", "operator": ">=", "value": 2}],
+                    hideConditions": []
                 },
                 {
                     id: "reconcile",
-                    stageId: "old_age",
+                    stageId": "old_age",
                     description: "You need to reconcile with mortality",
-                    costs: {time: 70, energy: 2},
-                    rewards: {peace: 3, serenity: 2},
-                    requirements: {transcendence: 2, perspective: 2},
+                    costs": {"time": 70, "energy": 2},
+                    rewards": {"peace": 3, "serenity": 2},
+                    requirements": {"transcendence": 2, "perspective": 2},
                     message: "The final threshold approaches. You prepare as best you can.",
-                    repeatable: false,
-                    triggerConditions: [
-                        {resource: "transcendence", operator: ">=", value: 2},
-                        {resource: "meaning", operator: ">=", value: 3}
+                    repeatable": false,
+                    triggerConditions": [
+                        {"resource": "transcendence", "operator": ">=", "value": 2},
+                        {"resource": "meaning", "operator": ">=", "value": 3}
                     ],
-                    hideConditions: []
+                    hideConditions": []
                 },
 
                 // Death stage problems (~200 weeks total)
                 {
                     id: "let_go",
-                    stageId: "death",
+                    stageId": "death",
                     description: "You need to let go",
-                    costs: {time: 100, everything: 1},
-                    rewards: {},
-                    requirements: {},
+                    costs": {"time": 100, "everything": 1},
+                    rewards": {},
+                    requirements": {},
                     message: "Breath slows. The grip loosens. All burdens set down at last.",
-                    repeatable: false,
-                    triggerConditions: []
+                    repeatable": false,
+                    triggerConditions": []
                 },
                 {
                     id: "fade",
-                    stageId: "death",
+                    stageId": "death",
                     description: "You are fading",
-                    costs: {time: 60, memories: 'ALL'},
-                    rewards: {dissolution: 1},
-                    requirements: {memories: 1},
+                    costs": {"time": 60, "memories": "ALL"},
+                    rewards": {"dissolution": 1},
+                    requirements": {"memories": 1},
                     message: "Boundaries blur. Self and world merge into indistinction.",
-                    repeatable: false,
-                    triggerConditions: [{resource: "memories", operator: ">=", value: 1}],
-                    hideConditions: []
+                    repeatable": false,
+                    triggerConditions": [{"resource": "memories", "operator": ">=", "value": 1}],
+                    hideConditions": []
                 },
                 {
                     id: "dissolve",
-                    stageId: "death",
+                    stageId": "death",
                     description: "You are dissolving",
-                    costs: {time: 80, dissolution: 1},
-                    rewards: {nothingness: 1},
-                    requirements: {dissolution: 1},
+                    costs": {"time": 80, "dissolution": 1},
+                    rewards": {"nothingness": 1},
+                    requirements": {"dissolution": 1},
                     message: "The final boundary dissolves. There is no more you to experience anything.",
-                    repeatable: false,
-                    triggerConditions: [{resource: "dissolution", operator: ">=", value: 1}],
-                    hideConditions: []
+                    repeatable": false,
+                    triggerConditions": [{"resource": "dissolution", "operator": ">=", "value": 1}],
+                    hideConditions": []
                 }
             ],
             resourceTypes: [
-                "awareness", "perception", "attachment", "energy", "joy", "curiosity",
-                "knowledge", "responsibility", "friendship", "vulnerability", "independence",
-                "identity", "passion", "confusion", "experience", "pain", "regret",
-                "stability", "purpose", "money", "time", "success", "stress", "love",
-                "hurt", "fulfillment", "exhaustion", "wisdom", "contentment", "perspective",
-                "pride", "serenity", "frustration", "possessions", "control", "meaning",
-                "anxiety", "transcendence", "loss", "denial", "peace", "fear", "memories",
-                "dissolution", "nothingness", "everything"
+                "anxiety", "attachment", "awareness",
+                "career_path_artistic",
+                "career_path_stable",
+                "confusion", "contentment", "control", "curiosity", "denial", "dissolution",
+                "doubled_down_on_commitments",
+                "embraced_solitude_late",
+                "energy", "everything", "exhaustion", "experience", "fear", "friendship", "frustration", "fulfillment", "hurt",
+                "identity", "independence", "joy", "knowledge", "loss", "love", "meaning", "memories", "money",
+                "nothingness", "pain", "passion", "peace", "perception", "perspective", "possessions", "pride", "purpose",
+                "rekindled_passion_project",
+                "regret", "responsibility", "serenity", "stability",
+                "strengthened_community_ties_late",
+                "stress", "success", "time", "transcendence", "vulnerability", "wisdom"
             ]
         };
 
