@@ -1,0 +1,2676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMMM</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    <style>
+            /* Dark mode toggle switch styles */
+        /* Dark mode modal and form styles */
+        body.dark-mode #modal-content h3,
+        body.dark-mode #modal-content .text-xl,
+        body.dark-mode .modal-content h3,
+        body.dark-mode .modal-content .text-xl,
+        body.dark-mode .text-xl,
+        body.dark-mode #tab-content h3 {
+            color: #ffffff !important;
+        }
+
+        body.dark-mode #modal-content {
+            background-color: #2d2d2d;
+            color: #ffffff;
+            border-color: #404040;
+        }
+
+        body.dark-mode .bg-blue-500:hover {
+            background-color: #4299e1;
+        }
+
+        body.dark-mode input:focus,
+        body.dark-mode textarea:focus,
+        body.dark-mode select:focus {
+            border-color: #4299e1;
+            outline: none;
+        }
+
+        body.dark-mode #modal-container {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        body.dark-mode .problem {
+            border-color: #404040;
+        }
+
+        body.dark-mode .problem-btn {
+            color: #4299e1;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:not(:checked) + .slider {
+            background-color: #2196F3;
+        }
+
+        input:not(:checked) + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        body.dark-mode #admin-panel {
+            background-color: #2d2d2d;
+            border-color: #404040;
+        }
+
+        body.dark-mode .text-gray-500,
+        body.dark-mode .text-gray-600,
+        body.dark-mode .text-sm {
+            color: #b0b0b0;
+        }
+
+        body.dark-mode .modal-content h3 {
+            color: #ffffff;
+        }
+
+        body.dark-mode .bg-gray-200 {
+            background-color: #4a4a4a;
+            color: #ffffff;
+        }
+
+        body.dark-mode .bg-gray-200:hover {
+            background-color: #5a5a5a;
+        }
+
+        body.dark-mode .italic {
+            color: #b0b0b0;
+        }
+
+        body.dark-mode .border {
+            border-color: #404040;
+        }
+
+        body.dark-mode .tab-active {
+            background-color: #2d2d2d;
+        }
+
+        body.dark-mode input,
+        body.dark-mode select,
+        body.dark-mode textarea,
+        body.dark-mode .modal-content {
+            background-color: #333;
+            color: #ffffff;
+            border-color: #404040;
+        }
+
+        body.dark-mode option {
+            background-color: #333;
+            color: #ffffff;
+        }
+
+        body.dark-mode .modal-content {
+            background-color: #2d2d2d;
+            color: #ffffff;
+        }
+
+        body.dark-mode .modal-content h3,
+        body.dark-mode .modal-content .text-xl,
+        body.dark-mode .text-xl,
+        body.dark-mode #tab-content h3 {
+            color: #ffffff !important;
+        }
+
+        body.dark-mode label,
+        body.dark-mode .text-sm,
+        body.dark-mode .text-gray-500,
+        body.dark-mode .text-gray-600 {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode button:disabled {
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        body.dark-mode .italic {
+            color: #bbb;
+        }
+
+        @keyframes resourceGain {
+                0% { color: inherit; }
+                50% { color: #383; }
+                100% { color: inherit; }
+            }
+
+            .resource-increase {
+                animation: resourceGain 1s ease-in-out;
+            }
+        html, body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #game-section {
+            max-height: none;
+            overflow-y: visible;
+        }
+
+        #admin-panel {
+            max-height: none;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .m-4 {
+                margin: 0.5rem;
+            }
+
+            #game-section, #admin-panel {
+                width: 100%;
+                padding: 0.5rem;
+            }
+        }
+
+        .mx-1 {
+            margin-left: 0.25rem;
+            margin-right: 0.25rem;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #F8F8F8;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #game-section {
+            max-height: none;
+            overflow-y: visible;
+        }
+
+        #admin-panel {
+            background-color: #f0f0f0;
+            border-left: 1px solid #ccc;
+            max-height: 100vh;
+            overflow-y: auto;
+            position: sticky;
+            top: 0;
+        }
+
+        @media (max-width: 768px) {
+            .m-4 {
+                margin: 0.5rem;
+            }
+
+            #game-section, #admin-panel {
+                width: 100%;
+                padding: 0.5rem;
+            }
+        }
+
+        .cost {
+            color: #f33;
+        }
+
+        .award {
+            color: #383;
+        }
+
+        .problem-btn {
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            font: inherit;
+        }
+
+        .problem-btn:disabled {
+            color: #999;
+            text-decoration: none;
+            cursor: not-allowed;
+        }
+
+        .progress-text {
+            font-family: monospace;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .tab-active {
+            background-color: #fff;
+            border-bottom: 2px solid #000;
+        }
+
+        .tab {
+            cursor: pointer;
+        }
+
+        @keyframes resourceLoss {
+          0% { color: inherit; }
+          50% { color: #f44336; }
+          100% { color: inherit; }
+        }
+
+        .resource-increase {
+          animation: resourceGain 1s ease-in-out;
+        }
+
+        .resource-decrease {
+          animation: resourceLoss 1s ease-in-out;
+        }
+    </style>
+</head>
+<body class="m-4">
+    <div class="flex flex-col md:flex-row">
+        <!-- Game Section -->
+        <div id="game-section" class="w-full md:w-7/12 pr-4 max-h-screen overflow-y-auto">
+            <h1 class="text-2xl mb-4">MMMM</h1>
+            <div class="flex justify-between mb-4">
+                <div class="text-sm italic">A journey through the inevitable progression of life</div>
+                <button id="admin-toggle" class="text-xs text-blue-600 underline">Admin Mode</button>
+            </div>
+
+            <div id="stage-indicator" class="mb-4 text-lg"></div>
+            <div id="stage-description" class="italic mb-6"></div>
+
+            <div class="flex flex-col md:flex-row">
+                <!-- Problems Section -->
+                <div id="problems" class="w-full md:w-7/12 pr-8"></div>
+
+                <!-- Resources Section -->
+                <div id="equipment" class="w-full md:w-5/12 mt-4 md:mt-0 pl-4">
+                    <div class="font-bold mb-2">Resources:</div>
+                    <div id="resources-list"></div>
+                </div>
+            </div>
+
+            <div id="message-log" class="mt-6">
+                <div class="font-bold mb-2">Reflections:</div>
+                <div id="messages" class="text-sm"></div>
+            </div>
+        </div>
+
+        <!-- Admin Panel (Hidden by default) -->
+        <div id="admin-panel" class="admin-panel w-full md:w-5/12 p-4 hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl">Admin Panel</h2>
+                <button id="admin-close" class="text-gray-500 hover:text-gray-800">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="flex border-b">
+                <div class="tab tab-active px-4 py-2" data-tab="stages">Stages</div>
+                <div class="tab px-4 py-2" data-tab="problems">Problems</div>
+                <div class="tab px-4 py-2" data-tab="resources">Resources</div>
+                <div class="tab px-4 py-2" data-tab="settings">Settings</div>
+            </div>
+
+            <div id="tab-content" class="p-2">
+                <!-- Tab content will be loaded here -->
+                <div id="stages-tab" class="tab-pane">
+                    <div class="flex justify-between mb-4">
+                        <h3 class="text-lg">Game Stages</h3>
+                        <button id="add-stage" class="bg-blue-500 text-white px-2 py-1 rounded text-sm">+ Add Stage</button>
+                    </div>
+                    <div id="stages-list" class="space-y-2"></div>
+                </div>
+
+                <div id="problems-tab" class="tab-pane hidden">
+                    <div class="flex justify-between mb-4">
+                        <h3 class="text-lg">Problems</h3>
+                        <button id="add-problem" class="bg-blue-500 text-white px-2 py-1 rounded text-sm">+ Add Problem</button>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm mb-1">Filter by Stage:</label>
+                        <select id="problem-stage-filter" class="w-full p-1 border">
+                            <option value="all">All Stages</option>
+                        </select>
+                    </div>
+                    <div id="problems-list" class="space-y-2"></div>
+                </div>
+
+                <div id="resources-tab" class="tab-pane hidden">
+                    <div class="flex justify-between mb-4">
+                        <h3 class="text-lg">Resource Types</h3>
+                        <button id="add-resource" class="bg-blue-500 text-white px-2 py-1 rounded text-sm">+ Add Resource</button>
+                    </div>
+                    <div id="resources-types-list" class="space-y-2"></div>
+                </div>
+
+                <div id="settings-tab" class="tab-pane hidden">
+                    <h3 class="text-lg mb-4">Game Settings</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm mb-1">Import/Export Game Data:</label>
+                            <div class="flex space-x-2">
+                                <button id="export-data" class="bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded text-sm">Export Data</button>
+                                <button id="import-data" class="bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded text-sm">Import Data</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">Reset Game Progress:</label>
+                            <button id="reset-game" class="bg-red-500 text-white px-2 py-1 rounded text-sm">Reset Game Progress</button>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">Load Default Template:</label>
+                            <button id="load-default" class="bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded text-sm">Load Default Game</button>
+                        </div>
+                        <div>
+                            <label for="dark-mode-toggle" class="block text-sm mb-1">Dark Mode:</label>
+                            <label class="switch">
+                              <input type="checkbox" id="dark-mode-toggle">
+                              <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for importing data -->
+    <input type="file" id="import-file" accept=".json" class="hidden">
+
+    <!-- Modal Templates -->
+    <div id="modal-container" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div id="modal-content" class="bg-white p-6 rounded max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <!-- Modal content will be injected here -->
+        </div>
+    </div>
+
+    <script>
+        // Game state and data
+        const DEFAULT_GAME_DATA = {
+            stages: [
+                {
+                    id: "birth",
+                    title: "Birth",
+                    description: "You are not yet aware, but you exist. Potential and nothing more.",
+                    thresholdProblemId: "recognize",
+                    startingResources: {
+                        energy: 3,
+                        time: 4000
+                    }
+                },
+                {
+                    id: "childhood",
+                    title: "Childhood",
+                    description: "The world is new and full of discovery. Everything is possibility.",
+                    thresholdProblemId: "trust",
+                    startingResources: {
+                        energy: 2,
+                    }
+                },
+                {
+                    id: "adolescence",
+                    title: "Adolescence",
+                    description: "Identity and uncertainty intertwine as you outgrow your foundations.",
+                    thresholdProblemId: "risk",
+                    startingResources: {
+                        energy: 2,
+                    }
+                },
+                {
+                    id: "adulthood",
+                    title: "Adulthood",
+                    description: "The weight of choice and consequence. Freedom paired with obligation.",
+                    thresholdProblemId: "balance",
+                    startingResources: {
+                        energy: 3,
+                    }
+                },
+                {
+                    id: "old_age",
+                    title: "Old Age",
+                    description: "The shadow lengthens. Wisdom accumulates as vigor wanes.",
+                    thresholdProblemId: "reconcile",
+                    startingResources: {
+                        energy: 2,
+                    }
+                },
+                {
+                    id: "death",
+                    title: "Death",
+                    description: "All journeys end. The circle closes.",
+                    thresholdProblemId: "dissolve",
+                    startingResources: {}
+                },
+                {
+                    id: "out_of_time",
+                    title: "Out of Time",
+                    description: "Your weeks are spent. Only echoes remain.",
+                    thresholdProblemId: "",
+                    startingResources: {}
+                }
+            ],
+            problems: [
+                // Birth stage problems (~200 weeks total)
+                {
+                    id: "emerge",
+                    stageId: "birth",
+                    description: "You need to emerge into consciousness",
+                    costs: {time: 80},
+                    rewards: {awareness: 1},
+                    requirements: {},
+                    message: "You become dimly aware of your own existence.",
+                    repeatable: false,
+                    triggerConditions: []
+                },
+                {
+                    id: "sense",
+                    stageId: "birth",
+                    description: "You need to sense the world",
+                    costs: {time: 60},
+                    rewards: {perception: 1, awareness: 1},
+                    requirements: {awareness: 1},
+                    message: "The world floods in through your senses.",
+                    repeatable: false,
+                    triggerConditions: [],
+                    hideConditions: [{resource: "awareness", operator: "<", value: 1}]
+                },
+                {
+                    id: "recognize",
+                    stageId: "birth",
+                    description: "You need to recognize familiarity",
+                    costs: {time: 20},
+                    rewards: {awareness: 1, attachment: 1},
+                    requirements: {awareness: 2, perception: 1},
+                    message: "You recognize faces and voices. Comfort emerges from familiarity.",
+                    repeatable: false,
+                    triggerConditions: [
+                        {resource: "awareness", operator: ">=", value: 2},
+                        {resource: "perception", operator: ">=", value: 1}
+                    ],
+                    hideConditions: []
+                },
+
+                // Childhood stage problems (~600 weeks total)
+                {
+                    id: "play",
+                    stageId: "childhood", 
+                    description: "You need to play and explore",
+                    costs: {time: 20, energy: 1},
+                    rewards: {joy: 1, curiosity: 1},
+                    requirements: {},
+                    message: "Through play, you discover yourself and the world.",
+                    repeatable: true,
+                    triggerConditions: []
+                },
+                {
+                    id: "learn",
+                    stageId: "childhood",
+                    description: "You need to learn",
+                    costs: {time: 40, energy: 1},
+                    rewards: {knowledge: 1},
+                    requirements: {curiosity: 1},
+                    message: "Knowledge accumulates through experience and instruction.",
+                    repeatable: true,
+                    triggerConditions: [],
+                    hideConditions: [{resource: "curiosity", operator: "<", value: 1}]
+                },
+                {
+                    id: "understand",
+                    stageId: "childhood",
+                    description: "You need to understand consequences",
+                    costs: {time: 60, joy: 1, curiosity: 1},
+                    rewards: {knowledge: 2, responsibility: 1},
+                    requirements: {knowledge: 2},
+                    message: "Actions have reactions. The world responds to you, and not always kindly.",
+                    repeatable: false,
+                    triggerConditions: [{resource: "knowledge", operator: ">=", value: 2}],
+                    hideConditions: []
+                },
+                {
+                    id: "rest",
+                    stageId: "childhood",
+                    description: "You need to rest and recover",
+                    costs: {time: 20},
+                    rewards: {energy: 2},
+                    requirements: {},
+                    message: "Sleep and rest restore your vitality.",
+                    repeatable: true,
+                    triggerConditions: [],
+                    hideConditions: []
+                },
+                {
+                    id: "connect",
+                    stageId: "childhood",
+                    description: "You need to connect with others",
+                    costs: {time: 30, energy: 1},
+                    rewards: {friendship: 1, attachment: 1},
+                    requirements: {},
+                    message: "Other beings become important. Connections form beyond necessity.",
+                    repeatable: true,
+                    triggerConditions: [],
+                    hideConditions: []
+                },
+                {
+                    id: "trust",
+                    stageId: "childhood",
+                    description: "You need to trust",
+                    costs: {time: 40, attachment: 1},
+                    rewards: {friendship: 2, vulnerability: 1},
+                    requirements: {friendship: 1, attachment: 1},
+                    message: "You learn to depend on others, opening yourself to both support and harm.",
+                    repeatable: false,
+                    triggerConditions: [
+                        {resource: "friendship", operator: ">=", value: 1},
+                        {resource: "attachment", operator: ">=", value: 1}
+                    ],
+                    hideConditions: []
+                },
+
+                // Adolescence stage problems (~700 weeks total)
+                {
+                    id: "search",
+                    stageId: "adolescence",
+                    description: "You need to search for identity",
+                    costs: {time: 60, energy: 1},
+                    rewards: {identity: 1},
+                    requirements: {},
+                    message: "You begin to question who you really are.",
+                    repeatable: false,
+                    triggerConditions: []
+                },
+                {
+                    id: "share_feelings",
+                    stageId: "adolescence",
+                    description: "You need to share your feelings",
+                    costs: {time: 30},
+                    rewards: {vulnerability: 1, friendship: 1},
+                    requirements: {},
+                    message: "Opening up about your inner world creates deeper connections.",
+                    repeatable: true,
+                    triggerConditions: [],
+                    hideConditions: []
+                },
+                {
+                    id: "keep_promises",
+                    stageId: "adolescence",
+                    description: "You need to keep your promises",
+                    costs: {time: 40, energy: 1},
+                    rewards: {responsibility: 2, friendship: 1},
+                    requirements: {},
+                    message: "Following through builds trust and reliability.",
+                    repeatable: true,
+                    triggerConditions: [],
+                    hideConditions: []
+                },
+                {
+                    id: "question",
+                    stageId: "adolescence",
+                    description: "You need to question authority",
+                    costs: {time: 60, attachment: 1, responsibility: 1},
+                    rewards: {independence: 2, stress: 1},
+                    requirements: {knowledge: 4},
+                    message: "The rules that once seemed absolute now appear arbitrary and flawed.",
+                    repeatable: false,
+                    triggerConditions: [{resource: "knowledge", operator: ">=", value: 4}],
+                    hideConditions: []
+                },
+                {
+                    id: "rebel",
+                    stageId: "adolescence",
+                    description: "You need to rebel",
+                    costs: {time: 50, friendship: 1, responsibility: 1},
+                    rewards: {independence: 2, identity: 1},
+                    requirements: {independence: 2},
+                    message: "You push against boundaries to find where you end and the world begins.",
+                    repeatable: false,
+                    triggerConditions: [{resource: "independence", operator: ">=", value: 2}],
+                    hideConditions: []
+                },
+                {
+                    id: "belong",
+                    stageId: "adolescence",
+                    description: "You need to belong",
+                    costs: {time: 30, independence: 1},
+                    rewards: {friendship: 2, identity: 1},
+                    requirements: {identity: 1},
+                    message: "Finding your tribe means both acceptance and compromise.",
+                    repeatable: true,
+                    triggerConditions: [{resource: "identity", operator: ">=", value: 1}],
+                    hideConditions: []
+                },
+                {
+                    id: "desire",
+                    stageId: "adolescence",
+                    description: "You need to experience desire",
+                    costs: {time: 30, vulnerability: 1},
+                    rewards: {passion: 2, confusion: 1},
+                    requirements: {},
+                    message: "New longings emerge that both energize and confuse.",
+                    repeatable: true,
+                    triggerConditions: [],
+                    hideConditions: []
+                },
+                {
+                    id: "risk",
+                    stageId: "adolescence",
+                    description: "You need to take risks",
+                    costs: {time: 70, responsibility: 1, friendship: 1},
+                    rewards: {experience: 3, pain: 1, regret: 1},
+                    requirements: {passion: 2},
+                    message: "Some lessons can only be learned through consequences.",
+                    repeatable: true,
+                    triggerConditions: [{resource: "passion", operator: ">=", value: 2}],
+                    hideConditions: []
+                },
+
+                // Adulthood stage problems (~1600 weeks total)
+                {
+                    id: "work",
+                    stageId: "adulthood",
+                    description: "You need to work",
+                    costs: {time: 80, energy: 2},
+                    rewards: {money: 2, stress: 1},
+                    requirements: {},
+                    message: "Labor shapes both world and self.",
+                    repeatable: true,
+                    triggerConditions: []
+                },
+                {
+                    id: "rest_and_recover",
+                    stageId: "adulthood",
+                    description: "You need to rest and recover",
+                    costs: {time: 20},
+                    rewards: {energy: 2},
+                    requirements: {},
+                    message: "Taking time to rest restores your energy.",
+                    repeatable: true,
+                    triggerConditions: [],
+                    hideConditions: []
+                },
+                {
+                    id: "assert_boundaries",
+                    stageId: "adulthood",
+                    description: "You need to assert your boundaries",
+                    costs: {time: 40, energy: 1},
+                    rewards: {independence: 2},
+                    requirements: {},
+                    message: "Setting boundaries helps establish your independence.",
+                    repeatable: true,
+                    triggerConditions: [],
+                    hideConditions: []
+                },
+                {
+                    id: "open_up",
+                    stageId: "adulthood",
+                    description: "You need to open up to others",
+                    costs: {time: 50, energy: 1},
+                    rewards: {vulnerability: 2},
+                    requirements: {},
+                    message: "Sharing your true self creates opportunities for deeper connections.",
+                    repeatable: true,
+                    triggerConditions: [],
+                    hideConditions: []
+                },
+                {
+                    id: "commit",
+                    stageId: "adulthood",
+                    description: "You need to commit",
+                    costs: {time: 60, independence: 2},
+                    rewards: {stability: 2, purpose: 1},
+                    requirements: {},
+                    message: "You plant roots, establishing foundations that both support and constrain.",
+                    repeatable: false,
+                    triggerConditions: [],
+                    hideConditions: []
+                },
+                {
+                    id: "provide",
+                    stageId: "adulthood",
+                    description: "You need to provide",
+                    costs: {time: 80, energy: 2, money: 1},
+                    rewards: {money: 3, stress: 1},
+                    requirements: {stability: 2},
+                    message: "Resources must be secured. The world demands payment for existence.",
+                    repeatable: true,
+                    triggerConditions: [{resource: "stability", operator: ">=", value: 2}],
+                    hideConditions: []
+                },
+                {
+                    id: "achieve",
+                    stageId: "adulthood",
+                    description: "You need to achieve goals",
+                    costs: {time: 100, energy: 2, money: 1},
+                    rewards: {success: 2, stress: 1},
+                    requirements: {purpose: 1, money: 3},
+                    message: "Ambitions materialize through persistent effort, though never exactly as imagined.",
+                    repeatable: true,
+                    triggerConditions: [
+                        {resource: "purpose", operator: ">=", value: 1},
+                        {resource: "money", operator: ">=", value: 3}
+                    ],
+                    hideConditions: []
+                },
+                {
+                    id: "love",
+                    stageId: "adulthood",
+                    description: "You need to love",
+                    costs: {time: 70, vulnerability: 1},
+                    rewards: {connection: 2, meaning: 1},
+                    requirements: {},
+                    message: "To love is to risk, to grow, to become.",
+                    repeatable: true,
+                    triggerConditions: []
+                },
+                {
+                    id: "connect_deeply",
+                    stageId: "adulthood",
+                    description: "You need to connect deeply with others",
+                    costs: {time: 90, vulnerability: 2, independence: 1},
+                    rewards: {love: 3, hurt: 1},
+                    requirements: {},
+                    message: "Meaningful bonds require exposure of your truest self, for better or worse.",
+                    repeatable: false,
+                    triggerConditions: [],
+                    hideConditions: []
+                },
+                {
+                    id: "nurture",
+                    stageId: "adulthood",
+                    description: "You need to nurture others",
+                    costs: {time: 100, energy: 2, money: 2},
+                    rewards: {fulfillment: 3, exhaustion: 2},
+                    requirements: {love: 3},
+                    message: "Giving of yourself creates both profound meaning and profound depletion.",
+                    repeatable: true,
+                    triggerConditions: [{resource: "love", operator: ">=", value: 3}],
+                    hideConditions: []
+                },
+                {
+                    id: "balance",
+                    stageId: "adulthood",
+                    description: "You need to find balance",
+                    costs: {time: 120, success: 1, money: 1},
+                    rewards: {wisdom: 2, contentment: 1},
+                    requirements: {stress: 2, exhaustion: 2},
+                    message: "The pursuit of everything results in mastery of nothing. Choices become necessary.",
+                    repeatable: false,
+                    triggerConditions: [
+                        {resource: "stress", operator: ">=", value: 2},
+                        {resource: "exhaustion", operator: ">=", value: 2}
+                    ],
+                    hideConditions: []
+                },
+
+                // Old Age stage problems (~700 weeks total)
+                {
+                    id: "rest_old_age",
+                    stageId: "old_age",
+                    description: "You need to rest your weary bones",
+                    costs: {time: 20},
+                    rewards: {energy: 1},
+                    requirements: {},
+                    message: "A long rest restores some of your diminishing energy.",
+                    repeatable: true,
+                    solveTime: 20000,
+                    triggerConditions: [],
+                    hideConditions: []
+                },
+                {
+                    id: "manage_time",
+                    stageId: "old_age",
+                    description: "You need to manage your time carefully",
+                    costs: {time: 30, energy: 1},
+                    rewards: {time: 2},
+                    requirements: {},
+                    message: "Through careful planning, you make the most of your limited energy.",
+                    repeatable: true,
+                    solveTime: 2000,
+                    triggerConditions: [],
+                    hideConditions: []
+                },
+                {
+                    id: "reflect",
+                    stageId: "old_age",
+                    description: "You need to reflect on your life",
+                    costs: {time: 50, energy: 1},
+                    rewards: {perspective: 3, regret: 1},
+                    requirements: {},
+                    message: "The patterns of your life reveal themselves only in retrospect.",
+                    repeatable: false,
+                    triggerConditions: [],
+                    hideConditions: []
+                },
+                {
+                    id: "take_pride",
+                    stageId: "old_age",
+                    description: "You need to take pride in your achievements",
+                    costs: {time: 40, energy: 1},
+                    rewards: {pride: 2},
+                    requirements: {perspective: 2},
+                    message: "Looking back at your accomplishments, you feel a sense of pride.",
+                    repeatable: true,
+                    triggerConditions: [{resource: "perspective", operator: ">=", value: 2}],
+                    hideConditions: []
+                },
+                {
+                    id: "accept",
+                    stageId: "old_age",
+                    description: "You need to accept your limitations",
+                    costs: {time: 60, pride: 2},
+                    rewards: {serenity: 2, frustration: 1},
+                    requirements: {perspective: 3},
+                    message: "The body betrays, the mind falters, but acceptance brings its own peace.",
+                    repeatable: false,
+                    triggerConditions: [{resource: "perspective", operator: ">=", value: 3}],
+                    hideConditions: []
+                },
+                {
+                    id: "preserve",
+                    stageId: "old_age",
+                    description: "You need to preserve your legacy",
+                    costs: {time: 80, energy: 2},
+                    rewards: {meaning: 3, anxiety: 1},
+                    requirements: {},
+                    message: "What will remain when you are gone? The question becomes unavoidable.",
+                    repeatable: false,
+                    triggerConditions: [],
+                    hideConditions: []
+                },
+                {
+                    id: "release",
+                    stageId: "old_age",
+                    description: "You need to release your attachments",
+                    costs: {time: 40, energy: 1},
+                    rewards: {transcendence: 2, serenity: 1},
+                    requirements: {},
+                    message: "Letting go becomes both necessity and choice, painful and liberating.",
+                    repeatable: false,
+                    triggerConditions: [{resource: "serenity", operator: ">=", value: 2}],
+                    hideConditions: []
+                },
+                {
+                    id: "reconcile",
+                    stageId: "old_age",
+                    description: "You need to reconcile with mortality",
+                    costs: {time: 70, energy: 2},
+                    rewards: {peace: 3, serenity: 2},
+                    requirements: {transcendence: 2, perspective: 2},
+                    message: "The final threshold approaches. You prepare as best you can.",
+                    repeatable: false,
+                    triggerConditions: [
+                        {resource: "transcendence", operator: ">=", value: 2},
+                        {resource: "meaning", operator: ">=", value: 3}
+                    ],
+                    hideConditions: []
+                },
+
+                // Death stage problems (~200 weeks total)
+                {
+                    id: "let_go",
+                    stageId: "death",
+                    description: "You need to let go",
+                    costs: {time: 100, everything: 1},
+                    rewards: {},
+                    requirements: {},
+                    message: "Breath slows. The grip loosens. All burdens set down at last.",
+                    repeatable: false,
+                    triggerConditions: []
+                },
+                {
+                    id: "fade",
+                    stageId: "death",
+                    description: "You are fading",
+                    costs: {time: 60, memories: 'ALL'},
+                    rewards: {dissolution: 1},
+                    requirements: {memories: 1},
+                    message: "Boundaries blur. Self and world merge into indistinction.",
+                    repeatable: false,
+                    triggerConditions: [{resource: "memories", operator: ">=", value: 1}],
+                    hideConditions: []
+                },
+                {
+                    id: "dissolve",
+                    stageId: "death",
+                    description: "You are dissolving",
+                    costs: {time: 80, dissolution: 1},
+                    rewards: {nothingness: 1},
+                    requirements: {dissolution: 1},
+                    message: "The final boundary dissolves. There is no more you to experience anything.",
+                    repeatable: false,
+                    triggerConditions: [{resource: "dissolution", operator: ">=", value: 1}],
+                    hideConditions: []
+                }
+            ],
+            resourceTypes: [
+                "awareness", "perception", "attachment", "energy", "joy", "curiosity",
+                "knowledge", "responsibility", "friendship", "vulnerability", "independence",
+                "identity", "passion", "confusion", "experience", "pain", "regret",
+                "stability", "purpose", "money", "time", "success", "stress", "love",
+                "hurt", "fulfillment", "exhaustion", "wisdom", "contentment", "perspective",
+                "pride", "serenity", "frustration", "possessions", "control", "meaning",
+                "anxiety", "transcendence", "loss", "denial", "peace", "fear", "memories",
+                "dissolution", "nothingness", "everything"
+            ]
+        };
+
+        // Game state
+        let gameState = {
+            currentStage: 0,
+            resources: {},
+            solvedProblems: [],
+            messages: [],
+            problemInstances: {}
+        };
+
+        // Game data (loaded from localStorage or default)
+        let gameData = JSON.parse(JSON.stringify(DEFAULT_GAME_DATA));
+
+        // Admin state
+        let adminMode = false;
+        let currentTab = "stages";
+
+        // DOM Elements
+        const stageIndicator = document.getElementById('stage-indicator');
+        const stageDescription = document.getElementById('stage-description');
+        const problemsContainer = document.getElementById('problems');
+        const resourcesList = document.getElementById('resources-list');
+        const messagesContainer = document.getElementById('messages');
+        const adminPanel = document.getElementById('admin-panel');
+        const modalContainer = document.getElementById('modal-container');
+        const modalContent = document.getElementById('modal-content');
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+        // Initialize the game
+        function initGame() {
+            loadGameData();
+            loadGameState();
+            updateGameDisplay();
+
+            // Set up event listeners
+            document.getElementById('admin-toggle').addEventListener('click', toggleAdminMode);
+            document.getElementById('admin-close').addEventListener('click', closeAdminPanel);
+
+            // Tab navigation
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.dataset.tab);
+                });
+            });
+
+            // Admin panel buttons
+            document.getElementById('add-stage').addEventListener('click', () => showStageModal());
+            document.getElementById('add-problem').addEventListener('click', () => showProblemModal());
+            document.getElementById('add-resource').addEventListener('click', () => showResourceModal());
+            document.getElementById('export-data').addEventListener('click', exportGameData);
+            document.getElementById('import-data').addEventListener('click', () => document.getElementById('import-file').click());
+            document.getElementById('import-file').addEventListener('change', importGameData);
+            document.getElementById('reset-game').addEventListener('click', resetGameData);
+            document.getElementById('load-default').addEventListener('click', loadDefaultGameData);
+
+            // Dark mode toggle
+            darkModeToggle.addEventListener('change', toggleDarkMode);
+
+            // Problem stage filter
+            document.getElementById('problem-stage-filter').addEventListener('change', updateProblemsList);
+
+            // First-time setup
+            updateAdminPanel();
+
+            // Check for dark mode preference on load
+            loadDarkModePreference();
+        }
+
+        // Load game data from localStorage or use default
+        function loadGameData() {
+            const savedData = localStorage.getItem('stagesOfBeingGameData');
+            if (savedData) {
+                try {
+                    gameData = JSON.parse(savedData);
+                } catch (e) {
+                    console.error("Error loading game data:", e);
+                    gameData = JSON.parse(JSON.stringify(DEFAULT_GAME_DATA));
+                }
+            }
+        }
+
+        // Load game state from localStorage or initialize
+        function loadGameState() {
+            const savedState = localStorage.getItem('stagesOfBeingGameState');
+            if (savedState) {
+                try {
+                    gameState = JSON.parse(savedState);
+                } catch (e) {
+                    console.error("Error loading game state:", e);
+                    resetGameState();
+                }
+            } else {
+                resetGameState();
+            }
+        }
+
+        // Reset game state to beginning
+        function resetGameState() {
+            gameState = {
+                currentStage: 0,
+                resources: Object.assign({}, gameData.stages[0].startingResources || {}),
+                solvedProblems: [],
+                messages: [],
+                problemInstances: {}
+            };
+            // Clear the messages container
+            document.getElementById('messages').innerHTML = '';
+            saveGameState();
+        }
+
+        // Save game state to localStorage
+        function saveGameState() {
+            localStorage.setItem('stagesOfBeingGameState', JSON.stringify(gameState));
+        }
+
+        // Save game data to localStorage
+        function saveGameData() {
+            localStorage.setItem('stagesOfBeingGameData', JSON.stringify(gameData));
+        }
+
+        // Update game display based on current state
+        function updateGameDisplay() {
+            const currentStage = gameData.stages[gameState.currentStage];
+
+            // Update stage info
+            stageIndicator.textContent = currentStage.title;
+            stageDescription.textContent = currentStage.description;
+
+            // Update problems
+            updateProblems();
+
+            // Update resources
+            updateResources();
+
+            // Save current game state
+            saveGameState();
+        }
+
+        // Update problems display
+        function updateProblems() {
+            problemsContainer.innerHTML = '';
+
+            const currentStage = gameData.stages[gameState.currentStage];
+            const stageProblems = gameData.problems.filter(p => p.stageId === currentStage.id);
+
+            let visibleProblems = 0;
+
+            for (const problem of stageProblems) {
+                // Skip if problem has hide conditions that are met
+                if (problem.hideConditions && problem.hideConditions.length > 0 && checkConditions(problem.hideConditions)) {
+                    continue;
+                }
+
+                // Skip if problem has been solved and is not repeatable
+                if (!problem.repeatable && gameState.solvedProblems.includes(problem.id)) {
+                    continue;
+                }
+
+                // Skip if problem has trigger conditions that are not met
+                if (!checkConditions(problem.triggerConditions)) {
+                    continue;
+                }
+
+                visibleProblems++;
+
+                const problemDiv = document.createElement('div');
+                problemDiv.className = 'mb-4 pb-3 border-b border-gray-200 flex items-center justify-between gap-8 problem';
+                problemDiv.dataset.problemId = problem.id;
+                problemDiv.dataset.problemId = problem.id;
+
+                const textContainer = document.createElement('div');
+                textContainer.className = 'flex-1 min-w-0';
+
+                let fullText = problem.description;
+
+                // Add costs if any (excluding time)
+                let costsText = '';
+                for (const [resource, amount] of Object.entries(problem.costs)) {
+                    if (resource === 'time') continue;
+                    if (costsText) costsText += ', ';
+                    costsText += `<span class="cost">${resource}: -${amount}</span>`;
+                }
+                if (costsText) {
+                    fullText += ` [${costsText}]`;
+                }
+
+                // Add rewards if any
+                let rewardsText = '';
+                for (const [resource, amount] of Object.entries(problem.rewards)) {
+                    if (rewardsText) rewardsText += ', ';
+                    rewardsText += `<span class="award">${resource}: +${amount}</span>`;
+                }
+                if (rewardsText) {
+                    fullText += ` [${rewardsText}]`;
+                }
+
+                textContainer.innerHTML = fullText;
+
+                const solveBtn = document.createElement('button');
+                solveBtn.className = 'problem-btn ml-4';
+                solveBtn.textContent = 'Solve';
+                solveBtn.addEventListener('click', function() {
+                    startSolvingAnimation(this, problem);
+                });
+
+                // Check if requirements and costs can be met using the canSolveProblem function
+                let canSolve = canSolveProblem(problem);
+
+                if (!canSolve) {
+                    solveBtn.disabled = true;
+                }
+
+                problemDiv.appendChild(textContainer);
+                problemDiv.appendChild(solveBtn);
+                if (problem.costs.time) {
+                    const timeRow = document.createElement('div');
+                    timeRow.className = 'text-red-500 text-sm mt-1';
+                    timeRow.textContent = `⧗ –${problem.costs.time}`;
+                    problemDiv.appendChild(timeRow);
+                }
+                problemsContainer.appendChild(problemDiv);
+            }
+
+            // Check if we should advance to next stage
+            checkStageProgression();
+
+            // If no problems are visible, show a message
+            if (visibleProblems === 0) {
+                const noProblemDiv = document.createElement('div');
+                noProblemDiv.className = 'italic text-gray-600';
+                noProblemDiv.textContent = "No problems currently require your attention.";
+                problemsContainer.appendChild(noProblemDiv);
+            }
+        }
+
+        // Check if conditions are met (used for trigger and hide conditions)
+        function checkConditions(conditions) {
+            if (!conditions || conditions.length === 0) {
+                return true; // No conditions means conditions are met
+            }
+
+            for (const condition of conditions) {
+                const resourceValue = gameState.resources[condition.resource] || 0;
+
+                switch (condition.operator) {
+                    case "==":
+                        if (resourceValue !== condition.value) return false;
+                        break;
+                    case "!=":
+                        if (resourceValue === condition.value) return false;
+                        break;
+                    case ">":
+                        if (resourceValue <= condition.value) return false;
+                        break;
+                    case ">=":
+                        if (resourceValue < condition.value) return false;
+                        break;
+                    case "<":
+                        if (resourceValue >= condition.value) return false;
+                        break;
+                    case "<=":
+                        if (resourceValue > condition.value) return false;
+                        break;
+                    default:
+                        console.warn(`Unknown operator: ${condition.operator}`);
+                        return false;
+                }
+            }
+
+            return true; // All conditions were met
+        }
+
+        // Track previous resource values
+        let previousResourceValues = {};
+
+        // Update resources display
+        function updateResources() {
+            resourcesList.innerHTML = '';
+
+            // Sort resources alphabetically
+            const sortedResources = Object.entries(gameState.resources)
+                .filter(([_, value]) => value > 0)
+                .sort(([a], [b]) => a.localeCompare(b));
+
+            for (const [resource, amount] of sortedResources) {
+                const resourceDiv = document.createElement('div');
+                resourceDiv.className = 'mb-1';
+
+                // Create spans for name and value
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = `${resource}: `;
+
+                const valueSpan = document.createElement('span');
+                valueSpan.textContent = amount;
+
+                // Check if resource has changed
+                const previousAmount = previousResourceValues[resource] || 0;
+                if (amount > previousAmount) {
+                    nameSpan.className = 'resource-increase';
+                } else if (amount < previousAmount) {
+                    nameSpan.className = 'resource-decrease';
+                }
+
+                resourceDiv.appendChild(nameSpan);
+                resourceDiv.appendChild(valueSpan);
+                resourcesList.appendChild(resourceDiv);
+            }
+
+            if (sortedResources.length === 0) {
+                const noResourcesDiv = document.createElement('div');
+                noResourcesDiv.className = 'italic text-gray-600';
+                noResourcesDiv.textContent = "No resources yet.";
+                resourcesList.appendChild(noResourcesDiv);
+            }
+
+            // Update previous values for next comparison
+            previousResourceValues = {};
+            for (const [resource, amount] of Object.entries(gameState.resources)) {
+                if (amount > 0) {
+                    previousResourceValues[resource] = amount;
+                }
+            }
+        }
+
+        // Helper function to check if a problem can be solved
+        function canSolveProblem(problem) {
+            let canSolve = true;
+
+            // Check requirements
+            for (const [resource, amount] of Object.entries(problem.requirements || {})) {
+                if ((gameState.resources[resource] || 0) < amount) {
+                    canSolve = false;
+                    break;
+                }
+            }
+
+            // Check costs
+            if (canSolve) {
+                for (const [resource, amount] of Object.entries(problem.costs || {})) {
+                    if (resource === "everything") {
+                        // "everything" cost is always solvable
+                        continue;
+                    }
+                    if (resource === "time") {
+                        // Time costs are always solvable
+                        continue;
+                    }
+                    if ((gameState.resources[resource] || 0) < amount) {
+                        canSolve = false;
+                        break;
+                    }
+                }
+            }
+
+            return canSolve;
+        }
+
+        // Solve a problem
+        function solveProblem(problem, choiceIndex = -1) {
+            // Check if problem can be solved
+            if (!canSolveProblem(problem)) {
+                return;
+            }
+
+            // Check if this is a threshold problem that should advance the stage
+            const currentStage = gameData.stages[gameState.currentStage];
+            const isThresholdProblem = problem.id === currentStage.thresholdProblemId;
+
+            // Track instance for repeatable problems
+            if (problem.repeatable) {
+                gameState.problemInstances[problem.id] = (gameState.problemInstances[problem.id] || 0) + 1;
+            }
+
+            // Add to solved problems
+            if (!gameState.solvedProblems.includes(problem.id)) {
+                gameState.solvedProblems.push(problem.id);
+            }
+
+            // After resources have been updated
+            updateResources();
+            refreshProblemButtonStates();
+
+            // Apply costs
+            for (const [resource, amount] of Object.entries(problem.costs)) {
+                if (amount === 'ALL') {
+                    // Get current amount of this resource and use it as the cost
+                    const currentAmount = gameState.resources[resource] || 0;
+                    gameState.resources[resource] = 0;
+                } else if (resource === "everything") {
+                    // If cost is "everything", count total resources and convert to memories, but preserve Time
+                    let totalResources = 0;
+                    for (const [res, amount] of Object.entries(gameState.resources)) {
+                        if (res !== "memories" && res !== "time") {
+                            totalResources += amount;
+                            gameState.resources[res] = 0;
+                        }
+                    }
+                    // Add memories equal to total resources lost
+                    if (totalResources > 0) {
+                        problem.rewards.memories = totalResources;
+                    }
+                } else {
+                    gameState.resources[resource] = Math.max(0, (gameState.resources[resource] || 0) - amount);
+                }
+            }
+
+            // ⏳ LIFE‑SPAN WATCHDOG
+            if (gameState.resources.time !== undefined &&
+                gameState.resources.time <= 0 &&
+                gameData.stages[gameState.currentStage].id !== "out_of_time") {
+
+                const outIdx = gameData.stages.findIndex(s => s.id === "out_of_time");
+                gameState.currentStage = outIdx;
+
+                addMessage("⧗  You are out of Time.");
+
+                // wipe everything except memories
+                for (const r in gameState.resources) {
+                    if (r !== "memories") gameState.resources[r] = 0;
+                }
+
+                updateGameDisplay();
+                saveGameState();
+                return; // stop further logic
+            }
+
+            // Apply rewards
+            for (const [resource, amount] of Object.entries(problem.rewards)) {
+                gameState.resources[resource] = (gameState.resources[resource] || 0) + amount;
+            }
+
+            // Add message
+            addMessage(problem.message);
+
+            // If this was the threshold problem, advance to next stage
+            if (isThresholdProblem && gameState.currentStage < gameData.stages.length - 1) {
+                gameState.currentStage++;
+                const nextStage = gameData.stages[gameState.currentStage];
+                addMessage(`You have completed the ${currentStage.title} stage.`);
+                addMessage(`You enter the ${nextStage.title} stage.`);
+
+                // Add starting resources for the new stage
+                Object.entries(nextStage.startingResources || {}).forEach(([resource, amount]) => {
+                    gameState.resources[resource] = (gameState.resources[resource] || 0) + amount;
+                });
+
+                // Update stage display immediately
+                stageIndicator.textContent = nextStage.title;
+                stageDescription.textContent = nextStage.description;
+            }
+
+            // Save current game state
+            saveGameState();
+
+            // Only update resources, not problems (to avoid removing progress bars)
+            updateResources();
+
+            // Check if we need to update the problems UI
+            checkForNewProblems();
+        }
+
+        // Add a message to the log
+        function addMessage(message) {
+            if (!message) return;
+
+            gameState.messages.unshift(message);
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'mb-2';
+            messageDiv.textContent = message;
+            messagesContainer.insertBefore(messageDiv, messagesContainer.firstChild);
+        }
+
+        // Check if we should advance to the next stage
+        function checkStageProgression() {
+            //This function is now redundant because stage progression is handled within solveProblem()
+        }
+
+        // Check if new problems should appear or if problems should be removed
+        function checkForNewProblems() {
+            // First make sure the stage indicator matches current stage
+            const currentStage = gameData.stages[gameState.currentStage];
+
+            // Update stage display if it doesn't match current stage
+            if (stageIndicator.textContent !== currentStage.title) {
+                stageIndicator.textContent = currentStage.title;
+                stageDescription.textContent = currentStage.description;
+            }
+
+            // Get current visible problem IDs
+            const visibleProblemIds = Array.from(document.querySelectorAll('.problem'))
+                .map(el => el.dataset.problemId)
+                .filter(id => id);
+
+            // Get problems that should be visible now
+            const stageProblems = gameData.problems.filter(p => p.stageId === currentStage.id);
+
+            let shouldUpdate = false;
+
+            // Check for problems that should no longer be visible
+            for (const id of visibleProblemIds) {
+                const problem = gameData.problems.find(p => p.id === id);
+                if (!problem) continue;
+
+                // Problem should be hidden if:
+                // 1. It's been solved and is not repeatable
+                const solved = gameState.solvedProblems.includes(problem.id) && !problem.repeatable;
+                // 2. It has hide conditions that are met
+                const shouldHide = problem.hideConditions && problem.hideConditions.length > 0 &&
+                    checkConditions(problem.hideConditions);
+                // 3. It belongs to a different stage than the current one
+                const wrongStage = problem.stageId !== currentStage.id;
+
+                if (solved || shouldHide || wrongStage) {
+                    shouldUpdate = true;
+                    break;
+                }
+            }
+
+            // Check for new problems that should be visible
+            if (!shouldUpdate) {
+                for (const problem of stageProblems) {
+                    // Skip if problem has hide conditions that are met
+                    if (problem.hideConditions && problem.hideConditions.length > 0 &&
+                        checkConditions(problem.hideConditions)) {
+                        continue;
+                    }
+
+                    // Skip if problem has been solved and is not repeatable
+                    if (!problem.repeatable && gameState.solvedProblems.includes(problem.id)) {
+                        continue;
+                    }
+
+                    // Skip if problem has trigger conditions that are not met
+                    if (!checkConditions(problem.triggerConditions)) {
+                        continue;
+                    }
+
+                    // If this problem should be visible but isn't, we need to update
+                    if (!visibleProblemIds.includes(problem.id)) {
+                        shouldUpdate = true;
+                        break;
+                    }
+                }
+            }
+
+            // Only update the problems display if needed
+            if (shouldUpdate) {
+                updateProblems();
+            }
+        }
+
+        // Toggle admin mode
+        function toggleAdminMode() {
+            adminMode = !adminMode;
+            adminPanel.classList.toggle('hidden', !adminMode);
+            updateAdminPanel();
+        }
+
+        // Close admin panel
+        function closeAdminPanel() {
+            adminMode = false;
+            adminPanel.classList.add('hidden');
+        }
+
+        // Switch between admin tabs
+        function switchTab(tabName) {
+            currentTab = tabName;
+
+            // Update tab UI
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.toggle('tab-active', tab.dataset.tab === tabName);
+            });
+
+            // Update tab content
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.add('hidden');
+            });
+
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+
+            // Update content for the current tab
+            updateTabContent(tabName);
+        }
+
+        // Update the admin panel
+        function updateAdminPanel() {
+            // Update stage filter dropdown
+            const stageFilter = document.getElementById('problem-stage-filter');
+            stageFilter.innerHTML = '<option value="all">All Stages</option>';
+
+            gameData.stages.forEach(stage => {
+                const option = document.createElement('option');
+                option.value = stage.id;
+                option.textContent = stage.title;
+                stageFilter.appendChild(option);
+            });
+
+            // Update current tab content
+            updateTabContent(currentTab);
+        }
+
+        // Update content for the current tab
+        function updateTabContent(tabName) {
+            switch (tabName) {
+                case 'stages':
+                    updateStagesList();
+                    break;
+                case 'problems':
+                    updateProblemsList();
+                    break;
+                case 'resources':
+                    updateResourcesList();
+                    break;
+                case 'settings':
+                    // No dynamic content to update for settings
+                    break;
+            }
+        }
+
+        // Update stages list in admin panel
+        function updateStagesList() {
+            const stagesList = document.getElementById('stages-list');
+            stagesList.innerHTML = '';
+
+            gameData.stages.forEach((stage, index) => {
+                const stageItem = document.createElement('div');
+                stageItem.className = 'p-2 border rounded mb-2';
+
+                const stageHeader = document.createElement('div');
+                stageHeader.className = 'flex justify-between items-center';
+
+                const stageTitle = document.createElement('div');
+                stageTitle.className = 'font-bold';
+                stageTitle.textContent = stage.title;
+
+                const stageActions = document.createElement('div');
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'text-blue-500 hover:text-blue-700 mr-2';
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                editBtn.addEventListener('click', () => showStageModal(stage));
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'text-red-500 hover:text-red-700';
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.addEventListener('click', () => {
+                    if (confirm(`Are you sure you want to delete the "${stage.title}" stage?`)) {
+                        deleteStage(stage.id);
+                    }
+                });
+
+                const stageInfo = document.createElement('div');
+                stageInfo.className = 'text-sm mt-1';
+                stageInfo.textContent = `ID: ${stage.id} | Threshold Problem: ${stage.thresholdProblemId}`;
+
+                const stageDesc = document.createElement('div');
+                stageDesc.className = 'text-sm italic mt-1';
+                stageDesc.textContent = stage.description;
+
+                stageActions.appendChild(editBtn);
+                stageActions.appendChild(deleteBtn);
+
+                stageHeader.appendChild(stageTitle);
+                stageHeader.appendChild(stageActions);
+
+                stageItem.appendChild(stageHeader);
+                stageItem.appendChild(stageInfo);
+                stageItem.appendChild(stageDesc);
+
+                stagesList.appendChild(stageItem);
+            });
+        }
+
+        // Update problems list in admin panel
+        function updateProblemsList() {
+            const problemsList = document.getElementById('problems-list');
+            problemsList.innerHTML = '';
+
+            const stageFilter = document.getElementById('problem-stage-filter').value;
+
+            let filteredProblems = gameData.problems;
+            if (stageFilter !== 'all') {
+                filteredProblems = gameData.problems.filter(p => p.stageId === stageFilter);
+            }
+
+            filteredProblems.forEach(problem => {
+                const problemItem = document.createElement('div');
+                problemItem.className = 'p-2 border rounded mb-2';
+
+                const problemHeader = document.createElement('div');
+                problemHeader.className = 'flex justify-between items-center';
+
+                const problemTitle = document.createElement('div');
+                problemTitle.className = 'font-bold';
+                problemTitle.textContent = problem.description;
+
+                const problemActions = document.createElement('div');
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'text-blue-500 hover:text-blue-700 mr-2';
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                editBtn.addEventListener('click', () => showProblemModal(problem));
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'text-red-500 hover:text-red-700';
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.addEventListener('click', () => {
+                    if (confirm(`Are you sure you want to delete the problem "${problem.description}"?`)) {
+                        deleteProblem(problem.id);
+                    }
+                });
+
+                const problemInfo = document.createElement('div');
+                problemInfo.className = 'text-sm mt-1';
+
+                // Find the stage name
+                const stage = gameData.stages.find(s => s.id === problem.stageId);
+                const stageName = stage ? stage.title : "Unknown Stage";
+
+                problemInfo.textContent = `ID: ${problem.id} | Stage: ${stageName} | ${problem.repeatable ? 'Repeatable' : 'One-time'}`;
+
+                problemActions.appendChild(editBtn);
+                problemActions.appendChild(deleteBtn);
+
+                problemHeader.appendChild(problemTitle);
+                problemHeader.appendChild(problemActions);
+
+                problemItem.appendChild(problemHeader);
+                problemItem.appendChild(problemInfo);
+
+                // Requirements
+                if (Object.keys(problem.requirements).length > 0) {
+                    const reqDiv = document.createElement('div');
+                    reqDiv.className = 'text-sm mt-1';
+                    reqDiv.textContent = `Requirements: ${Object.entries(problem.requirements).map(([r, v]) => `${r}: ${v}`).join(', ')}`;
+                    problemItem.appendChild(reqDiv);
+                }
+
+                // Costs
+                if (Object.keys(problem.costs).length > 0) {
+                    const costsDiv = document.createElement('div');
+                    costsDiv.className = 'text-sm mt-1';
+                    costsDiv.innerHTML = `Costs: ${Object.entries(problem.costs).map(([r, v]) => `<span class="cost">${r}: -${v}</span>`).join(', ')}`;
+                    problemItem.appendChild(costsDiv);
+                }
+
+                // Rewards
+                if (Object.keys(problem.rewards).length > 0) {
+                    const rewardsDiv = document.createElement('div');
+                    rewardsDiv.className = 'text-sm mt-1';
+                    rewardsDiv.innerHTML = `Rewards: ${Object.entries(problem.rewards).map(([r, v]) => `<span class="award">${r}: +${v}</span>`).join(', ')}`;
+                    problemItem.appendChild(rewardsDiv);
+                }
+
+                problemsList.appendChild(problemItem);
+            });
+
+            if (filteredProblems.length === 0) {
+                const noProblemsDiv = document.createElement('div');
+                noProblemsDiv.className = 'italic text-gray-600';
+                noProblemsDiv.textContent = "No problems found for this filter.";
+                problemsList.appendChild(noProblemsDiv);
+            }
+        }
+
+        // Update resources list in admin panel
+        function updateResourcesList() {
+            const resourcesTypesList = document.getElementById('resources-types-list');
+            resourcesTypesList.innerHTML = '';
+
+            // Sort resources alphabetically
+            const sortedResources = [...gameData.resourceTypes].sort((a, b) => a.localeCompare(b));
+
+            sortedResources.forEach(resource => {
+                const resourceItem = document.createElement('div');
+                resourceItem.className = 'p-2 border rounded mb-2 flex justify-between items-center';
+
+                const resourceName = document.createElement('div');
+                resourceName.textContent = resource;
+
+                const resourceActions = document.createElement('div');
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'text-blue-500 hover:text-blue-700 mr-2';
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                editBtn.addEventListener('click', () => showResourceEditModal(resource));
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'text-red-500 hover:text-red-700';
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.addEventListener('click', () => {
+                    if (confirm(`Are you sure you want to delete the resource "${resource}"?`)) {
+                        deleteResource(resource);
+                    }
+                });
+
+                resourceActions.appendChild(editBtn);
+                resourceActions.appendChild(deleteBtn);
+
+                resourceItem.appendChild(resourceName);
+                resourceItem.appendChild(resourceActions);
+
+                resourcesTypesList.appendChild(resourceItem);
+            });
+        }
+
+        // Show modal for adding/editing a stage
+        function showStageModal(stage = null) {
+            const isEditing = !!stage;
+
+            const modalHTML = `
+                <h3 class="text-xl mb-4">${isEditing ? 'Edit' : 'Add'} Stage</h3>
+                <form id="stage-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm mb-1">ID (unique, no spaces):</label>
+                        <input type="text" id="stage-id" class="w-full p-2 border" ${isEditing ? 'disabled' : ''}
+                               value="${isEditing ? stage.id : ''}" required pattern="[a-zA-Z0-9_]+">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb1">Title:</label>
+                        <input type="text" id="stage-title" class="w-full p-2 border"
+                               value="${isEditing ? stage.title : ''}" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Description:</label<textarea id="stage-description" class="w-full p-2 border" rows="3" required>${isEditing ? stage.description : ''}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Threshold Problem ID:</label>
+                        <input type="text" id="stage-threshold-problem" class="w-full p-2 border"
+                               value="${isEditing ?stage.thresholdProblemId : ''}" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Starting Resources (JSON):</label>
+                        <textarea id="stage-resources" class="w-full p-2 border font-mono text-sm" rows="3">${isEditing ? JSON.stringify(stage.startingResources || {}, null, 2) : '{}'}</textarea>
+                        <div class="text-xs text-gray-500 mt-1">Format: {"resourceName": amount, ...}</div>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" id="cancel-stage" class="px-4 py-2 bg-gray-200 rounded">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Save</button>
+                    </div>
+                </form>
+            `;
+
+            showModal(modalHTML);
+
+            // Set up event listeners
+            document.getElementById('cancel-stage').addEventListener('click', closeModal);
+            document.getElementById('stage-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                try {
+                    const startingResources = JSON.parse(document.getElementById('stage-resources').value);
+
+                    const stageData = {
+                        id: document.getElementById('stage-id').value,
+                        title: document.getElementById('stage-title').value,
+                        description: document.getElementById('stage-description').value,
+                        thresholdProblemId: document.getElementById('stage-threshold-problem').value,
+                        startingResources: startingResources
+                    };
+
+                    if (isEditing) {
+                        updateStage(stage.id, stageData);
+                    } else {
+                        addStage(stageData);
+                    }
+
+                    closeModal();
+                } catch (e) {
+                    alert(`Error in JSON format: ${e.message}`);
+                }
+            });
+        }
+
+        // Show modal for adding/editing a problem
+        function showProblemModal(problem = null) {
+            const isEditing = !!problem;
+
+            // Create stage options
+            let stageOptions = '';
+            gameData.stages.forEach(stage => {
+                stageOptions += `<option value="${stage.id}" ${isEditing && problem.stageId === stage.id ? 'selected' : ''}>${stage.title}</option>`;
+            });
+
+            // Create resource options
+            let resourceOptions = '';
+            gameData.resourceTypes.forEach(resource => {
+                resourceOptions += `<option value="${resource}">${resource}</option>`;
+            });
+
+            const modalHTML = `
+                <h3 class="text-xl mb-4">${isEditing ? 'Edit' : 'Add'} Problem</h3>
+                <form id="problem-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm mb-1">ID (unique, no spaces):</label>
+                        <input type="text" id="problem-id" class="w-full p-2 border" ${isEditing ? 'disabled' : ''}
+                               value="${isEditing ? problem.id : ''}" required pattern="[a-zA-Z0-9_]+">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Stage:</label>
+                        <select id="problem-stage" class="w-full p-2 border" required>
+                            ${stageOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Description:</label>
+                        <textarea id="problem-description" class="w-full p-2 border" rows="2" required>${isEditing ? problem.description : ''}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Message (shown after solving):</label>
+                        <textarea id="problem-message" class="w-full p-2 border" rows="2">${isEditing ? problem.message || '' : ''}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Requirements (JSON):</label>
+                        <textarea id="problem-requirements" class="w-full p-2 border font-mono text-sm" rows="2">${isEditing ? JSON.stringify(problem.requirements || {}, null, 2) : '{}'}</textarea>
+                        <div class="text-xs text-gray-500 mt-1">Format: {"resourceName": amount, ...}</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Costs (JSON):</label>
+                        <textarea id="problem-costs" class="w-full p-2 border font-mono text-sm" rows="2">${isEditing ? JSON.stringify(problem.costs || {}, null, 2) : '{}'}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Rewards (JSON):</label>
+                        <textarea id="problem-rewards" class="w-full p-2 border font-mono text-sm" rows="2">${isEditing ? JSON.stringify(problem.rewards || {}, null, 2) : '{}'}</textarea>
+                    </div>
+                    <div class="flex items-center mb-4">
+                        <input type="checkbox" id="problem-repeatable" class="mr-2" ${isEditing && problem.repeatable ? 'checked' : ''}>
+                        <label for="problem-repeatable">Repeatable problem</label>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Solve Time (milliseconds):</label>
+                        <input type="number" id="problem-solve-time" class="w-full p-2 border"
+                               value="${isEditing ? problem.solveTime || 2000 : 2000}" min="100" step="100" required>
+                        <div class="text-xs text-gray-500 mt-1">Time in milliseconds to complete the problem (1000ms = 1 second)</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Trigger Conditions (when problem appears):</label>
+                        <div id="trigger-conditions" class="space-y-2">
+                            ${isEditing && problem.triggerConditions ? problem.triggerConditions.map((condition, index) => `
+                                <div class="flex items-center space-x-2 condition-row">
+                                    <select class="condition-resource p-1 border">
+                                        ${gameData.resourceTypes.map(r => `<option value="${r}" ${condition.resource === r ? 'selected' : ''}>${r}</option>`).join('')}
+                                    </select>
+                                    <select class="condition-operator p-1 border">
+                                        <option value="==" ${condition.operator === '==' ? 'selected' : ''}>==</option>
+                                        <option value="!=" ${condition.operator === '!=' ? 'selected' : ''}>!=</option>
+                                        <option value=">" ${condition.operator === '>' ? 'selected' : ''}>></option>
+                                        <option value=">=" ${condition.operator === '>=' ? 'selected' : ''}>>=</option>
+                                        <option value="<" ${condition.operator === '<' ? 'selected' : ''}><</option>
+                                        <option value="<=" ${condition.operator === '<=' ? 'selected' : ''}><=</option>
+                                    </select>
+                                    <input type="number" class="condition-value p-1 border w-16" value="${condition.value}">
+                                    <button type="button" class="remove-condition text-red-500">&times;</button>
+                                </div>
+                            `).join('') : ''}
+                        </div>
+                        <button type="button" id="add-trigger" class="mt-2 text-blue-500 text-sm">+ Add Trigger Condition</button>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Hide Conditions (when problem is hidden):</label>
+                        <div id="hide-conditions" class="space-y-2">
+                            ${isEditing && problem.hideConditions ? problem.hideConditions.map((condition, index) => `
+                                <div class="flex items-center space-x-2 condition-row">
+                                    <select class="condition-resource p-1 border">
+                                        ${gameData.resourceTypes.map(r => `<option value="${r}" ${condition.resource === r ? 'selected' : ''}>${r}</option>`).join('')}
+                                    </select>
+                                    <select class="condition-operator p-1 border">
+                                        <option value==" ${condition.operator === '==' ? 'selected' : ''}>==</option>
+                                        <option value="!=" ${condition.operator === '!=' ? 'selected' : ''}>!=</option>
+                                        <option value=">" ${condition.operator === '>' ? 'selected' : ''}>></option>
+                                        <option value=">=" ${condition.operator === '>=' ? 'selected' : ''}>>=</option>
+                                        <option value="<" ${condition.operator === '<' ? 'selected' : ''}><</option>
+                                        <option value="<=" ${condition.operator === '<=' ? 'selected' : ''}><=</option>
+                                    </select>
+                                    <input type="number" class="condition-value p-1 border w-16" value="${condition.value}">
+                                    <button type="button" class="remove-condition text-red-500">&times;</button>
+                                </div>
+                            `).join('') : ''}
+                        </div>
+                        <button type="button" id="add-hide" class="mt-2 text-blue-500 text-sm">+ Add Hide Condition</button>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" id="cancel-problem" class="px-4 py-2 bg-gray-200 rounded">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Save</button>
+                    </div>
+                </form>
+            `;
+
+            showModal(modalHTML);
+
+            // Set up event listeners
+            document.getElementById('cancel-problem').addEventListener('click', closeModal);
+
+            // Add condition buttons
+            document.getElementById('add-trigger').addEventListener('click', () => addConditionRow('trigger-conditions'));
+            document.getElementById('add-hide').addEventListener('click', () => addConditionRow('hide-conditions'));
+
+            // Add event listeners to existing remove buttons
+            document.querySelectorAll('.remove-condition').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.condition-row').remove();
+                });
+            });
+
+            document.getElementById('problem-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                try {
+                    const requirements = JSON.parse(document.getElementById('problem-requirements').value);
+                    const costs = JSON.parse(document.getElementById('problem-costs').value);
+                    const rewards = JSON.parse(document.getElementById('problem-rewards').value);
+
+                    // Collect trigger conditions
+                    const triggerConditions = [];
+                    document.querySelectorAll('#trigger-conditions .condition-row').forEach(row => {
+                        triggerConditions.push({
+                            resource: row.querySelector('.condition-resource').value,
+                            operator: row.querySelector('.condition-operator').value,
+                            value: parseInt(row.querySelector('.condition-value').value)
+                        });
+                    });
+
+                    // Collect hide conditions
+                    const hideConditions = [];
+                    document.querySelectorAll('#hide-conditions .condition-row').forEach(row => {
+                        hideConditions.push({
+                            resource: row.querySelector('.condition-resource').value,
+                            operator: row.querySelector('.condition-operator').value,
+                            value: parseInt(row.querySelector('.condition-value').value)
+                        });
+                    });
+
+                    const problemData = {
+                        id: document.getElementById('problem-id').value,
+                        stageId: document.getElementById('problem-stage').value,
+                        description: document.getElementById('problem-description').value,
+                        message: document.getElementById('problem-message').value,
+                        requirements: requirements,
+                        costs: costs,
+                        rewards: rewards,
+                        repeatable: document.getElementById('problem-repeatable').checked,
+                        solveTime: parseInt(document.getElementById('problem-solve-time').value) || 2000,
+                        triggerConditions: triggerConditions,
+                        hideConditions: hideConditions
+                    };
+
+                    if (isEditing) {
+                        updateProblem(problem.id, problemData);
+                    } else {
+                        addProblem(problemData);
+                    }
+
+                    closeModal();
+                } catch (e) {
+                    alert(`Error in JSON format: ${e.message}`);
+                }
+            });
+        }
+
+        // Add a condition row to the specified container
+        function addConditionRow(containerId) {
+            const container = document.getElementById(containerId);
+
+            const row = document.createElement('div');
+            row.className = 'flex items-center space-x-2 condition-row';
+
+            // Resource dropdown
+            const resourceSelect = document.createElement('select');
+            resourceSelect.className = 'condition-resource p-1 border';
+
+            gameData.resourceTypes.forEach(resource => {
+                const option = document.createElement('option');
+                option.value = resource;
+                option.textContent = resource;
+                resourceSelect.appendChild(option);
+            });
+
+            // Operator dropdown
+            const operatorSelect = document.createElement('select');
+            operatorSelect.className = 'condition-operator p-1 border';
+
+            const operators = ['==', '!=', '>', '>=', '<', '<='];
+            operators.forEach(op => {
+                const option = document.createElement('option');
+                option.value = op;
+                option.textContent = op;
+                operatorSelect.appendChild(option);
+            });
+
+            // Value input
+            const valueInput = document.createElement('input');
+            valueInput.type = 'number';
+            valueInput.className = 'condition-value p-1 border w-16';
+            valueInput.value = '1';
+
+            // Remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'remove-condition text-red-500';
+            removeBtn.textContent = '×';
+            removeBtn.addEventListener('click', function() {
+                this.closest('.condition-row').remove();
+            });
+
+            row.appendChild(resourceSelect);
+            row.appendChild(operatorSelect);
+            row.appendChild(valueInput);
+            row.appendChild(removeBtn);
+
+            container.appendChild(row);
+        }
+
+        // Show modal for adding/editing a resource
+        function showResourceModal() {
+            const modalHTML = `
+                <h3 class="text-xl mb-4">Add Resource Type</h3>
+                <form id="resource-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm mb-1">Resource Name:</label>
+                        <input type="text" id="resource-name" class="w-full p-2 border" required pattern="[a-zA-Z0-9_]+">
+                        <div class="text-xs text-gray-500 mt-1">Use only letters, numbers, and underscores. No spaces.</div>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" id="cancel-resource" class="px-4 py-2 bg-gray-200 rounded">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Add</button>
+                    </div>
+                </form>
+            `;
+
+            showModal(modalHTML);
+
+            // Set up event listeners
+            document.getElementById('cancel-resource').addEventListener('click', closeModal);
+            document.getElementById('resource-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const resourceName = document.getElementById('resource-name').value;
+
+                if (gameData.resourceTypes.includes(resourceName)) {
+                    alert(`Resource "${resourceName}" already exists.`);
+                    return;
+                }
+
+                addResource(resourceName);
+                closeModal();
+            });
+        }
+
+        // Show modal for editing a resource
+        function showResourceEditModal(resource) {
+            const modalHTML = `
+                <h3 class="text-xl mb-4">Edit Resource Type</h3>
+                <form id="resource-edit-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm mb-1">Current Name:</label>
+                        <div class="font-bold">${resource}</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">New Name:</label>
+                        <input type="text" id="resource-new-name" class="w-full p-2 border" required pattern="[a-zA-Z0-9_]+">
+                        <div class="text-xs text-gray-500 mt-1">Use only letters, numbers, and underscores. No spaces.</div>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" id="cancel-resource-edit" class="px-4 py-2 bg-gray-200 rounded">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Update</button>
+                    </div>
+                </form>
+            `;
+
+            showModal(modalHTML);
+
+            // Set up event listeners
+            document.getElementById('cancel-resource-edit').addEventListener('click', closeModal);
+            document.getElementById('resource-edit-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const newName = document.getElementById('resource-new-name').value;
+
+                if (gameData.resourceTypes.includes(newName) && newName !== resource) {
+                    alert(`Resource "${newName}" already exists.`);
+                    return;
+                }
+
+                updateResource(resource, newName);
+                closeModal();
+            });
+        }
+
+        // Add a new stage
+        function addStage(stageData) {
+            // Check if ID already exists
+            if (gameData.stages.some(s => s.id === stageData.id)) {
+                alert(`Stage with ID "${stageData.id}" already exists.`);
+                return;
+            }
+
+            gameData.stages.push(stageData);
+            saveGameData();
+            updateAdminPanel();
+        }
+
+        // Update an existing stage
+        function updateStage(stageId, stageData) {
+            const index = gameData.stages.findIndex(s => s.id === stageId);
+            if (index === -1) return;
+
+            // Preserve the ID
+            stageData.id = stageId;
+
+            gameData.stages[index] = stageData;
+            saveGameData();
+            updateAdminPanel();
+        }
+
+        // Delete a stage
+        function deleteStage(stageId) {
+            // Check if there are problems associated with this stage
+            const associatedProblems = gameData.problems.filter(p => p.stageId === stageId);
+
+            if (associatedProblems.length > 0) {
+                if (!confirm(`This stage has ${associatedProblems.length} problems associated with it. Deleting it will also delete these problems. Continue?`)) {
+                    return;
+                }
+
+                // Delete associated problems
+                gameData.problems = gameData.problems.filter(p => p.stageId !== stageId);
+            }
+
+            // Delete the stage
+            gameData.stages = gameData.stages.filter(s => s.id !== stageId);
+
+            // If the current stage was deleted, reset game state
+            if (gameData.stages[gameState.currentStage]?.id === stageId) {
+                resetGameState();
+            }
+
+            saveGameData();
+            updateAdminPanel();
+            updateGameDisplay();
+        }
+
+        // Add a new problem
+        function addProblem(problemData) {
+            // Check if ID already exists
+            if (gameData.problems.some(p => p.id === problemData.id)) {
+                alert(`Problem with ID "${problemData.id}" already exists.`);
+                return;
+            }
+
+            gameData.problems.push(problemData);
+            saveGameData();
+            updateAdminPanel();
+            updateGameDisplay();
+        }
+
+        // Update an existing problem
+        function updateProblem(problemId, problemData) {
+            const index = gameData.problems.findIndex(p => p.id === problemId);
+            if (index === -1) return;
+
+            // Preserve the ID
+            problemData.id = problemId;
+
+            gameData.problems[index] = problemData;
+            saveGameData();
+            updateAdminPanel();
+            updateGameDisplay();
+        }
+
+        // Delete a problem
+        function deleteProblem(problemId) {
+            gameData.problems = gameData.problems.filter(p => p.id !== problemId);
+
+            // If this problem was solved, remove it from solved problems
+            if (gameState.solvedProblems.includes(problemId)) {
+                gameState.solvedProblems = gameState.solvedProblems.filter(id => id !== problemId);
+                saveGameState();
+            }
+
+            saveGameData();
+            updateAdminPanel();
+            updateGameDisplay();
+        }
+
+        // Add a new resource type
+        function addResource(resourceName) {
+            if (gameData.resourceTypes.includes(resourceName)) {
+                alert(`Resource "${resourceName}" already exists.`);
+                return;
+            }
+
+            gameData.resourceTypes.push(resourceName);
+            saveGameData();
+            updateAdminPanel();
+        }
+
+        // Update a resource type (rename)
+        function updateResource(oldName, newName) {
+            if (oldName === newName) return;
+
+            // Update resource type in the list
+            const index = gameData.resourceTypes.indexOf(oldName);
+            if (index === -1) return;
+
+            gameData.resourceTypes[index] = newName;
+
+            // Update all references to this resource in problems
+            gameData.problems.forEach(problem => {
+                // Update requirements
+                if (problem.requirements && problem.requirements[oldName] !== undefined) {
+                    problem.requirements[newName] = problem.requirements[oldName];
+                    delete problem.requirements[oldName];
+                }
+
+                // Update costs
+                if (problem.costs && problem.costs[oldName] !== undefined) {
+                    problem.costs[newName] = problem.costs[oldName];
+                    delete problem.costs[oldName];
+                }
+
+                // Update rewards
+                if (problem.rewards && problem.rewards[oldName] !== undefined) {
+                    problem.rewards[newName] = problem.rewards[oldName];
+                    delete problem.rewards[oldName];
+                }
+
+                // Update trigger conditions
+                if (problem.triggerConditions) {
+                    problem.triggerConditions.forEach(condition => {
+                        if (condition.resource === oldName) {
+                            condition.resource = newName;
+                        }
+                    });
+                }
+
+                // Update hide conditions
+                if (problem.hideConditions) {
+                    problem.hideConditions.forEach(condition => {
+                        if (condition.resource === oldName) {
+                            condition.resource = newName;
+                        }
+                    });
+                }
+            });
+
+            // Update stage starting resources
+            gameData.stages.forEach(stage => {
+                if (stage.startingResources && stage.startingResources[oldName] !== undefined) {
+                    stage.startingResources[newName] = stage.startingResources[oldName];
+                    delete stage.startingResources[oldName];
+                }
+            });
+
+            // Update player resources
+            if (gameState.resources[oldName] !== undefined) {
+                gameState.resources[newName] = gameState.resources[oldName];
+                delete gameState.resources[oldName];
+                saveGameState();
+            }
+
+            saveGameData();
+            updateAdminPanel();
+            updateGameDisplay();
+        }
+
+        // Delete a resource type
+        function deleteResource(resourceName) {
+            // Check if this resource is used in any problems
+            let isUsed = false;
+
+            for (const problem of gameData.problems) {
+                if (
+                    (problem.requirements && problem.requirements[resourceName] !== undefined) ||
+                    (problem.costs && problem.costs[resourceName] !== undefined) ||
+                    (problem.rewards && problem.rewards[resourceName] !== undefined) ||
+                    (problem.triggerConditions && problem.triggerConditions.some(c => c.resource === resourceName)) ||
+                    (problem.hideConditions && problem.hideConditions.some(c => c.resource === resourceName))
+                ) {
+                    isUsed = true;
+                    break;
+                }
+            }
+
+            // Check if used in stage starting resources
+            if (!isUsed) {
+                for (const stage of gameData.stages) {
+                    if (stage.startingResources && stage.startingResources[resourceName] !== undefined) {
+                        isUsed = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isUsed) {
+                if (!confirm(`Resource "${resourceName}" is used in problems or stages. Deleting it may cause issues. Continue?`)) {
+                    return;
+                }
+            }
+
+            // Remove from resource types
+            gameData.resourceTypes = gameData.resourceTypes.filter(r => r !== resourceName);
+
+            // Clean up any references
+            gameData.problems.forEach(problem => {
+                if (problem.requirements) delete problem.requirements[resourceName];
+                if (problem.costs) delete problem.costs[resourceName];
+                if (problem.rewards) delete problem.rewards[resourceName];
+
+                if (problem.triggerConditions) {
+                    problem.triggerConditions = problem.triggerConditions.filter(c => c.resource !== resourceName);
+                }
+
+                if (problem.hideConditions) {
+                    problem.hideConditions = problem.hideConditions.filter(c => c.resource !== resourceName);
+                }
+            });
+
+            // Remove from stage starting resources
+            gameData.stages.forEach(stage => {
+                if (stage.startingResources) delete stage.startingResources[resourceName];
+            });
+
+            // Remove from player resources
+            if (gameState.resources[resourceName] !== undefined) {
+                delete gameState.resources[resourceName];
+                saveGameState();
+            }
+
+            saveGameData();
+            updateAdminPanel();
+            updateGameDisplay();
+        }
+
+        // Export game data
+        function exportGameData() {
+            const dataStr = JSON.stringify(gameData, null, 2);
+            const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+
+            const exportLink = document.createElement('a');
+            exportLink.setAttribute('href', dataUri);
+            exportLink.setAttribute('download', 'stages_of_being_game_data.json');
+            exportLink.click();
+        }
+
+        // Import game data
+        function importGameData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+
+                    // Validate imported data structure
+                    if (!importedData.stages || !importedData.problems || !importedData.resourceTypes) {
+                        throw new Error('Imported data is missing required properties.');
+                    }
+
+                    if (!confirm("This will replace all current game data. Continue?")) {
+                        return;
+                    }
+
+                    gameData = importedData;
+                    saveGameData();
+                    resetGameState();
+                    updateAdminPanel();
+                    updateGameDisplay();
+
+                    alert('Game data imported successfully.');
+                } catch (error) {
+                    alert(`Error importing data: ${error.message}`);
+                }
+            };
+            reader.readAsText(file);
+
+            // Reset the file input
+            event.target.value = '';
+        }
+
+        // Reset game progress to beginning
+        function resetGameData() {
+            if (confirm("This will reset your game progress to the beginning. Continue?")) {
+                resetGameState();
+                updateAdminPanel();
+                updateGameDisplay();
+                alert('Game progress reset to beginning.');
+            }
+        }
+
+        // Load default game data
+        function loadDefaultGameData() {
+            if (confirm("This will load the default game template. All current game data will be replaced. Continue?")) {
+                gameData = JSON.parse(JSON.stringify(DEFAULT_GAME_DATA));
+                saveGameData();
+                resetGameState();
+                updateAdminPanel();
+                updateGameDisplay();
+                alert('Default game template loaded.');
+            }
+        }
+
+        // Show modal
+        function showModal(content) {
+            modalContent.innerHTML = content;
+            modalContainer.classList.remove('hidden');
+        }
+
+        // Close modal
+        function closeModal() {
+            modalContainer.classList.add('hidden');
+        }
+
+        // Helper function to check if a problem can be solved
+        function canSolveProblem(problem) {
+            let canSolve = true;
+
+            // Check requirements
+            for (const [resource, amount] of Object.entries(problem.requirements || {})) {
+                if ((gameState.resources[resource] || 0) < amount) {
+                    canSolve = false;
+                    break;
+                }
+            }
+
+            // Check costs
+            if (canSolve) {
+                for (const [resource, amount] of Object.entries(problem.costs || {})) {
+                    if (resource === "everything") {
+                        // "everything" cost is always solvable
+                        continue;
+                    }
+                    if (resource === "time") {
+                        // Time costs are always solvable
+                        continue;
+                    }
+                    if ((gameState.resources[resource] || 0) < amount) {
+                        canSolve = false;
+                        break;
+                    }
+                }
+            }
+
+            return canSolve;
+        }
+
+        function refreshProblemButtonStates() {
+            document.querySelectorAll('.problem').forEach(problemDiv => {
+                const problemId = problemDiv.dataset.problemId;
+                if (!problemId) return;
+
+                const problem = gameData.problems.find(p => p.id === problemId);
+                if (!problem) return;
+
+                const button = problemDiv.querySelector('.problem-btn');
+                if (!button) return;
+
+                const canSolve = canSolveProblem(problem);
+                button.disabled = !canSolve;
+            });
+        }
+
+        function startSolvingAnimation(button, problem) {
+            // Disable this button to prevent multiple clicks
+            button.disabled = true;
+
+            // Create a unique ID for this solve operation
+            const solveId = `solve_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+            // Replace button with progress
+            const progressDiv = document.createElement('div');
+            progressDiv.className = 'progress-text';
+            progressDiv.id = solveId;
+            progressDiv.textContent = '[0.00%]';
+            button.replaceWith(progressDiv);
+
+            // Use problem's defined solve time
+            const solveTime = problem.solveTime || 2000;
+            const startTime = Date.now();
+
+            // Each solve operation gets its own animation frame tracking
+            let animationFrameId = null;
+
+            // Update progress with closure to maintain local state
+            const updateProgress = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min((elapsed / solveTime) * 100, 100);
+
+                // Make sure the element still exists (might have been removed)
+                const progressElement = document.getElementById(solveId);
+                if (progressElement) {
+                    progressElement.textContent = `[${progress.toFixed(2)}%]`;
+                }
+
+                if (elapsed < solveTime) {
+                    // Store the animation ID for this specific solve operation
+                    animationFrameId = requestAnimationFrame(updateProgress);
+                } else {
+                    // Cleanup when done
+                    cancelAnimationFrame(animationFrameId);
+                    // Solve the problem
+                    solveProblem(problem);
+
+                    // Handle what happens after solving
+                    const problemContainer = document.querySelector(`.problem[data-problem-id="${problem.id}"]`);
+
+                    // For repeatable problems, restore the solve button
+                    if (problem.repeatable && problemContainer) {
+                        const newSolveBtn = document.createElement('button');
+                        newSolveBtn.className = 'problem-btn ml-4';
+                        newSolveBtn.textContent = 'Solve';
+                        newSolveBtn.addEventListener('click', function() {
+                            startSolvingAnimation(this, problem);
+                        });
+
+                        // Check if the problem is still solvable
+                        let canSolve = canSolveProblem(problem);
+                        if (!canSolve) {
+                            newSolveBtn.disabled = true;
+                        }
+
+                        // If progress element still exists, replace it with the new button
+                        if (progressElement) {
+                            progressElement.replaceWith(newSolveBtn);
+                        }
+                    } else {
+                        // For non-repeatable problems, just remove the progress element
+                        progressElement?.remove();
+                    }
+                }
+            };
+
+            // Start the animation for this specific solve
+            animationFrameId = requestAnimationFrame(updateProgress);
+        }
+
+
+        // Initialize the game when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', initGame);
+
+        // Function to toggle dark mode
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            saveDarkModePreference();
+        }
+
+        // Function to save dark mode preference
+        function saveDarkModePreference() {
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        // Function to load dark mode preference
+        function loadDarkModePreference() {
+            const darkMode = localStorage.getItem('darkMode');
+            if (darkMode === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        }
+    </script>
+</body>
+</html>
