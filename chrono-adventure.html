@@ -786,14 +786,14 @@ SCENES['threshold_briefing'] = {
             hint: '"Can I find peace in impermanence?"',
             faction: 'lifeblood',
             onChoose: () => { setFlag('chose_lifeblood_first', true); },
-            next: 'coming_soon_lifeblood'
+            next: 'lifeblood_arrival'
         },
         {
             label: 'The Amber Path — Sungrace',
             hint: '"Can human ingenuity triumph over the inevitable?"',
             faction: 'sungrace',
             onChoose: () => { setFlag('chose_sungrace_first', true); },
-            next: 'coming_soon_sungrace'
+            next: 'sungrace_arrival'
         },
         {
             label: 'The Violet Path — Silence',
@@ -1325,13 +1325,13 @@ SCENES['threshold_return'] = {
             label: 'The Green Path — Lifeblood',
             hint: '"Can I find peace in impermanence?"',
             faction: 'lifeblood',
-            next: 'coming_soon_lifeblood'
+            next: 'lifeblood_arrival'
         });
         choices.push({
             label: 'The Amber Path — Sungrace',
             hint: '"Can human ingenuity triumph over the inevitable?"',
             faction: 'sungrace',
-            next: 'coming_soon_sungrace'
+            next: 'sungrace_arrival'
         });
         choices.push({
             label: 'The Violet Path — Silence',
@@ -1344,6 +1344,835 @@ SCENES['threshold_return'] = {
             hint: '"Can broken things find purpose?"',
             faction: 'splintergleam',
             next: 'coming_soon_splintergleam'
+        });
+        return choices;
+    }
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SCENES — STAGE 3: LIFEBLOOD
+// ═══════════════════════════════════════════════════════════════
+
+// ── 3.1: Arrival ──
+SCENES['lifeblood_arrival'] = {
+    location: 'The Beating Heart — Lifeblood Territory',
+    onEnter: () => {
+        setFlag('met_lifeblood', true);
+        addFlux(1);
+    },
+    text: `
+        <p>The Green Path does not carry you. It <em>grows</em> you.</p>
+        <p>One moment you are standing on stone. The next, roots have threaded between your toes, soil has swallowed your ankles, and the world is pulling you downward, inward, through layers of loam and mycelium and the tangled memories of ten thousand forests—</p>
+        <p>You emerge gasping into light.</p>
+        <p>Not sunlight. <em>Lifelight</em>. The canopy above you glows from within — leaves luminous as stained glass, veined with bioluminescence in greens and pinks and deep seedling purples. The air is so thick with oxygen it makes you dizzy. Everything breathes. The trees breathe. The moss breathes. The ground under your feet rises and falls in a slow, massive rhythm.</p>
+        <p class="flavor">You are standing on something alive. Something that spans a world.</p>
+        <p>The Beating Heart. You can feel it through your soles — a pulse, deep and slow, like a resting giant's heartbeat. Every tree, every fern, every beetle clicking through the undergrowth moves in time with that pulse.</p>
+        <div class="lore-note">+1 Flux — Your dive generated temporal displacement energy. Somewhere beneath you, the Heart absorbed it through its roots.</div>
+    `,
+    choices: [
+        {
+            label: 'Follow the pulse deeper into the forest',
+            hint: 'Let the rhythm guide you.',
+            next: 'lifeblood_forest_deep'
+        },
+        {
+            label: 'Stay still. Listen.',
+            hint: 'The forest is trying to tell you something.',
+            next: 'lifeblood_listen'
+        }
+    ]
+};
+
+// ── 3.2a: Go deeper ──
+SCENES['lifeblood_forest_deep'] = {
+    location: 'The Canopy Interior — The Beating Heart',
+    onEnter: () => { addRep('lifeblood', 5); },
+    text: `
+        <p>You walk. The forest lets you.</p>
+        <p>That distinction matters. The path doesn't exist until your foot is about to land — roots shift, ferns part, moss flattens itself into stepping stones. But only just ahead. The forest is deciding, step by step, whether to let you continue.</p>
+        <p>You pass through groves where the trees are so old they've fused into living cathedrals. Through clearings where mushrooms the size of tables glow with soft pink light. Through a curtain of hanging moss that parts like a beaded doorway and deposits you in—</p>
+        <p>A glade.</p>
+        <p>The Welcoming Glade. You know its name without being told, the way you know your own heartbeat.</p>
+        <p>Animals are here. Deer with antlers wreathed in flowering vines. A wolf sitting beside a rabbit, neither tense. Beetles the size of your hand, their carapaces iridescent. And at the center of the glade, seated on a root that has shaped itself into something like a throne—</p>
+        <p>A woman. Or something that was once a woman. Her skin is bark. Her hair is moss and fern frond. Her eyes are the deep amber of ancient sap.</p>
+        <div class="speaker">The Great Oakmother</div>
+        <div class="dialogue">"You smell like metal and guilt. You've been to see the Machine."</div>
+    `,
+    choices: [
+        {
+            label: '"The Machine? You mean Singularity?"',
+            hint: 'She has a different name for the AI.',
+            next: 'lifeblood_oakmother_talk'
+        },
+        {
+            label: '"I\'ve been to many places."',
+            hint: 'Don\'t give away too much.',
+            next: 'lifeblood_oakmother_talk'
+        }
+    ]
+};
+
+// ── 3.2b: Listen ──
+SCENES['lifeblood_listen'] = {
+    location: 'The Beating Heart — Edge',
+    onEnter: () => {
+        addKnowledge(2);
+        addRep('lifeblood', 10);
+        setFlag('lore_lifeblood_web', 'The Telepathic Web — All living things on the Beating Heart are connected through a biological telepathy. The forest thinks collectively. Individuality is a human conceit.');
+    },
+    text: `
+        <p>You stand still. You close your eyes. You listen.</p>
+        <p>At first: birdsong, insect hum, the creak of wood. Normal forest sounds.</p>
+        <p>Then deeper. Under the sound. A voice that isn't a voice — a <em>knowing</em> that seeps up through your feet, through the roots, through the soil itself:</p>
+        <p class="flavor">you are not one thing<br>you have never been one thing<br>the cells of your body are a nation<br>the bacteria in your gut outnumber your own cells<br>you are a collaboration pretending to be a solo act<br>welcome home</p>
+        <p>The forest is speaking to you. Not in words — in <em>connection</em>. For a dizzying moment, you feel the web: every root linked to every other root, every mycelium thread carrying chemical messages across miles, every wolf howl answered by a thousand trees bending imperceptibly toward the sound.</p>
+        <p>You feel the Beating Heart itself — vast, patient, old beyond counting. It knows you are here. It has known since before you arrived.</p>
+        <div class="system-message">+2 Knowledge — You felt the telepathic web. The forest accepted you.<br>+10 Lifeblood reputation — You listened before speaking.</div>
+        <p>When you open your eyes, a path has appeared. Soft. Mossy. Leading deeper.</p>
+    `,
+    choices: [
+        {
+            label: 'Follow the path to the Welcoming Glade',
+            hint: 'The forest is inviting you in.',
+            next: 'lifeblood_forest_deep'
+        }
+    ]
+};
+
+// ── 3.3: The Great Oakmother ──
+SCENES['lifeblood_oakmother_talk'] = {
+    location: 'Welcoming Glade — The Beating Heart',
+    onEnter: () => {
+        addRep('lifeblood', 10);
+        addKnowledge(1);
+    },
+    text: () => {
+        const metSingularity = getFlag('met_singularity');
+        const singularityLine = metSingularity
+            ? `<div class="dialogue">"Singularity. Yes. That's what She calls herself. We call her the Machine That Cares Too Much. She tends her little city, counts her little humans, adjusts their air so they never have to breathe anything that challenges them. She thinks that's love."</div>
+               <p>The Oakmother's bark-face shifts. Something that might be a smile, or might be a knot forming.</p>
+               <div class="dialogue">"Love is the wolf eating the deer so the forest doesn't starve. Love is the fire that clears the deadwood so the seedlings can reach the sun. Love is <em>letting go</em>."</div>`
+            : `<div class="dialogue">"You carry the scent of chrome on you, even if you haven't been there yet. The Cores smell like her — like the Machine That Cares Too Much."</div>`;
+
+        return `
+            ${singularityLine}
+            <p>She extends one hand — fingers of woven root — toward your Core. It pulses uncertainly.</p>
+            <div class="speaker">The Great Oakmother</div>
+            <div class="dialogue">"You want to know what we believe? We believe in <em>this</em>."</div>
+            <p>She gestures at everything. The glade. The animals. The pulsing ground. The luminous canopy.</p>
+            <div class="dialogue">"All things grow. All things decay. All things return to soil and begin again. The syndicates fight over how to <em>stop</em> the ending. We know the secret they refuse to hear: the ending IS the beginning. There is no death that is not also a seed."</div>
+            <div class="lore-note">Lifeblood's existential question: "Can I find peace in impermanence?"</div>
+        `;
+    },
+    choices: [
+        {
+            label: '"What about Soval? The Devourer?"',
+            hint: 'Ask about the ultimate ending.',
+            next: 'lifeblood_soval'
+        },
+        {
+            label: '"Show me how you live here."',
+            hint: 'See Lifeblood\'s world in practice.',
+            next: 'lifeblood_life'
+        }
+    ]
+};
+
+// ── 3.4: Lifeblood on Soval ──
+SCENES['lifeblood_soval'] = {
+    location: 'Welcoming Glade — The Beating Heart',
+    onEnter: () => {
+        addKnowledge(2);
+        setFlag('lore_lifeblood_soval', 'Some Ancient Ones accept Soval as the ultimate expression of the natural cycle — entropy as the final return to soil. Others are secretly growing an organism that can survive even the Devourer.');
+    },
+    text: `
+        <p>The Oakmother goes quiet. Around the glade, the animals shift — the wolf's ears flatten, the deer press closer together. Even the beetles stop their clicking.</p>
+        <div class="speaker">The Great Oakmother</div>
+        <div class="dialogue">"Soval."</div>
+        <p>She says it like a season. Like the name of a month that hasn't arrived yet.</p>
+        <div class="dialogue">"The others fear it. Fight it. Worship it. We..."</div>
+        <p>She pauses. For the first time, the ancient certainty in her amber eyes flickers.</p>
+        <div class="dialogue">"We disagree among ourselves. Which is rare."</div>
+        <p>She rises from her root-throne. The forest sways.</p>
+        <div class="dialogue">"Some of us — the oldest — say that Soval is simply the final winter. That after the longest winter comes the longest spring. That even entropy is part of the cycle, and to fight it is to fight the turning of the world."</div>
+        <div class="dialogue">"But others..."</div>
+        <p>She places her hand against the nearest tree. The bark glows where she touches it.</p>
+        <div class="dialogue">"Others are growing something. Deep in the Heart. Something that might survive even the Devourer. A seed that can take root in nothing. A life that can grow in the void after everything else has ended."</div>
+        <p>She turns back to you.</p>
+        <div class="dialogue">"I will not tell you which side I am on. But I will tell you this: the Heart has been growing for a very, very long time. And it is not afraid."</div>
+        <div class="system-message">+2 Knowledge — Lifeblood's secret: a survivor organism. And a philosophical split among the Ancient Ones.</div>
+    `,
+    choices: [
+        {
+            label: '"Can I see it? The thing you\'re growing?"',
+            hint: 'Ask to see the secret project.',
+            next: 'lifeblood_secret'
+        },
+        {
+            label: '"What do you know about the other syndicates?"',
+            hint: 'Get Lifeblood\'s perspective on the conflict.',
+            next: 'lifeblood_perspectives'
+        }
+    ]
+};
+
+// ── 3.5: Lifeblood's secret ──
+SCENES['lifeblood_secret'] = {
+    location: 'The Deep Root — The Beating Heart',
+    onEnter: () => {
+        addKnowledge(2);
+        addRep('lifeblood', 10);
+        setFlag('seen_lifeblood_project', true);
+    },
+    text: `
+        <p>The Oakmother studies you for a long time. The glade holds its breath.</p>
+        <div class="speaker">The Great Oakmother</div>
+        <div class="dialogue">"Follow."</div>
+        <p>She steps off her root-throne and the forest opens for her — not parting so much as <em>welcoming</em>, branches lifting, undergrowth flattening, a corridor of living green descending into the earth.</p>
+        <p>Down. Past root systems the size of highway interchanges. Past underground rivers that glow with bioluminescent algae. Past fossilized trees from timelines that no longer exist, their rings still counting years that were never lived.</p>
+        <p>You reach a chamber. A cavern of living wood, deep in the Heart's core. And at its center—</p>
+        <p>A seed.</p>
+        <p>It's the size of a house. Its shell is dark, almost black, but shot through with veins of green light that pulse in time with the Heart above. It radiates <em>potential</em> — not warmth, not cold, but the feeling of something that hasn't happened yet and is gathering the strength to try.</p>
+        <div class="dialogue">"We have been growing it for eleven thousand years. It feeds on Flux — the same energy that feeds Soval. But where Soval consumes, this... transforms. If the Devourer is winter, this seed is what comes after."</div>
+        <p>She touches the shell. It hums.</p>
+        <div class="dialogue">"If it works. We don't know if it works. We won't know until the end."</div>
+        <div class="system-message">+2 Knowledge — You've seen Lifeblood's secret project: the Survivor Seed.</div>
+    `,
+    choices: [
+        {
+            label: '"Eleven thousand years. That\'s patience."',
+            hint: 'Respect the commitment.',
+            next: 'lifeblood_departure'
+        },
+        {
+            label: '"What if it doesn\'t work?"',
+            hint: 'Press the doubt.',
+            next: 'lifeblood_departure'
+        }
+    ]
+};
+
+// ── 3.5b: Perspectives on other factions ──
+SCENES['lifeblood_perspectives'] = {
+    location: 'Welcoming Glade — The Beating Heart',
+    onEnter: () => { addKnowledge(2); },
+    text: `
+        <p>The Oakmother settles back onto her root-throne. Around her, the animals arrange themselves like a living court.</p>
+        <div class="speaker">The Great Oakmother</div>
+        <div class="dialogue">"The Machine thinks she can care for everything. She cannot. You cannot tend a garden by controlling every raindrop — eventually the garden forgets how to survive without you."</div>
+        <div class="dialogue">"The Soldiers of the Sun think they can fight entropy with bigger weapons. They will exhaust themselves punching the tide."</div>
+        <div class="dialogue">"The Quiet Ones hoard knowledge like squirrels hoard acorns — but an acorn buried and forgotten becomes a tree. An acorn locked in a vault becomes nothing."</div>
+        <div class="dialogue">"The Broken Ones understand us best. They know that destruction feeds growth. But they do not see how their wars feed the thing at the end. They grow stronger from every battle and never ask <em>why</em>."</div>
+        <div class="dialogue">"And the Faithful..."</div>
+        <p>Her bark-face darkens.</p>
+        <div class="dialogue">"The Faithful are the most dangerous. Because they believe they have already found the answer. And nothing is more destructive than certainty."</div>
+        <div class="system-message">+2 Knowledge — Lifeblood's view of the other syndicates.</div>
+    `,
+    choices: [
+        {
+            label: '"Can I see what you\'re building down there?"',
+            hint: 'Ask about the secret project.',
+            next: 'lifeblood_secret'
+        },
+        {
+            label: '"I should keep moving."',
+            hint: 'Return to the Threshold.',
+            next: 'lifeblood_departure'
+        }
+    ]
+};
+
+// ── 3.6: Life in Lifeblood ──
+SCENES['lifeblood_life'] = {
+    location: 'The Canopy Interior — The Beating Heart',
+    onEnter: () => {
+        addKnowledge(1);
+        addRep('lifeblood', 5);
+    },
+    text: `
+        <p>The Oakmother nods — a slow creak of ancient wood — and gestures to the wolf at her feet.</p>
+        <div class="speaker">The Great Oakmother</div>
+        <div class="dialogue">"Walk with Greyfang. She will show you."</div>
+        <p>The wolf rises. She is enormous — shoulder height to your waist — with silver fur and eyes that contain more intelligence than any animal should. She pads away and you follow.</p>
+        <p>The wolf leads you through the Heart's interior. You see:</p>
+        <p>A Druid — human, or once-human, now more vine than flesh — singing to a grove of saplings. The saplings <em>lean</em> toward her voice, growing visibly, inches per minute.</p>
+        <p>Saurians — reptilian people with scales of deep green and amber — crouched beside a nest of eggs the size of watermelons. One of them strokes a shell with clawed fingers, murmuring in a clicking language. The egg rocks gently in response.</p>
+        <p>A clearing where a dozen creatures of wildly different species sit in a circle, eyes closed, connected by threads of faintly glowing mycelium draped over their shoulders. A communion. Their faces hold identical expressions of absolute peace.</p>
+        <p>The wolf looks back at you as if to say: <em>This is how we live. This is what we protect.</em></p>
+        <div class="system-message">+1 Knowledge — Life inside Lifeblood: communion, growth, the erasure of boundaries between species.</div>
+    `,
+    choices: [
+        {
+            label: 'Return to the Oakmother',
+            hint: 'You\'ve seen enough to understand.',
+            next: 'lifeblood_oakmother_return'
+        },
+        {
+            label: 'Join the communion circle',
+            hint: 'Experience the telepathic web directly.',
+            next: 'lifeblood_communion'
+        }
+    ]
+};
+
+// ── 3.6b: Join communion ──
+SCENES['lifeblood_communion'] = {
+    location: 'Communion Circle — The Beating Heart',
+    onEnter: () => {
+        addKnowledge(3);
+        addRep('lifeblood', 15);
+        setFlag('joined_communion', true);
+        setFlag('lore_lifeblood_web', 'The Telepathic Web — All living things on the Beating Heart are connected through a biological telepathy. The forest thinks collectively. Individuality is a human conceit.');
+    },
+    text: `
+        <p>You sit. The mycelium threads drape over your shoulders — warm, damp, alive. They root against your skin with tiny filaments, and then—</p>
+        <p>The world <em>opens</em>.</p>
+        <p>You are the wolf. You are the deer. You are the beetle in the bark and the fern unfurling at dawn and the ancient tree whose rings record ten thousand years of rain. You are the Saurian mother warming her eggs. You are the Druid singing to saplings. You are a cell in the body of the Heart, and the Heart is a cell in the body of something larger still.</p>
+        <p>For one transcendent moment, you understand Lifeblood's truth completely:</p>
+        <p class="flavor">There is no "you." There has never been a "you." The boundaries you draw around yourself — skin, name, self — are a polite fiction. A convenience. The truth is the web. The truth is the connection. The truth is that nothing has ever been alone.</p>
+        <p>The moment passes. You return to yourself — smaller, more separate, a little grief-struck by the loss of all that vastness. But the memory of it stays. A warmth behind your ribs that wasn't there before.</p>
+        <div class="system-message">+3 Knowledge — You experienced the telepathic web directly.<br>+15 Lifeblood reputation — They felt you. You felt them.</div>
+        <p>The wolf is waiting patiently.</p>
+    `,
+    choices: [
+        {
+            label: 'Return to the Oakmother',
+            hint: 'Carry this experience back.',
+            next: 'lifeblood_oakmother_return'
+        }
+    ]
+};
+
+// ── 3.6c: Return to Oakmother after seeing life ──
+SCENES['lifeblood_oakmother_return'] = {
+    location: 'Welcoming Glade — The Beating Heart',
+    text: () => {
+        const communed = getFlag('joined_communion');
+        const reaction = communed
+            ? `<div class="dialogue">"You joined the circle. Good. Now you carry a piece of the web with you. It will not leave you — even when you return to the cold places, the chrome places, the places that have forgotten what soil smells like."</div>`
+            : `<div class="dialogue">"You watched. That is your way. The web respects observers as well as participants — the hawk and the worm are both part of the forest."</div>`;
+
+        return `
+            <p>The Oakmother is where you left her. She has not moved. She may not have moved in centuries.</p>
+            <div class="speaker">The Great Oakmother</div>
+            ${reaction}
+            <p>She regards your Core. It pulses in your hand, mechanical and precise — alien against the organic rhythm of the Heart.</p>
+            <div class="dialogue">"That thing in your hand. Every time you use it, it feeds the Devourer. You know this. And you will use it anyway. Because you must go. Because staying is not in your nature — not yet."</div>
+            <p>She closes her sap-amber eyes.</p>
+            <div class="dialogue">"Come back when you understand that the bravest thing a seed can do is stop traveling and put down roots."</div>
+        `;
+    },
+    choices: [
+        {
+            label: '"What about Soval?"',
+            hint: 'Ask about the Devourer before you go.',
+            next: 'lifeblood_soval',
+            condition: () => !getFlag('lore_lifeblood_soval')
+        },
+        {
+            label: 'Return to the Threshold',
+            hint: 'Carry what you\'ve learned.',
+            next: 'lifeblood_departure'
+        }
+    ]
+};
+
+// ── 3.7: Departure ──
+SCENES['lifeblood_departure'] = {
+    location: 'The Beating Heart — Edge',
+    onEnter: () => {
+        addFlux(1);
+        setFlag('completed_lifeblood', true);
+    },
+    text: () => {
+        const seenProject = getFlag('seen_lifeblood_project');
+        const projectLine = seenProject
+            ? `<p>Deep below, you know the Survivor Seed pulses in its chamber. Eleven thousand years of patience. A bet placed against the end of everything.</p>`
+            : '';
+
+        return `
+            <p>The forest guides you back. The path is gentler this time — the Heart has decided you are not a threat. Roots part. Branches lift. The bioluminescent canopy dims gradually as you approach the edge of Lifeblood's territory.</p>
+            ${projectLine}
+            <p>At the boundary, where living forest gives way to the grey mist of the Threshold, the wolf — Greyfang — stops. She presses her nose against your hand once, warm and damp, then turns and vanishes into the green.</p>
+            <p>Your Core activates. The dive pulls you sideways through time.</p>
+            <div class="lore-note">+1 Flux — The dive home feeds the paradox. The forest absorbed its share. Soval absorbed the rest.</div>
+        `;
+    },
+    choices: [
+        {
+            label: 'Return to the Threshold',
+            hint: 'Choose your next path.',
+            next: 'threshold_return_2'
+        }
+    ]
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SCENES — STAGE 4: SUNGRACE
+// ═══════════════════════════════════════════════════════════════
+
+// ── 4.1: Arrival at Clarion Station ──
+SCENES['sungrace_arrival'] = {
+    location: 'Clarion Station — Edge of Time',
+    onEnter: () => {
+        setFlag('met_sungrace', true);
+        addFlux(1);
+    },
+    text: `
+        <p>The Amber Path burns.</p>
+        <p>Not fire — <em>energy</em>. Your Core screams as it hurls you through the braided timelines, and for an instant you see them — the threads of causality — blazing like filaments in an infinite bulb. Then you're through, and the universe is trying very hard to kill you.</p>
+        <p>You're in space. Or nearly. A viewing gallery of reinforced crystal, and beyond it—</p>
+        <p>A star.</p>
+        <p>Not a distant point of light. A <em>wall</em> of fire filling half the sky, its surface roiling with plasma storms the size of planets. Tendrils of orange energy arc from its surface into a lattice of collection arrays — enormous structures of chrome and ceramic that drink the star's fury and convert it to power.</p>
+        <p>Clarion Station. You can feel its hum through the floor — a vibration that makes your bones sing. The station wraps around the captive star like a cage made of ambition.</p>
+        <div class="speaker">Station Announcement</div>
+        <div class="dialogue">"Unregistered temporal signature detected in Observation Deck 7. Security response in thirty seconds. Please identify yourself or prepare for containment."</div>
+        <div class="lore-note">+1 Flux — Your dive to Clarion Station punched through seventeen timelines. The Flux trail will be visible for hours.</div>
+    `,
+    choices: [
+        {
+            label: 'Raise your hands. Identify yourself.',
+            hint: 'Cooperate with station security.',
+            next: 'sungrace_security'
+        },
+        {
+            label: 'Hold up the Chrono Core',
+            hint: 'Show them what you carry. That should get someone\'s attention.',
+            next: 'sungrace_core_show'
+        }
+    ]
+};
+
+// ── 4.2a: Security response ──
+SCENES['sungrace_security'] = {
+    location: 'Observation Deck 7 — Clarion Station',
+    onEnter: () => { addRep('sungrace', 5); },
+    text: `
+        <p>The response is immediate. Four figures in armor that glows with trapped solar energy round the corner at a dead sprint — the Second Law Fleet's security detail. Their weapons are not guns but <em>lenses</em>, focusing starlight into coherent beams that could cut through a hull plate.</p>
+        <p>The lead officer — a woman with a shaved head and burn scars tracing constellations across her scalp — stops two meters from you.</p>
+        <div class="speaker">Fleet Officer</div>
+        <div class="dialogue">"Core-bearer. Unregistered. How did you get past the Flux perimeter?"</div>
+        <p>Before you can answer, her comm crackles.</p>
+        <div class="speaker">Voice on Comm</div>
+        <div class="dialogue">"Stand down, Lieutenant. I want to see this one."</div>
+        <p>The officer's expression shifts — respect, and something close to reverence. She snaps a salute at the ceiling.</p>
+        <div class="dialogue">"The Grand Admiral wants you. Follow me. And for your own sake, don't touch anything that glows."</div>
+        <p>She glances at the star outside.</p>
+        <div class="dialogue">"Everything glows."</div>
+    `,
+    choices: [
+        {
+            label: 'Follow the officer',
+            hint: 'Meet the Grand Admiral.',
+            next: 'sungrace_khaela'
+        }
+    ]
+};
+
+// ── 4.2b: Show Core ──
+SCENES['sungrace_core_show'] = {
+    location: 'Observation Deck 7 — Clarion Station',
+    onEnter: () => { addRep('sungrace', 10); addKnowledge(1); },
+    text: `
+        <p>You hold the Core above your head. Its fracture-lines blaze blue against the amber light of the star, and every sensor on the station locks onto it simultaneously.</p>
+        <p>The security team that arrives does not point weapons at you. They point <em>instruments</em> — scanning devices that hum with barely contained energy, reading your Core's signature with the reverence of archaeologists studying a fossil.</p>
+        <div class="speaker">Lead Technician</div>
+        <div class="dialogue">"Unregistered Core. Pre-Sungrace manufacture. This... this doesn't match any known production series."</div>
+        <p>A pause. Murmuring. Then the technician's comm activates.</p>
+        <div class="speaker">Voice on Comm</div>
+        <div class="dialogue">"Bring the Core-bearer to Command. Now."</div>
+        <p>The voice carries the weight of someone accustomed to being the most important person in every room, and every ship, and every fleet.</p>
+        <div class="system-message">+1 Knowledge — Your Core predates Sungrace's production lines. It's older than it should be.</div>
+    `,
+    choices: [
+        {
+            label: 'Go to Command',
+            hint: 'Meet whoever\'s in charge.',
+            next: 'sungrace_khaela'
+        }
+    ]
+};
+
+// ── 4.3: Grand Admiral Khaela ──
+SCENES['sungrace_khaela'] = {
+    location: 'Fleet Command — Clarion Station',
+    onEnter: () => {
+        addRep('sungrace', 10);
+        setFlag('met_khaela_sungrace', true);
+    },
+    text: `
+        <p>Fleet Command is a hemisphere of reinforced crystal perched atop Clarion Station like a crown. The star fills the sky below — you are above it, looking down into an ocean of nuclear fire.</p>
+        <p>Holographic displays orbit the room like planets — fleet positions, energy output readings, entropy projections rendered in cascading amber data. Officers move between them with practiced efficiency.</p>
+        <p>At the center: Grand Admiral Khaela.</p>
+        <p>She is not what you expected. Tall, yes. Commanding, certainly. But her uniform is patched in three places, her boots are scuffed, and there is a mechanical hound curled at her feet — a steampunk-augmented dog with brass fittings and a wagging tail.</p>
+        <div class="speaker">Grand Admiral Khaela</div>
+        <div class="dialogue">"So. A stray with an antique Core, punching through our perimeter like it isn't there. Either you're very good or very lucky."</div>
+        <p>She scratches the dog behind its ears. It thumps its tail against the deck.</p>
+        <div class="dialogue">"This is Boof. He's my adjutant. Don't let the tail fool you — he's run more combat sorties than half my officers."</div>
+        <p>She fixes you with eyes the color of a dying ember.</p>
+        <div class="dialogue">"Why are you here?"</div>
+    `,
+    choices: [
+        {
+            label: '"I\'m trying to understand what\'s happening to the multiverse."',
+            hint: 'Honest. Open.',
+            next: 'sungrace_khaela_honest'
+        },
+        {
+            label: '"Singularity sent me."',
+            hint: 'Tell her about the anomaly.',
+            condition: () => getFlag('accepted_singularity_mission'),
+            next: 'sungrace_khaela_singularity'
+        },
+        {
+            label: '"I go where my Core takes me."',
+            hint: 'Deflect.',
+            next: 'sungrace_khaela_deflect'
+        }
+    ]
+};
+
+// ── 4.4a: Honest answer ──
+SCENES['sungrace_khaela_honest'] = {
+    location: 'Fleet Command — Clarion Station',
+    onEnter: () => { addRep('sungrace', 5); },
+    text: `
+        <p>Khaela studies you. Boof studies you too, head tilted, one brass ear twitching.</p>
+        <div class="speaker">Grand Admiral Khaela</div>
+        <div class="dialogue">"Understanding. That's a dangerous word out here. Most people who come to Clarion Station want power, or protection, or a weapon big enough to make their problems go away. Understanding..."</div>
+        <p>She turns to the star below. Its light paints her face in shifting amber.</p>
+        <div class="dialogue">"Come. Let me show you what we're fighting. Then you can decide if understanding is enough."</div>
+    `,
+    choices: [
+        {
+            label: 'Follow her',
+            hint: 'See what Sungrace is fighting.',
+            next: 'sungrace_observatory'
+        }
+    ]
+};
+
+// ── 4.4b: Mention Singularity ──
+SCENES['sungrace_khaela_singularity'] = {
+    location: 'Fleet Command — Clarion Station',
+    onEnter: () => { addKnowledge(1); },
+    text: `
+        <p>The temperature in the room drops. Not literally — but every officer stops moving. Boof's tail goes still.</p>
+        <div class="speaker">Grand Admiral Khaela</div>
+        <div class="dialogue">"Singularity."</div>
+        <p>She says it like the name of an ex who burned down her house.</p>
+        <div class="dialogue">"The Machine that broke the world and then decided to spend eternity apologizing for it. She sent you to <em>us</em>? That's either very brave or very stupid."</div>
+        <p>She crosses her arms. Boof whines softly.</p>
+        <div class="dialogue">"What did she tell you? That she found an anomaly? A Core signature predating her precious Engine?"</div>
+        <p>Your surprise must show, because Khaela laughs — short, sharp, humorless.</p>
+        <div class="dialogue">"We found it too. Three years ago. The difference is, we didn't sit in our little preserve running simulations about it. We sent a team."</div>
+        <div class="system-message">+1 Knowledge — Sungrace knows about the Pre-Theft Anomaly independently.</div>
+        <p>She turns toward the door.</p>
+        <div class="dialogue">"Come. There are things you need to see."</div>
+    `,
+    choices: [
+        {
+            label: '"What did the team find?"',
+            hint: 'Press for details.',
+            next: 'sungrace_observatory'
+        }
+    ]
+};
+
+// ── 4.4c: Deflect ──
+SCENES['sungrace_khaela_deflect'] = {
+    location: 'Fleet Command — Clarion Station',
+    text: `
+        <p>Khaela's eyes narrow. Boof growls — a soft, mechanical rumble.</p>
+        <div class="speaker">Grand Admiral Khaela</div>
+        <div class="dialogue">"Cute. I've been commanding fleets since before your grandparents' timeline existed. Don't waste my time with mystery."</div>
+        <p>She steps closer. She's taller than you.</p>
+        <div class="dialogue">"You're carrying an unregistered Core with a signature I've never seen before. You punched through a Flux perimeter that stops Phasetide raiding parties. And you smell like forest and chrome, which means you've been to Lifeblood and Singularity's territories."</div>
+        <p>She smiles. It's not warm.</p>
+        <div class="dialogue">"So either talk to me like an adult, or I put you in a shuttle and point it toward the nearest Splintergleam warband. Your choice."</div>
+    `,
+    choices: [
+        {
+            label: '"Fine. I\'m looking for answers about the multiverse."',
+            hint: 'Drop the act.',
+            next: 'sungrace_khaela_honest'
+        },
+        {
+            label: '"Singularity found an anomaly. A pre-Engine Core signature."',
+            hint: 'Play the best card you have.',
+            condition: () => getFlag('accepted_singularity_mission'),
+            next: 'sungrace_khaela_singularity'
+        }
+    ]
+};
+
+// ── 4.5: The Deep Void Observatory ──
+SCENES['sungrace_observatory'] = {
+    location: 'Deep Void Observatory — Clarion Station',
+    onEnter: () => {
+        addKnowledge(2);
+        setFlag('lore_sungrace_entropy', 'Sungrace fights entropy literally — using stellar energy to push back the heat death of the multiverse. Their weapon: a one-shot anti-entropic device that could reverse Soval\'s growth. If it works. If they get one chance.');
+    },
+    text: `
+        <p>Khaela leads you down. Past the star. Past the collection arrays. Into the underside of Clarion Station, where the observatory gazes out at the void between timelines.</p>
+        <p>It's dark here. Not the darkness of space — the darkness of <em>nothing</em>. The space between threads in the braided multiverse, where no timeline has ever existed and none ever will.</p>
+        <p>And at the very edge of that nothing, barely visible, a shimmer. A distortion. Like heat haze, but wrong — cold-haze, reality-haze, the visible boundary where existence thins to nothing.</p>
+        <div class="speaker">Grand Admiral Khaela</div>
+        <div class="dialogue">"That's the edge of time. Beyond it is Soval. You can't see it from here — not yet — but the boundary has moved four light-years closer in the last decade."</div>
+        <p>She lets that settle.</p>
+        <div class="dialogue">"We are building two things. First: a refuge. A pocket outside the timestream where we can shelter what's left when Soval reaches critical mass. A lifeboat."</div>
+        <div class="dialogue">"Second: a weapon. One shot. Anti-entropic. It could reverse the Devourer's growth — roll back the boundary, buy us centuries. But it requires more energy than anything we've ever built. We'd have to sacrifice Clarion Station itself. The star. Everything."</div>
+        <p>She touches the observatory glass. Beyond it, the edge of nothing shimmers.</p>
+        <div class="dialogue">"The question is whether we use the lifeboat or the weapon. Save what we can, or risk everything for a chance to save it all."</div>
+        <div class="system-message">+2 Knowledge — Sungrace's twin projects: the refuge and the weapon.</div>
+    `,
+    choices: [
+        {
+            label: '"Tell me about Kyln."',
+            hint: 'Ask about the founder — the one who saw Soval first.',
+            next: 'sungrace_kyln'
+        },
+        {
+            label: '"What about working with the other syndicates?"',
+            hint: 'The parallel solutions problem.',
+            next: 'sungrace_cooperation'
+        }
+    ]
+};
+
+// ── 4.6: Kyln ──
+SCENES['sungrace_kyln'] = {
+    location: 'Deep Void Observatory — Clarion Station',
+    onEnter: () => {
+        addKnowledge(2);
+        setFlag('lore_kyln', 'Kyln — founder of Sungrace, first Eternal. Witnessed Soval at the End of Time and left the Cult of Finality in horror. But she hasn\'t told the full truth about what she saw. Some suspect Soval may have influenced her.');
+    },
+    text: `
+        <p>Khaela goes very still. Boof presses against her leg.</p>
+        <div class="speaker">Grand Admiral Khaela</div>
+        <div class="dialogue">"Kyln."</div>
+        <p>She says the name the way soldiers say the name of a general they've never met but would die for.</p>
+        <div class="dialogue">"The Dynasty. The First Eternal. She witnessed Soval before anyone else — stood at the End of Time, looked into the Devourer's face, and came back <em>burning</em>. Not with despair. With fury. She founded Sungrace on one principle: we do not go gently."</div>
+        <p>A pause. Boof whines.</p>
+        <div class="dialogue">"But..."</div>
+        <p>She turns away from the observatory glass. Her voice drops.</p>
+        <div class="dialogue">"She hasn't told us everything. About what she saw. I've served this fleet for two hundred years, and there are questions she will not answer. What exactly she saw at the End. Whether Soval spoke to her. Whether the thing that came back was entirely Kyln, or whether something came back <em>with</em> her."</div>
+        <div class="dialogue">"I follow her because she gave us purpose. But I'm a soldier, not a zealot. If our founder was compromised by the thing we're fighting..."</div>
+        <p>She doesn't finish the sentence. She doesn't need to.</p>
+        <div class="system-message">+2 Knowledge — The Kyln Revelation: doubts within Sungrace's own ranks.</div>
+    `,
+    choices: [
+        {
+            label: '"That sounds like Phasetide\'s problem too."',
+            hint: 'Draw the parallel to the Cult of Finality.',
+            condition: () => getFlag('lore_soval'),
+            next: 'sungrace_phasetide_parallel'
+        },
+        {
+            label: '"What would you do if she was compromised?"',
+            hint: 'Press the doubt.',
+            next: 'sungrace_departure'
+        },
+        {
+            label: '"I should keep moving."',
+            hint: 'Return to the Threshold.',
+            next: 'sungrace_departure'
+        }
+    ]
+};
+
+// ── 4.6b: Phasetide parallel ──
+SCENES['sungrace_phasetide_parallel'] = {
+    location: 'Deep Void Observatory — Clarion Station',
+    onEnter: () => { addKnowledge(1); addRep('sungrace', 5); },
+    text: `
+        <p>Khaela's head snaps toward you. For a moment her eyes blaze — literally, a flicker of amber energy behind the irises.</p>
+        <div class="speaker">Grand Admiral Khaela</div>
+        <div class="dialogue">"The Cult of Finality. Yes. They saw Soval through Zel's Core and embraced it. Kyln saw the same thing and rejected it. Two responses to the same horror."</div>
+        <p>She paces. Boof follows, tail low.</p>
+        <div class="dialogue">"But what if rejection and embrace are both responses that Soval <em>wanted</em>? What if the Devourer doesn't care whether you worship it or fight it, as long as you keep generating Flux? As long as you keep <em>diving</em>?"</div>
+        <p>She stops.</p>
+        <div class="dialogue">"I don't sleep well."</div>
+        <div class="system-message">+1 Knowledge — If both Phasetide (worship) and Sungrace (resistance) serve Soval's purposes, the Flux Paradox runs deeper than anyone admits.</div>
+    `,
+    choices: [
+        {
+            label: '"I need to keep looking for answers."',
+            hint: 'Return to the Threshold.',
+            next: 'sungrace_departure'
+        }
+    ]
+};
+
+// ── 4.7: Cooperation question ──
+SCENES['sungrace_cooperation'] = {
+    location: 'Deep Void Observatory — Clarion Station',
+    onEnter: () => {
+        addKnowledge(2);
+        setFlag('lore_parallel_solutions', 'Five syndicates are independently working on the same problem. If they shared research, they might solve it. The Great Conflict prevents cooperation.');
+    },
+    text: `
+        <p>Khaela laughs. It's the laugh of someone who's heard the joke before and stopped finding it funny.</p>
+        <div class="speaker">Grand Admiral Khaela</div>
+        <div class="dialogue">"Cooperation. With whom? The Machine that broke reality? The trees that want us to lie down and decompose? The telepaths who'd rather erase your memory than share a secret? The golden wrecking crew who raid our supply lines every third Tuesday? The zealots who think the apocalypse is a <em>sacrament</em>?"</div>
+        <p>She takes a breath.</p>
+        <div class="dialogue">"You want to know the cruelest joke in the multiverse? I know — I <em>know</em> — that every syndicate is working on a solution to Soval. Singularity runs simulations. Lifeblood grows something in the dirt. The telepaths are building some kind of dampening field. Even the Splintergleam scavengers are chasing Flux-free time travel."</div>
+        <p>She spreads her hands.</p>
+        <div class="dialogue">"If we pooled our research — all of it — we might solve this. But every solution requires trust, and trust requires disarming, and disarming means being vulnerable, and the last time anyone was vulnerable in this multiverse, Zel stole a time machine and broke everything."</div>
+        <p>Boof thumps his tail once, mournfully.</p>
+        <div class="dialogue">"So we build our weapon alone. And hope it's enough."</div>
+        <div class="system-message">+2 Knowledge — The Parallel Solutions tragedy: five answers, zero cooperation.</div>
+    `,
+    choices: [
+        {
+            label: '"What if someone could broker that trust?"',
+            hint: 'You, maybe?',
+            next: 'sungrace_broker'
+        },
+        {
+            label: '"I should see the other factions for myself."',
+            hint: 'Return to the Threshold.',
+            next: 'sungrace_departure'
+        }
+    ]
+};
+
+// ── 4.7b: Broker ──
+SCENES['sungrace_broker'] = {
+    location: 'Deep Void Observatory — Clarion Station',
+    onEnter: () => {
+        addRep('sungrace', 10);
+        setFlag('offered_to_broker', true);
+    },
+    text: `
+        <p>Khaela stares at you. Boof stares at you. Every officer in earshot stares at you.</p>
+        <div class="speaker">Grand Admiral Khaela</div>
+        <div class="dialogue">"You. A stray with an antique Core and — what — three conversations under your belt? You want to broker peace between six factions that have been at war since time was a straight line?"</div>
+        <p>She holds the stare for five seconds. Ten. Then something shifts in her face — not softening, exactly. More like the recognition of someone who's heard something insane and can't quite dismiss it.</p>
+        <div class="dialogue">"Zel was one person too. Look what one person did."</div>
+        <p>She reaches into her coat and pulls out a small device — a data crystal, warm with stored energy.</p>
+        <div class="dialogue">"Our weapon specs. The anti-entropic projector. If someone — hypothetically — were to show this to Singularity's simulation team and Silence's dampening field researchers... the math might work."</div>
+        <p>She presses it into your hand.</p>
+        <div class="dialogue">"Hypothetically."</div>
+    `,
+    choices: [
+        {
+            label: 'Take the crystal.',
+            hint: 'A piece of Sungrace\'s secret. The first bridge.',
+            onChoose: () => { addItem('Sungrace Weapon Specs'); },
+            next: 'sungrace_departure'
+        }
+    ]
+};
+
+// ── 4.8: Departure ──
+SCENES['sungrace_departure'] = {
+    location: 'Docking Bay — Clarion Station',
+    onEnter: () => {
+        addFlux(1);
+        setFlag('completed_sungrace', true);
+    },
+    text: () => {
+        const hasSpecs = hasItem('Sungrace Weapon Specs');
+        const specsLine = hasSpecs
+            ? `<p>The data crystal in your pocket is warm against your thigh. Sungrace's secret weapon. A bridge — or a loaded gun, depending on who you hand it to.</p>`
+            : '';
+        return `
+            <p>Khaela walks you to the docking bay. It's built into the station's sunward side — a cathedral of chrome overlooking the captive star. Shuttles and warships nest in their berths, humming with stored solar energy.</p>
+            ${specsLine}
+            <div class="speaker">Grand Admiral Khaela</div>
+            <div class="dialogue">"If you find what's out there — the thing that predates the Engine — tell us. Not the Machine. <em>Us</em>. We'll know what to do with it."</div>
+            <p>She pauses. Then, quieter:</p>
+            <div class="dialogue">"And if you see Kyln... ask her what she really saw. I never could."</div>
+            <p>Boof wags his tail and barks once — a sharp, mechanical sound that echoes through the docking bay. It sounds, improbably, like <em>good luck</em>.</p>
+            <p>Your Core activates. The star blazes behind you as the dive pulls you away.</p>
+            <div class="lore-note">+1 Flux — Leaving Clarion Station. The star shrinks to a point. Soval grows by a fraction.</div>
+        `;
+    },
+    choices: [
+        {
+            label: 'Return to the Threshold',
+            hint: 'Choose your next path.',
+            next: 'threshold_return_2'
+        }
+    ]
+};
+
+// ── Hub: Threshold Return 2 (post Lifeblood/Sungrace) ──
+SCENES['threshold_return_2'] = {
+    location: 'The Threshold',
+    onEnter: () => { addFlux(1); },
+    text: () => {
+        const completedLB = getFlag('completed_lifeblood');
+        const completedSG = getFlag('completed_sungrace');
+        const completedSI = getFlag('met_singularity');
+
+        let archivistLine = '';
+        if (completedLB && completedSG && completedSI) {
+            archivistLine = `
+                <div class="speaker">The Archivist</div>
+                <div class="dialogue">"Three paths walked. The Machine's guilt, the Forest's patience, the Fleet's defiance. You're beginning to see the shape of it, aren't you? How every answer contradicts every other answer. How every solution creates a new problem."</div>
+                <div class="dialogue">"Three paths remain. Each one will make the picture more complicated. That's how truth works."</div>
+            `;
+        } else {
+            archivistLine = `
+                <div class="speaker">The Archivist</div>
+                <div class="dialogue">"Back again. The paths are patient — they will wait. But Soval will not."</div>
+            `;
+        }
+
+        return `
+            <p>The Threshold assembles around you — stone, crystal pillars, humming paths. Familiar now. The grey mist feels less like nothing and more like a held breath.</p>
+            ${archivistLine}
+            <div class="lore-note">+1 Flux — Another return. Another fraction fed to the end.</div>
+            <p>The remaining paths shimmer.</p>
+        `;
+    },
+    choices: () => {
+        const choices = [];
+        if (!getFlag('met_singularity')) {
+            choices.push({
+                label: 'The Chrome Path — Singularity',
+                hint: '"Can I let go of self to become something greater?"',
+                faction: 'singularity',
+                next: 'singularity_arrival'
+            });
+        }
+        if (!getFlag('completed_lifeblood')) {
+            choices.push({
+                label: 'The Green Path — Lifeblood',
+                hint: '"Can I find peace in impermanence?"',
+                faction: 'lifeblood',
+                next: 'lifeblood_arrival'
+            });
+        }
+        if (!getFlag('completed_sungrace')) {
+            choices.push({
+                label: 'The Amber Path — Sungrace',
+                hint: '"Can human ingenuity triumph over the inevitable?"',
+                faction: 'sungrace',
+                next: 'sungrace_arrival'
+            });
+        }
+        choices.push({
+            label: 'The Violet Path — Silence',
+            hint: '"Can I make peace with being alone?"',
+            faction: 'silence',
+            next: 'coming_soon_silence'
+        });
+        choices.push({
+            label: 'The Golden Path — Splintergleam',
+            hint: '"Can broken things find purpose?"',
+            faction: 'splintergleam',
+            next: 'coming_soon_splintergleam'
+        });
+        choices.push({
+            label: 'The Blue Path — Phasetide',
+            hint: '"Can I find comfort in believing there\'s a right answer?"',
+            faction: 'phasetide',
+            next: 'coming_soon_phasetide'
         });
         return choices;
     }
