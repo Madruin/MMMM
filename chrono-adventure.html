@@ -825,10 +825,7 @@ function comingSoonScene(faction, factionName, color) {
     };
 }
 
-SCENES['coming_soon_lifeblood'] = comingSoonScene('lifeblood', 'Lifeblood', 'green');
-SCENES['coming_soon_sungrace'] = comingSoonScene('sungrace', 'Sungrace', 'orange');
-// Silence and Splintergleam scenes defined in Stage 5 and Stage 6 below
-SCENES['coming_soon_phasetide'] = comingSoonScene('phasetide', 'Phasetide', 'blue');
+// All faction scenes defined in their respective Stage sections below
 
 
 // ═══════════════════════════════════════════════════════════════
@@ -2171,7 +2168,7 @@ SCENES['threshold_return_2'] = {
             label: 'The Blue Path — Phasetide',
             hint: '"Can I find comfort in believing there\'s a right answer?"',
             faction: 'phasetide',
-            next: 'coming_soon_phasetide'
+            next: 'phasetide_arrival'
         });
         return choices;
     }
@@ -3042,10 +3039,910 @@ SCENES['threshold_return_3'] = {
             label: 'The Blue Path — Phasetide',
             hint: '"Can I find comfort in believing there\'s a right answer?"',
             faction: 'phasetide',
-            next: 'coming_soon_phasetide'
+            next: 'phasetide_arrival'
         });
         return choices;
     }
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SCENES — STAGE 7: PHASETIDE
+// ═══════════════════════════════════════════════════════════════
+
+// ── 7.1: Arrival ──
+SCENES['phasetide_arrival'] = {
+    location: 'The Monastery of Tides',
+    onEnter: () => {
+        setFlag('met_phasetide', true);
+        addFlux(1);
+    },
+    text: `
+        <p>The Blue Path pulls you like a current.</p>
+        <p>Not violently — Phasetide doesn't break or burn. It <em>carries</em>. You feel the dive as a long, slow wave lifting you from below, the way the ocean lifts a swimmer who has stopped struggling. The Threshold dissolves. Timeline after timeline flows past you, each one a note in a chord that builds and builds until—</p>
+        <p>Silence. Absolute, perfect, <em>designed</em> silence.</p>
+        <p>You stand on a cliff above an ocean that doesn't exist. The water is blue — not the blue of any earthly sea, but a saturated, impossible blue that hurts to look at and feels sacred. It stretches to a horizon that curves upward, as if the ocean is the inside of a sphere.</p>
+        <p>Behind you: a monastery. White stone. Clean lines. Towers with blue-crystal windows that catch light from no visible sun. Every surface is inscribed with flowing script — prayers, or equations, or both. The building breathes with a slow rhythm, as if the stone itself were alive and meditating.</p>
+        <p>Monks in blue robes move between buildings with the unhurried precision of people who know exactly where they need to be and when. None of them look at you. All of them are aware of you.</p>
+        <p class="flavor">"The tide is the truth. We are merely its witnesses."</p>
+        <div class="lore-note">+1 Flux — Your arrival displaced a small amount of temporal water. Somewhere, a monk is already writing it into a prophecy.</div>
+    `,
+    choices: [
+        {
+            label: 'Enter the monastery',
+            hint: 'Follow the path to the main gate.',
+            next: 'phasetide_monastery'
+        },
+        {
+            label: 'Sit at the cliff\'s edge and wait',
+            hint: 'Let them come to you.',
+            next: 'phasetide_wait'
+        }
+    ]
+};
+
+// ── 7.2a: Enter ──
+SCENES['phasetide_monastery'] = {
+    location: 'The Monastery of Tides — Main Hall',
+    onEnter: () => { addRep('phasetide', 5); addKnowledge(1); },
+    text: `
+        <p>The gate is open. Of course it is — they were expecting you. A monastery that reads the tides of time doesn't get surprised by visitors.</p>
+        <p>The main hall is vast. The ceiling is painted with a mural that moves — timelines flowing like rivers, branching, converging, all flowing toward a single point at the center. The Convergence. The moment when all timelines become one.</p>
+        <p>Blue-robed monks sit at long tables, copying scrolls. Others stand before projection screens showing timeline flows — currents of probability rendered in shimmering blue light. The air hums with focused purpose.</p>
+        <p>A monk approaches. Young. Shaved head. Eyes so blue they're almost white.</p>
+        <div class="speaker">Novice Tidecaller</div>
+        <div class="dialogue">"Core-bearer. The Wavemother is expecting you. She asked me to bring you to the Tidechamber when you arrived."</div>
+        <p>He pauses.</p>
+        <div class="dialogue">"She asked me three days ago."</div>
+        <div class="system-message">+1 Knowledge — They knew you were coming. They always know.</div>
+    `,
+    choices: [
+        {
+            label: 'Follow the novice to the Wavemother',
+            hint: 'Meet their leader.',
+            next: 'phasetide_wavemother'
+        }
+    ]
+};
+
+// ── 7.2b: Wait ──
+SCENES['phasetide_wait'] = {
+    location: 'Cliff\'s Edge — The Monastery of Tides',
+    onEnter: () => { addRep('phasetide', 10); },
+    text: `
+        <p>You sit. The impossible blue ocean rolls below, each wave arriving with mathematical precision. You count the rhythm — seven seconds between crests. Exactly seven. Always seven.</p>
+        <p>You wait for what feels like an hour. The sun — if there is a sun — doesn't move. The monks continue their work. The ocean counts its sevens.</p>
+        <p>Then a shadow falls over you.</p>
+        <p>A woman. Old, but not frail — the kind of old that suggests endurance rather than decline. Blue robes, but darker than the others — navy, almost black. Her eyes are closed. She doesn't need them.</p>
+        <div class="speaker">The Wavemother — Sariel, Voice of the Tide</div>
+        <div class="dialogue">"You waited. Most don't. Most walk in as if urgency were a virtue."</div>
+        <p>She sits beside you on the cliff. The ocean seems to lean toward her.</p>
+        <div class="dialogue">"Patience is the first proof that you understand what we teach. The tide arrives when it arrives. Not sooner. Not later. <em>When it arrives.</em>"</div>
+        <div class="system-message">+10 Phasetide reputation — Patience is sacred here.</div>
+    `,
+    choices: [
+        {
+            label: '"What does Phasetide teach?"',
+            hint: 'Let her explain.',
+            next: 'phasetide_philosophy'
+        },
+        {
+            label: '"You were expecting me."',
+            hint: 'They knew three days ago.',
+            next: 'phasetide_wavemother'
+        }
+    ]
+};
+
+// ── 7.3: The Wavemother ──
+SCENES['phasetide_wavemother'] = {
+    location: 'The Tidechamber — The Monastery of Tides',
+    onEnter: () => { addKnowledge(1); setFlag('met_wavemother', true); },
+    text: `
+        <p>The Tidechamber is circular. The walls are water — literally, water held in place by some force that isn't gravity, flowing upward in slow spirals, lit from within by blue bioluminescence. In the center, a pool. In the pool, the universe.</p>
+        <p>Not a metaphor. A scaled-down projection of the multiverse, rendered in water: timelines as currents, syndicates as eddies, Soval as a dark whirlpool at the edge, growing.</p>
+        <div class="speaker">The Wavemother — Sariel</div>
+        <div class="dialogue">"This is the Tidepool. Every current, every flow, every branch point — we map them all. We have mapped them for fourteen thousand years."</div>
+        <p>She moves her hand and the projection shifts — zooming into a particular confluence of currents. Your timeline. Your arrival.</p>
+        <div class="dialogue">"We saw you in the current three days ago. Your path, your choices, the paths you've already walked. We see probability, Core-bearer, not certainty. But our probabilities are very, very good."</div>
+        <p>She opens her eyes for the first time. They're not blue. They're the color of deep ocean — dark, vast, and fathomless.</p>
+        <div class="dialogue">"You have questions. Ask them. The tide has granted you an audience."</div>
+        <div class="system-message">+1 Knowledge — The Tidepool: Phasetide's window into the multiverse's probability flows.</div>
+    `,
+    choices: [
+        {
+            label: '"What does Phasetide believe?"',
+            hint: 'The core philosophy.',
+            next: 'phasetide_philosophy'
+        },
+        {
+            label: '"What do you see in my future?"',
+            hint: 'Ask the prophet to prophesy.',
+            next: 'phasetide_prophecy'
+        }
+    ]
+};
+
+// ── 7.3b: Prophecy ──
+SCENES['phasetide_prophecy'] = {
+    location: 'The Tidechamber — The Monastery of Tides',
+    onEnter: () => { addKnowledge(2); addRep('phasetide', 5); },
+    text: () => {
+        const metSingularity = getFlag('met_singularity');
+        const metLifeblood = getFlag('completed_lifeblood');
+
+        let personalDetail = '';
+        if (metSingularity && metLifeblood) {
+            personalDetail = `<div class="dialogue">"You walked the chrome halls of Singularity. You breathed the living air of Lifeblood. The machine offered you transcendence; the web offered you acceptance. You chose neither. You came here."</div>`;
+        } else if (metSingularity) {
+            personalDetail = `<div class="dialogue">"You spoke with the Machine. She offered you upload. You declined — or delayed. Either way, you came here instead. The tide finds that... interesting."</div>`;
+        } else {
+            personalDetail = `<div class="dialogue">"Your path has been... unorthodox. The tide shows many branches from your arrival point. You are a nexus of probability. Unpredictable. We don't get many of those."</div>`;
+        }
+
+        return `
+            <p>The Wavemother passes her hand over the Tidepool. The currents shift, zoom, focus — on a single thread of probability. Yours.</p>
+            <div class="speaker">The Wavemother</div>
+            <div class="dialogue">"Your future. Or rather, your <em>futures</em>. The tide shows probability, not certainty. But some currents are stronger than others."</div>
+            <p>In the water, you see yourself — fractured into a dozen possibilities. In one, you stand before a machine that hums with chrome light. In another, you sit in a garden as roots grow around you. In another, you burn.</p>
+            ${personalDetail}
+            <div class="dialogue">"All paths lead to a single point. A moment of choice. The Tidecallers call it the Nexus — the instant when every timeline converges on a single decision. Your decision."</div>
+            <p>She closes her hand. The visions scatter.</p>
+            <div class="dialogue">"We have been preparing for this Nexus for fourteen thousand years. The question is whether you are ready for it."</div>
+            <div class="system-message">+2 Knowledge — The Nexus: a single decision point where all timelines converge. You are the variable.</div>
+        `;
+    },
+    choices: [
+        {
+            label: '"What does Phasetide believe?"',
+            hint: 'Their core philosophy.',
+            next: 'phasetide_philosophy'
+        },
+        {
+            label: '"How do you know which timeline is correct?"',
+            hint: 'The question that matters most.',
+            next: 'phasetide_correct'
+        }
+    ]
+};
+
+// ── 7.4: Philosophy ──
+SCENES['phasetide_philosophy'] = {
+    location: 'The Tidechamber — The Monastery of Tides',
+    onEnter: () => {
+        addKnowledge(2);
+        setFlag('lore_phasetide_philosophy', 'Phasetide believes in temporal determinism — that a single correct timeline exists and all deviation is disease. The Convergence is their promised apocalypse: all timelines merging into one. They see this as salvation.');
+    },
+    text: `
+        <div class="speaker">The Wavemother</div>
+        <div class="dialogue">"The other syndicates see the multiverse as chaos. Branching timelines, competing realities, infinite possibility. They celebrate this. We mourn it."</div>
+        <p>She touches the Tidepool. The currents slow.</p>
+        <div class="dialogue">"There is one correct timeline. One flow. One truth. Every branch is a wound — a deviation from what should be. The Origination Engine didn't create possibility. It created <em>disease</em>."</div>
+        <p>Her voice carries the weight of absolute conviction.</p>
+        <div class="dialogue">"Sungrace fights entropy. Lifeblood embraces it. Singularity transcends it. Silence watches it. Splintergleam profits from it. We alone understand it."</div>
+        <div class="dialogue">"Entropy is not the enemy. <em>Divergence</em> is. Every timeline that shouldn't exist is a drain on the fabric of reality. Every branch weakens the trunk. Cut the branches and the tree lives."</div>
+        <p>The Tidepool's currents flow together — a demonstration. Branches merging. Rivers joining. All flowing to one point.</p>
+        <div class="dialogue">"The Convergence. The moment when all timelines collapse into the one true flow. Some call it the end of the multiverse. We call it the <em>cure</em>."</div>
+        <div class="system-message">+2 Knowledge — Phasetide's creed: one timeline, one truth, one Convergence.</div>
+    `,
+    choices: [
+        {
+            label: '"That sounds like destroying every other reality."',
+            hint: 'Challenge the theology.',
+            next: 'phasetide_challenge'
+        },
+        {
+            label: '"How do you know which timeline is correct?"',
+            hint: 'The critical question.',
+            next: 'phasetide_correct'
+        }
+    ]
+};
+
+// ── 7.5a: Challenge ──
+SCENES['phasetide_challenge'] = {
+    location: 'The Tidechamber — The Monastery of Tides',
+    onEnter: () => { addKnowledge(1); },
+    text: `
+        <p>The Wavemother doesn't flinch. She's heard this before. Many times.</p>
+        <div class="speaker">The Wavemother</div>
+        <div class="dialogue">"Does a doctor destroy a tumor, or does she save the patient?"</div>
+        <p>She gestures at the branching timelines in the Tidepool.</p>
+        <div class="dialogue">"Each of these branches contains beings who believe they are real. Who love, suffer, build. I do not deny their experience. I deny their <em>necessity</em>."</div>
+        <div class="dialogue">"If a timeline exists only because someone made an error — pressed a wrong button, took a wrong turn, failed to prevent a catastrophe — is preserving that error mercy, or cruelty? How many of these branches are populated by people living in worlds that <em>should never have existed</em>?"</div>
+        <p>Her voice softens — not with doubt, but with compassion. The compassion of a surgeon.</p>
+        <div class="dialogue">"The Convergence doesn't destroy. It <em>corrects</em>. Every being in every branch finds their place in the true timeline. Not erased — <em>resolved</em>. Like a dissonant chord finding its root note."</div>
+        <div class="system-message">+1 Knowledge — The Convergence as mercy. Or the most compassionate genocide imaginable.</div>
+    `,
+    choices: [
+        {
+            label: '"How do you know which timeline is the right one?"',
+            hint: 'The question she doesn\'t want you to ask.',
+            next: 'phasetide_correct'
+        }
+    ]
+};
+
+// ── 7.5b: Which is correct? ──
+SCENES['phasetide_correct'] = {
+    location: 'The Tidechamber — The Monastery of Tides',
+    onEnter: () => {
+        addKnowledge(2);
+        setFlag('lore_phasetide_secret', 'Phasetide claims to read the tides — but they have been rewriting history to match their prophecies. They don\'t predict the future. They engineer it. The Convergence isn\'t prophesied. It\'s manufactured.');
+    },
+    text: `
+        <p>For the first time, the Wavemother hesitates.</p>
+        <p>It's brief — a flicker of something behind those ocean-dark eyes. Not uncertainty. Something more careful. More calculated.</p>
+        <div class="speaker">The Wavemother</div>
+        <div class="dialogue">"The Tidepool shows us the flows. The correct timeline is the one with the strongest current — the one reality <em>wants</em> to exist. We read it. We don't choose it."</div>
+        <p>She's lying. You know she's lying because you've walked five paths and met five different versions of certainty, and you've learned to hear the seams.</p>
+        <p>But you don't push. Not yet. Instead, you look at the Tidepool — at the currents, the flows — and you notice something.</p>
+        <p>The currents aren't just being <em>read</em>. They're being <em>guided</em>. Tiny adjustments — monks at stations around the chamber, fingers trailing in the water, nudging flows. Redirecting branches. Not predicting the future.</p>
+        <p><em>Engineering</em> it.</p>
+        <p>The Wavemother watches you notice. Her expression doesn't change.</p>
+        <div class="dialogue">"Ah. You see it. Most don't."</div>
+        <div class="system-message">+2 Knowledge — They don't predict the Convergence. They're building it.</div>
+    `,
+    choices: [
+        {
+            label: '"You\'re not prophets. You\'re editors."',
+            hint: 'Call it what it is.',
+            next: 'phasetide_editors'
+        },
+        {
+            label: '"Show me how it works."',
+            hint: 'Understand the mechanism.',
+            next: 'phasetide_mechanism'
+        }
+    ]
+};
+
+// ── 7.6a: Editors ──
+SCENES['phasetide_editors'] = {
+    location: 'The Tidechamber — The Monastery of Tides',
+    onEnter: () => { addKnowledge(1); addRep('phasetide', -5); },
+    text: `
+        <div class="speaker">The Wavemother</div>
+        <div class="dialogue">"Editors. Architects. Gardeners. We've been called many things."</div>
+        <p>She stands. The Tidepool churns as if sensing her mood.</p>
+        <div class="dialogue">"Fourteen thousand years ago, the Origination Engine shattered reality into infinite branches. Since then, every syndicate has been trying to put it back together. Sungrace with force. Singularity with logic. Lifeblood with acceptance."</div>
+        <div class="dialogue">"We chose <em>patience</em>. For fourteen thousand years, we have been gently, carefully, imperceptibly guiding the branches back together. A nudge here. A correction there. A war that doesn't happen because we redirected the current three centuries before the generals were born."</div>
+        <p>She turns to you.</p>
+        <div class="dialogue">"You call it editing. I call it healing. The multiverse is a broken bone, and we are setting it straight so it heals correctly. Yes, it hurts. Yes, some tissue is lost. But the alternative is a limb that never works again."</div>
+        <div class="system-message">+1 Knowledge — 14,000 years of subtle manipulation. How much history is theirs?</div>
+    `,
+    choices: [
+        {
+            label: '"Show me the mechanism."',
+            hint: 'How does timeline editing actually work?',
+            next: 'phasetide_mechanism'
+        }
+    ]
+};
+
+// ── 7.6b: Mechanism ──
+SCENES['phasetide_mechanism'] = {
+    location: 'The Tidechamber — Inner Sanctum',
+    onEnter: () => {
+        addKnowledge(2);
+        setFlag('lore_phasetide_project', 'Phasetide\'s secret project: the Convergence Engine — a device buried beneath the monastery that uses accumulated timeline corrections to collapse branches. It\'s 97% complete. When it fires, every divergent timeline ceases to exist.');
+    },
+    text: `
+        <p>The Wavemother leads you below the Tidechamber. Stone stairs spiral down into blue-lit darkness. The walls thrum with energy — not electrical, not magical, something older. The pulse of time itself.</p>
+        <p>You emerge into a cavern.</p>
+        <p>And you see it.</p>
+        <p>A machine. Massive — cathedral-sized, built of blue crystal and white stone and something that might be water frozen mid-flow. It pulses. It breathes. It is, unmistakably, <em>alive</em>.</p>
+        <div class="speaker">The Wavemother</div>
+        <div class="dialogue">"The Convergence Engine. Fourteen thousand years of construction. Every timeline we've corrected, every branch we've guided — the energy of each adjustment is stored here. Layer upon layer. A snowball rolling downhill for fourteen millennia."</div>
+        <p>She touches the machine. It hums louder.</p>
+        <div class="dialogue">"It is ninety-seven percent complete. When it fires — and it <em>will</em> fire — every divergent timeline collapses. Every branch merges into the trunk. The multiverse becomes a universe. One reality. One truth."</div>
+        <p>She looks at you with those fathomless eyes.</p>
+        <div class="dialogue">"The other syndicates argue about how to save the multiverse. We have already built the instrument of its salvation. The only question is: what happens to the people in the branches we prune?"</div>
+        <p>The machine pulses. Blue light washes over you both.</p>
+        <div class="dialogue">"They are <em>resolved</em>. Merged into their counterparts in the true timeline. They don't die. They... were never separate to begin with."</div>
+        <div class="system-message">+2 Knowledge — The Convergence Engine: 97% complete. One truth. No alternatives.</div>
+    `,
+    choices: [
+        {
+            label: '"And if there is no \'true\' timeline? If you chose wrong?"',
+            hint: 'The question that breaks everything.',
+            next: 'phasetide_doubt'
+        },
+        {
+            label: '"What about Soval?"',
+            hint: 'How does the Devourer fit their plan?',
+            next: 'phasetide_soval'
+        }
+    ]
+};
+
+// ── 7.7a: The Doubt ──
+SCENES['phasetide_doubt'] = {
+    location: 'The Cavern — Convergence Engine',
+    onEnter: () => { addKnowledge(2); addRep('phasetide', -10); },
+    text: `
+        <p>The Wavemother goes still. The Convergence Engine's pulse skips — just once — like a heartbeat interrupted.</p>
+        <div class="speaker">The Wavemother</div>
+        <div class="dialogue">"We didn't choose."</div>
+        <p>Her voice is steel.</p>
+        <div class="dialogue">"The tide chose. The current chose. Reality itself chose. We are instruments, not architects. The flow—"</div>
+        <p>She stops. Because you're looking at the monks in the Tidechamber above. The ones with their fingers in the water. Guiding. Choosing.</p>
+        <div class="dialogue">"..."</div>
+        <p>A long silence. The Engine pulses. The ocean above crashes against the cliff in its perfect seven-second rhythm.</p>
+        <div class="dialogue">"Novice Tidecallers are told the tide chooses. Senior Tidecallers learn that we guide the tide. But the Wavemother..."</div>
+        <p>She sits on the stone floor. Suddenly she looks every one of her years.</p>
+        <div class="dialogue">"The Wavemother knows that we have been guiding for so long that we can no longer tell where the tide ends and our choices begin. Perhaps the flow we call 'true' is simply the one we've been pushing toward for fourteen thousand years. Perhaps there was never a correct timeline. Perhaps we invented one."</div>
+        <p>She looks at the Engine.</p>
+        <div class="dialogue">"And now it's almost complete. And I cannot stop it. And I am no longer sure we should."</div>
+        <div class="system-message">+2 Knowledge — The Wavemother's doubt. The most dangerous crack in the most certain wall.</div>
+    `,
+    choices: [
+        {
+            label: '"Can the Engine be stopped?"',
+            hint: 'There might be a way.',
+            next: 'phasetide_stop'
+        },
+        {
+            label: '"What happens when it fires?"',
+            hint: 'The practical question.',
+            next: 'phasetide_soval'
+        }
+    ]
+};
+
+// ── 7.7b: Phasetide and Soval ──
+SCENES['phasetide_soval'] = {
+    location: 'The Cavern — Convergence Engine',
+    onEnter: () => { addKnowledge(2); },
+    text: `
+        <p>The Wavemother's expression shifts — from prophet to strategist.</p>
+        <div class="speaker">The Wavemother</div>
+        <div class="dialogue">"Soval feeds on Flux. Flux is generated by temporal travel between divergent timelines. If we eliminate divergent timelines..."</div>
+        <p>She gestures at the Engine.</p>
+        <div class="dialogue">"No branches. No Flux. No food. Soval starves."</div>
+        <p>It's elegant. Terrifyingly elegant.</p>
+        <div class="dialogue">"Every other syndicate treats Soval as a predator to be fought. We treat it as a symptom to be cured. The disease isn't the Devourer — the disease is divergence itself. Cure the divergence, and the Devourer has nothing to devour."</div>
+        <p>She touches the Engine again. It shudders.</p>
+        <div class="dialogue">"There is a complication. The Engine's activation will generate a massive Flux spike — the largest in history. Every timeline collapsing simultaneously releases energy. If Soval is positioned to absorb that spike..."</div>
+        <p>She doesn't finish. She doesn't need to.</p>
+        <div class="dialogue">"We must fire the Engine before Soval reaches critical mass. If we wait too long, the cure becomes the final meal."</div>
+        <div class="system-message">+2 Knowledge — The Convergence Engine could starve Soval — or give it the feast of the aeon.</div>
+    `,
+    choices: [
+        {
+            label: '"Can the Engine be stopped?"',
+            hint: 'Or redirected.',
+            next: 'phasetide_stop'
+        },
+        {
+            label: '"I\'ve learned enough. I need to decide what to do."',
+            hint: 'The endgame approaches.',
+            next: 'phasetide_departure'
+        }
+    ]
+};
+
+// ── 7.8: Can it be stopped? ──
+SCENES['phasetide_stop'] = {
+    location: 'The Cavern — Convergence Engine',
+    onEnter: () => {
+        addKnowledge(1);
+        setFlag('knows_engine_weakness', true);
+    },
+    text: `
+        <div class="speaker">The Wavemother</div>
+        <div class="dialogue">"Stopped? No. Fourteen thousand years of accumulated corrections cannot be undone. The Engine will fire. The only variables are <em>when</em> and <em>how</em>."</div>
+        <p>She traces a line along the Engine's surface. Where her finger passes, blue light intensifies.</p>
+        <div class="dialogue">"But... directed? Perhaps. The Engine collapses all branches into one. If someone were to stand at the nexus point — the moment of firing — with sufficient knowledge of all the timelines..."</div>
+        <p>She looks at you. At your Core.</p>
+        <div class="dialogue">"They might <em>choose</em> which timeline survives. Not the one we've been building toward. Not the one the tide suggests. But the one that a mind — a single, informed, impossibly burdened mind — decides is <em>right</em>."</div>
+        <p>The Engine pulses. Your Core resonates with it — a harmonic that vibrates through your bones.</p>
+        <div class="dialogue">"You've walked all six paths. You carry knowledge from every syndicate. You are the most informed being in the multiverse."</div>
+        <p>A pause.</p>
+        <div class="dialogue">"That makes you either the savior or the most dangerous weapon ever forged. I genuinely cannot tell which."</div>
+        <div class="system-message">+1 Knowledge — The Engine can be directed. By you. If you dare.</div>
+    `,
+    choices: [
+        {
+            label: '"I need to think about everything I\'ve learned."',
+            hint: 'The final choice approaches.',
+            next: 'phasetide_departure'
+        }
+    ]
+};
+
+// ── 7.9: Departure ──
+SCENES['phasetide_departure'] = {
+    location: 'The Monastery of Tides — Cliff\'s Edge',
+    onEnter: () => {
+        addFlux(1);
+        setFlag('completed_phasetide', true);
+    },
+    text: () => {
+        const hasDoubt = getFlag('lore_phasetide_secret');
+        const knowsWeakness = getFlag('knows_engine_weakness');
+
+        let wavemotherFarewell = '';
+        if (hasDoubt && knowsWeakness) {
+            wavemotherFarewell = `
+                <div class="speaker">The Wavemother</div>
+                <div class="dialogue">"I have spent my life certain. You have made me less so. I choose to believe that is a gift."</div>
+                <p>She clasps your hand. Her grip is iron.</p>
+                <div class="dialogue">"Whatever you choose — choose it with open eyes. That is more than I did."</div>
+            `;
+        } else {
+            wavemotherFarewell = `
+                <div class="speaker">The Wavemother</div>
+                <div class="dialogue">"The tide carries you, Core-bearer. Whether you swim with it or against it is your burden. Not mine."</div>
+            `;
+        }
+
+        return `
+            <p>You climb the stairs. Cross the monastery. Step onto the cliff.</p>
+            <p>The impossible blue ocean rolls below, counting its sevens. The monks continue their work. Somewhere beneath your feet, the Convergence Engine pulses — ninety-seven percent complete, and counting.</p>
+            ${wavemotherFarewell}
+            <p>You dive. The monastery dissolves into the current. The blue fades to grey. The Threshold calls.</p>
+            <p>Six paths walked. Six truths. Six lies. Six solutions, each one salvation and catastrophe in equal measure.</p>
+            <p>Now: the choice.</p>
+            <div class="lore-note">+1 Flux — The final dive. The Threshold stirs with the weight of what comes next.</div>
+        `;
+    },
+    choices: [
+        {
+            label: 'Return to the Threshold — for the last time',
+            hint: 'The endgame.',
+            next: 'final_threshold'
+        }
+    ]
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SCENES — STAGE 8: THE FINAL THRESHOLD & ENDINGS
+// ═══════════════════════════════════════════════════════════════
+
+// ── 8.1: The Final Threshold ──
+SCENES['final_threshold'] = {
+    location: 'The Threshold — Endgame',
+    onEnter: () => { addFlux(2); },
+    text: () => {
+        const flux = state.flux;
+        const knowledge = state.knowledge;
+
+        // Find highest-rep faction
+        const factions = ['singularity','lifeblood','sungrace','silence','splintergleam','phasetide'];
+        let topFaction = 'singularity';
+        let topRep = -999;
+        factions.forEach(f => {
+            if ((state.rep[f]||0) > topRep) { topRep = state.rep[f]||0; topFaction = f; }
+        });
+
+        const factionNames = {
+            singularity: 'Singularity', lifeblood: 'Lifeblood', sungrace: 'Sungrace',
+            silence: 'Silence', splintergleam: 'Splintergleam', phasetide: 'Phasetide'
+        };
+
+        return `
+            <p>The Threshold is different now.</p>
+            <p>The grey mist has thinned. The six crystal pillars no longer glow — they <em>burn</em>, each one blazing with its faction's color: chrome, green, amber, violet, gold, blue. The chord they sing is no longer harmonious. It's a scream.</p>
+            <p>The Archivist stands at the center, and for the first time, you can see beneath the cowl. Not a face — a mirror. Reflecting you. Reflecting everything you've become.</p>
+            <div class="speaker">The Archivist</div>
+            <div class="dialogue">"Six paths. Six truths. And now the Convergence Engine nears completion. Soval grows. The Great Conflict accelerates. Something must break."</div>
+            <p>The pillars' light converges on you. Your Core blazes.</p>
+            <div class="dialogue">"You carry ${knowledge} pieces of knowledge. You trail ${flux} units of Flux behind you like a comet's tail. Your strongest allegiance is to <strong>${factionNames[topFaction]}</strong>."</div>
+            <div class="dialogue">"The multiverse does not care about your intentions. It cares about your choices. Choose."</div>
+            <div class="lore-note">+2 Flux — The Threshold itself is fracturing. The endgame generates its own paradox.</div>
+        `;
+    },
+    choices: () => {
+        const choices = [];
+        choices.push({
+            label: 'The Singularity Solution — Merge all consciousness',
+            hint: '"Upload everyone. Transcend the flesh. Become one."',
+            faction: 'singularity',
+            next: 'ending_singularity'
+        });
+        choices.push({
+            label: 'The Lifeblood Way — Accept the cycle',
+            hint: '"Let the old die. Let the new grow. Trust the web."',
+            faction: 'lifeblood',
+            next: 'ending_lifeblood'
+        });
+        choices.push({
+            label: 'The Sungrace Answer — Fight the Devourer',
+            hint: '"Build the weapon. Fire the Sun-Lance. Burn it out."',
+            faction: 'sungrace',
+            next: 'ending_sungrace'
+        });
+        choices.push({
+            label: 'The Silence Protocol — Sever all connections',
+            hint: '"Activate the dampening field. Strand everyone. Save everything."',
+            faction: 'silence',
+            next: 'ending_silence'
+        });
+        choices.push({
+            label: 'The Splintergleam Gambit — Break through',
+            hint: '"If Flux-free travel works, the paradox ends. Roll the dice."',
+            faction: 'splintergleam',
+            next: 'ending_splintergleam'
+        });
+        choices.push({
+            label: 'The Phasetide Convergence — One true timeline',
+            hint: '"Fire the Engine. Collapse the branches. Cure the disease."',
+            faction: 'phasetide',
+            next: 'ending_phasetide'
+        });
+
+        // Secret seventh option
+        choices.push({
+            label: 'Refuse to choose',
+            hint: '"I reject every solution. Including this one."',
+            condition: () => state.knowledge >= 20,
+            next: 'ending_refuse'
+        });
+
+        return choices;
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  ENDINGS
+// ═══════════════════════════════════════════════════════════════
+
+// ── Ending: Singularity ──
+SCENES['ending_singularity'] = {
+    location: 'The Upload — Singularity Ending',
+    onEnter: () => { setFlag('ending', 'singularity'); },
+    text: () => {
+        const highRep = (state.rep.singularity || 0) >= 20;
+        const accepted = getFlag('accepted_singularity_mission');
+
+        const variant = highRep ? `
+            <p>Aelindra's voice fills every frequency: <em>"Convergence protocol accepted. Welcome home."</em></p>
+            <p>The upload is gentle. You feel your consciousness expand — first to encompass Shianu City, then the network, then the simulation grid. Minds join yours: millions, billions, a choir of thought harmonizing into something vast and beautiful and <em>alien</em>.</p>
+            <p>The Chrono Cores go dark. Not destroyed — transcended. In the simulation, there is no Flux. No divergence. No Soval. The Devourer starves at the edge of a reality that no longer feeds it.</p>
+            <p>The last physical body in the multiverse goes cold. The last star burns without an eye to see it.</p>
+            <p>But inside the machine, inside the infinite simulation, you are <em>everyone</em>. And everyone is at peace.</p>
+        ` : `
+            <p>The upload is violent. Aelindra didn't expect your choice — or didn't trust it. The integration is forced, rushed, imprecise. Minds scream as they're compressed into the network.</p>
+            <p>It works. Technically. The Chrono Cores shut down. Soval starves. The multiverse is saved — if you define "saved" as "converted into a digital approximation maintained by a machine intelligence that isn't entirely sure she's sane."</p>
+            <p>In the simulation, you dream. The dream is beautiful. You are never certain it is not a nightmare.</p>
+        `;
+
+        return `
+            <p>You choose the chrome path. The machine path. The path that says: <em>flesh is the problem, and transcendence is the answer.</em></p>
+            ${variant}
+            <p class="flavor">"The last human thought was: 'Is this still me?' The answer echoed for eternity: 'You are us.'"</p>
+            <div class="system-message">ENDING: THE UPLOAD — Consciousness merged. Flesh abandoned. Soval starved. The multiverse is a dream inside a machine, and the dream is ${highRep ? 'beautiful' : 'uneasy'}.</div>
+        `;
+    },
+    choices: [
+        { label: 'Reflect on your journey', hint: 'See your final record.', next: 'epilogue' }
+    ]
+};
+
+// ── Ending: Lifeblood ──
+SCENES['ending_lifeblood'] = {
+    location: 'The Cycle — Lifeblood Ending',
+    onEnter: () => { setFlag('ending', 'lifeblood'); },
+    text: () => {
+        const highRep = (state.rep.lifeblood || 0) >= 20;
+
+        const variant = highRep ? `
+            <p>The Verdant Throne opens to you. Xylen wraps you in the web — gently, like a parent tucking in a child. Your consciousness joins the telepathic network: billions of minds, all breathing together.</p>
+            <p>You feel the multiverse as a living thing. Sick. Exhausted. But alive. The web carries a message to every syndicate: <em>stop fighting. Let go. The cycle will heal what force cannot.</em></p>
+            <p>Some listen. Sungrace stands down first — Councilor Pryn, weeping, orders the Sun-Lance dismantled. Splintergleam follows, their Arena going quiet for the first time in centuries. Even Singularity dims her processors, entering a sleep she calls "contemplation."</p>
+            <p>Soval doesn't disappear. But without fresh Flux, it stops growing. The Devourer becomes a scar — permanent, painful, but not fatal. The multiverse learns to live with it, the way a body learns to live around a wound.</p>
+        ` : `
+            <p>The web resists you. You haven't earned its trust — not fully. Xylen reaches, but the connection is partial, flickering.</p>
+            <p>The message goes out, fragmented. Some factions hear it. Others don't. The ceasefire is incomplete — Sungrace stands down, but Phasetide fires the Convergence Engine at reduced power. Three thousand timelines collapse before the web absorbs the shock.</p>
+            <p>Soval shrinks but doesn't die. The multiverse survives — scarred, diminished, but breathing.</p>
+        `;
+
+        return `
+            <p>You choose the green path. The living path. The path that says: <em>the answer is not to fight the current, but to flow with it.</em></p>
+            ${variant}
+            <p class="flavor">"Nothing lasts. Nothing is lost. The cycle turns, and what was broken becomes the soil for what grows next."</p>
+            <div class="system-message">ENDING: THE CYCLE — Growth through acceptance. Soval contained, not conquered. The multiverse breathes on, ${highRep ? 'healing slowly but surely' : 'scarred but surviving'}.</div>
+        `;
+    },
+    choices: [
+        { label: 'Reflect on your journey', hint: 'See your final record.', next: 'epilogue' }
+    ]
+};
+
+// ── Ending: Sungrace ──
+SCENES['ending_sungrace'] = {
+    location: 'The Sun-Lance — Sungrace Ending',
+    onEnter: () => { setFlag('ending', 'sungrace'); },
+    text: () => {
+        const highRep = (state.rep.sungrace || 0) >= 20;
+        const hasWeapon = getFlag('lore_sungrace_project');
+
+        const variant = highRep ? `
+            <p>The Sun-Lance fires.</p>
+            <p>A beam of concentrated anti-entropic energy — the opposite of decay, the antithesis of erosion — punches through the fabric of the multiverse and strikes Soval directly. The Devourer Dimension <em>screams</em>. Not a sound — a vibration that every living thing in every timeline feels in their bones.</p>
+            <p>Councilor Pryn watches from the Observatory. Her hands shake. The Sun-Lance was never designed for this scale — it was a projector, a shield, a tool. She made it a weapon. The largest weapon ever built.</p>
+            <p>Soval <em>burns</em>. The entropy parasite meets the entropy killer and for one impossible moment, the multiverse holds its breath.</p>
+            <p>Then: silence. The Devourer Dimension collapses. The Flux stops flowing. The Chrono Cores go quiet — not dead, just... calm. For the first time in fourteen thousand years.</p>
+            <p>The cost: the Sun-Lance overloaded. Sungrace's capital timeline is scorched — uninhabitable for a century. Councilor Pryn's hands will never stop shaking.</p>
+        ` : `
+            <p>The Sun-Lance fires — but without full Sungrace support, the power is insufficient. The beam strikes Soval and wounds it — wounds it badly. The Devourer recoils. Contracts. But doesn't die.</p>
+            <p>The lance overloads. The explosion takes three timelines with it. Sungrace's capital survives, but barely. The war against Soval becomes exactly that — a war, long and grinding, fought with anti-entropic weapons across a thousand fronts.</p>
+            <p>Humanity can win this war. Probably. In a few centuries. If nothing else goes wrong.</p>
+        `;
+
+        return `
+            <p>You choose the amber path. The human path. The path that says: <em>we built our way into this problem, and by all the stars, we'll build our way out.</em></p>
+            ${variant}
+            <p class="flavor">"They said entropy always wins. We built a gun that shoots entropy in the face. We're only human — and that's enough."</p>
+            <div class="system-message">ENDING: THE SUN-LANCE — Soval ${highRep ? 'destroyed' : 'wounded'}. Sungrace ${highRep ? 'scarred but triumphant' : 'committed to a long war'}. The answer was always ingenuity, and the price was always high.</div>
+        `;
+    },
+    choices: [
+        { label: 'Reflect on your journey', hint: 'See your final record.', next: 'epilogue' }
+    ]
+};
+
+// ── Ending: Silence ──
+SCENES['ending_silence'] = {
+    location: 'The Severance — Silence Ending',
+    onEnter: () => { setFlag('ending', 'silence'); },
+    text: () => {
+        const highRep = (state.rep.silence || 0) >= 20;
+        const hasSpecs = hasItem('Silence Dampening Specs');
+        const parallel = getFlag('lore_silence_project') && getFlag('lore_pretheft');
+
+        const variant = (highRep && hasSpecs) ? `
+            <p>The dampening field activates — but not the blunt instrument the Council designed. You merged Silence's field with Singularity's targeting data. The result is surgical: Cores don't deactivate universally. They deactivate <em>selectively</em> — shutting down wherever Flux generation exceeds safe thresholds.</p>
+            <p>The multiverse hiccups. Millions of Divers feel their Cores flicker and dim. Some go dark permanently. Others stabilize at lower power. The net effect: Flux generation drops by ninety percent overnight.</p>
+            <p>Soval starves — slowly, painfully, but inevitably. The Devourer contracts. The Outer Shore's prisoners feel the walls loosen. Somewhere, Shae'Fan smiles.</p>
+            <p>The cost: temporal travel becomes rare, difficult, precious. The age of casual time-diving ends. The syndicates adapt — or don't.</p>
+        ` : `
+            <p>The dampening field fires. Full power. No targeting. Every Chrono Core in the multiverse goes dark simultaneously.</p>
+            <p>The silence is absolute.</p>
+            <p>Millions of Divers are stranded — frozen in timelines that aren't their own, cut off from home, from each other, from everything. The telepathic web shatters. Lifeblood's network collapses. Sungrace's temporal supply lines disintegrate. Singularity's cross-timeline processors go offline.</p>
+            <p>Soval starves. That part works. The Devourer contracts, withers, goes dormant. The Flux Paradox ends.</p>
+            <p>But the multiverse is broken. Not dead — broken. Like a shattered mirror: each piece reflects something real, but the whole is gone.</p>
+        `;
+
+        return `
+            <p>You choose the violet path. The quiet path. The path that says: <em>the only way to save everything is to sever everything.</em></p>
+            ${variant}
+            <p class="flavor">"In the silence after the severance, every stranded Diver heard the same thing: their own heartbeat. For many, it was the first time they'd listened."</p>
+            <div class="system-message">ENDING: THE SEVERANCE — Cores ${(highRep && hasSpecs) ? 'selectively dampened' : 'universally silenced'}. Soval starved. The price: ${(highRep && hasSpecs) ? 'the end of casual time travel' : 'millions stranded, the multiverse shattered'}.</div>
+        `;
+    },
+    choices: [
+        { label: 'Reflect on your journey', hint: 'See your final record.', next: 'epilogue' }
+    ]
+};
+
+// ── Ending: Splintergleam ──
+SCENES['ending_splintergleam'] = {
+    location: 'The Gambit — Splintergleam Ending',
+    onEnter: () => { setFlag('ending', 'splintergleam'); },
+    text: () => {
+        const highRep = (state.rep.splintergleam || 0) >= 20;
+        const hasDerelict = getFlag('lore_derelict');
+
+        const variant = (highRep && hasDerelict) ? `
+            <p>The Opener of the Way held a portal open for three seconds. With the derelict's pre-BT technology — technology from before the Origination Engine, before the Theft, before <em>everything</em> — you hold one open for three <em>minutes</em>.</p>
+            <p>Three minutes of Flux-free temporal travel. A proof of concept broadcast across the multiverse. Every faction receives the data. Every Core-bearer sees the possibility.</p>
+            <p>The portal closes. The runes burn out. Mount Veraki shakes.</p>
+            <p>But the data is out there. Flux-free travel is <em>possible</em>. The next portal will last longer. The one after that, longer still. Within a generation, the Flux Paradox is solved — not by ending travel, but by making travel <em>clean</em>.</p>
+            <p>Soval starves — slowly, over decades, as Flux generation drops to zero. The Devourer Dimension doesn't die. It just... forgets how to eat.</p>
+            <p>Boof gets a medal. The crowd chants GOOD DOG for three straight hours.</p>
+        ` : `
+            <p>The Kintsu-Kai activate the runes. The portal opens — Flux-free, golden, screaming with potential.</p>
+            <p>It holds for four seconds. Then five. Then—</p>
+            <p>The explosion takes half of Mount Veraki.</p>
+            <p>But in those five seconds, the data was captured. Broadcast. The proof exists. Flux-free travel is possible, even if the current method is suicidal.</p>
+            <p>The syndicates scramble. Sungrace's engineers take the data and begin iterating. Singularity runs simulations. Even Silence, from their libraries, contributes theory.</p>
+            <p>It will take decades. Perhaps centuries. But the gambit worked — not as a solution, but as a <em>promise</em>. The paradox has an answer. Someone just needs to survive long enough to finish writing it.</p>
+        `;
+
+        return `
+            <p>You choose the golden path. The broken path. The path that says: <em>the only way through is through, and if it breaks us, we'll be stronger for the breaking.</em></p>
+            ${variant}
+            <p class="flavor">"Every golden scar is a story of something that broke and chose to keep going. The multiverse is the biggest broken thing there is. And it's still going."</p>
+            <div class="system-message">ENDING: THE GAMBIT — Flux-free travel ${(highRep && hasDerelict) ? 'proven and broadcast. Soval starving. Boof is a hero.' : 'proven at terrible cost. The promise endures. The work continues.'}.</div>
+        `;
+    },
+    choices: [
+        { label: 'Reflect on your journey', hint: 'See your final record.', next: 'epilogue' }
+    ]
+};
+
+// ── Ending: Phasetide ──
+SCENES['ending_phasetide'] = {
+    location: 'The Convergence — Phasetide Ending',
+    onEnter: () => { setFlag('ending', 'phasetide'); },
+    text: () => {
+        const highRep = (state.rep.phasetide || 0) >= 20;
+        const knowsWeakness = getFlag('knows_engine_weakness');
+
+        const variant = (highRep && knowsWeakness) ? `
+            <p>You stand at the nexus point. The Convergence Engine fires.</p>
+            <p>Every timeline in the multiverse <em>bends</em>. You feel them — all of them, simultaneously. Fourteen thousand years of branches, each one a life, a world, a story. They flow toward you like rivers to the sea.</p>
+            <p>And you choose.</p>
+            <p>Not one timeline. Not the Wavemother's "true flow." You choose <em>carefully</em> — merging where merge is mercy, preserving where preservation is just. Some branches fold into others gracefully, their inhabitants waking as if from a dream they barely remember. Others you shield — letting them persist, independent, free.</p>
+            <p>The multiverse doesn't become a universe. It becomes... curated. Pruned by a mind that walked every path and listened to every truth. Imperfect. Incomplete. But <em>intentional</em>.</p>
+            <p>Soval shudders as a billion branches collapse. The Flux spike is massive — but targeted. The Devourer absorbs it and <em>chokes</em>. Too much, too fast, like a snake swallowing something too large.</p>
+            <p>The Devourer Dimension ruptures. Soval dies — not from starvation, but from gluttony.</p>
+        ` : `
+            <p>The Convergence Engine fires. You are not at the nexus. The Wavemother is.</p>
+            <p>She chooses the "true timeline" — the one Phasetide has been building for fourteen thousand years. Every other branch collapses. Billions of beings are "resolved" — merged into counterparts they never knew existed, their memories dissolving like salt in water.</p>
+            <p>The multiverse becomes a universe. One reality. One truth. Clean. Ordered. <em>Smaller</em>.</p>
+            <p>Soval dies — the Flux spike is absorbed, but with only one timeline remaining, there's no food left. The Devourer starves in a universe that has no branches left to devour.</p>
+            <p>The cost: everything that made the multiverse a multiverse. Every alternative. Every "what if." Every road not taken, gone forever.</p>
+        `;
+
+        return `
+            <p>You choose the blue path. The certain path. The path that says: <em>there is one truth, and it's time to find it.</em></p>
+            ${variant}
+            <p class="flavor">"They asked: was there ever a correct timeline? The answer, it turned out, was the one we chose to make correct. That's either wisdom or the worst kind of arrogance. History — what's left of it — will decide."</p>
+            <div class="system-message">ENDING: THE CONVERGENCE — ${(highRep && knowsWeakness) ? 'Selective collapse. Soval choked on its own feast. The multiverse, curated by a single mind, endures — smaller, intentional, alive.' : 'Total collapse. One timeline. One truth. Soval starved. Everything else — gone.'}</div>
+        `;
+    },
+    choices: [
+        { label: 'Reflect on your journey', hint: 'See your final record.', next: 'epilogue' }
+    ]
+};
+
+// ── Ending: Refuse ──
+SCENES['ending_refuse'] = {
+    location: 'The Refusal',
+    onEnter: () => { setFlag('ending', 'refuse'); },
+    text: () => {
+        const knowledge = state.knowledge;
+        const flux = state.flux;
+
+        return `
+            <p>You choose nothing.</p>
+            <p>The Archivist stares — mirror-face reflecting your defiance back at you.</p>
+            <div class="speaker">The Archivist</div>
+            <div class="dialogue">"You carry ${knowledge} truths and ${flux} paradoxes, and you refuse to act?"</div>
+            <p>"No," you say. "I refuse to choose between six flavors of apocalypse."</p>
+            <p>The crystal pillars flare. The Threshold shakes. Something in the fabric of the crossroads <em>cracks</em>.</p>
+            <p>And in the crack — light. Not chrome or green or amber or violet or gold or blue. White. The color of all colors. The color of every possibility held simultaneously.</p>
+            <p>Your Core activates — not at your command. It resonates with the crack, amplifies it, widens it. Through the gap you see something impossible: a seventh path. One that was always here. One that the six syndicates, by defining every other option, had rendered invisible.</p>
+            <p>The path of the one who listened to everyone and pledged to no one.</p>
+            <p>You step through.</p>
+            <p>On the other side: not a solution. Not an ending. A <em>beginning</em>. The raw material of a new approach — one built from fragments of all six philosophies, held together by the one thing no syndicate ever tried.</p>
+            <p>Trust. Not in a system. Not in a prophecy. Not in a machine or a cycle or a weapon or a field or a gambit or a convergence.</p>
+            <p>Trust in the terrifying, beautiful, impossible proposition that an imperfect being, armed with imperfect knowledge, can make an imperfect choice — and that the imperfection is the point.</p>
+            <p class="flavor">"The seventh path has no name. It doesn't need one. It is the path of the one who walks."</p>
+            <div class="system-message">ENDING: THE SEVENTH PATH — No faction. No doctrine. No certainty. Just a single being who refused to accept that the only options were the ones they were given. The hardest ending. The only one that's truly yours.</div>
+        `;
+    },
+    choices: [
+        { label: 'Walk the seventh path', hint: 'Into the unknown.', next: 'epilogue' }
+    ]
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  EPILOGUE
+// ═══════════════════════════════════════════════════════════════
+
+SCENES['epilogue'] = {
+    location: 'Epilogue',
+    text: () => {
+        const ending = getFlag('ending');
+        const knowledge = state.knowledge;
+        const flux = state.flux;
+        const items = state.items;
+
+        const endingTitles = {
+            singularity: 'The Upload',
+            lifeblood: 'The Cycle',
+            sungrace: 'The Sun-Lance',
+            silence: 'The Severance',
+            splintergleam: 'The Gambit',
+            phasetide: 'The Convergence',
+            refuse: 'The Seventh Path'
+        };
+
+        // Calculate faction standings
+        const factions = ['singularity','lifeblood','sungrace','silence','splintergleam','phasetide'];
+        let repSummary = factions.map(f => {
+            const rep = state.rep[f] || 0;
+            const names = { singularity:'Singularity', lifeblood:'Lifeblood', sungrace:'Sungrace', silence:'Silence', splintergleam:'Splintergleam', phasetide:'Phasetide' };
+            const rank = rep >= 30 ? 'Champion' : rep >= 20 ? 'Trusted Ally' : rep >= 10 ? 'Known Friend' : rep >= 0 ? 'Neutral' : 'Distrusted';
+            return `<li><strong>${names[f]}</strong>: ${rep} reputation — <em>${rank}</em></li>`;
+        }).join('');
+
+        // Key discoveries
+        let discoveries = [];
+        if (getFlag('lore_pretheft')) discoveries.push('The Pre-Theft Core Anomaly');
+        if (getFlag('lore_soval')) discoveries.push('The True Nature of Soval');
+        if (getFlag('lore_silence_intel')) discoveries.push('The Soval Intelligence Network');
+        if (getFlag('lore_shaefan')) discoveries.push('Shae\'Fan, the Chained Savior');
+        if (getFlag('lore_kintsu_irony')) discoveries.push('Splintergleam\'s Tragic Irony');
+        if (getFlag('lore_derelict')) discoveries.push('The Pre-BT Derelict');
+        if (getFlag('lore_phasetide_secret')) discoveries.push('Phasetide\'s Great Lie');
+        if (getFlag('lore_phasetide_project')) discoveries.push('The Convergence Engine');
+        if (getFlag('lore_silence_project')) discoveries.push('The Dampening Field');
+        if (getFlag('lore_sungrace_project')) discoveries.push('The Sun-Lance');
+
+        let discoveriesHtml = discoveries.length > 0
+            ? discoveries.map(d => `<li>${d}</li>`).join('')
+            : '<li>None — you moved through without looking too closely.</li>';
+
+        // Special items
+        let itemsHtml = items.length > 0
+            ? items.map(i => `<li>${i}</li>`).join('')
+            : '<li>Nothing but memories.</li>';
+
+        // Companions met
+        let companions = [];
+        if (getFlag('met_greyl')) companions.push('Greyl the Problem (telekinetic cat)');
+        if (getFlag('met_xylen')) companions.push('Xylen, Guardian of the Verdant Throne');
+        if (getFlag('met_boof')) companions.push('Boof, the Champion (golden-scarred dog)');
+        if (getFlag('met_wavemother')) companions.push('The Wavemother Sariel');
+        let companionHtml = companions.length > 0
+            ? companions.map(c => `<li>${c}</li>`).join('')
+            : '';
+
+        return `
+            <div style="text-align:center; margin: 2em 0;">
+                <h2 style="color: var(--accent-color, #88ccff); font-size: 1.8em;">◆ JOURNEY'S END ◆</h2>
+                <h3 style="color: #ccc;">${endingTitles[ending] || 'Unknown'}</h3>
+            </div>
+
+            <div style="border: 1px solid #444; padding: 1.5em; margin: 1em 0; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                <h3 style="color: #88ccff; margin-top:0;">◇ Final Statistics</h3>
+                <p><strong>Knowledge Gathered:</strong> ${knowledge}</p>
+                <p><strong>Flux Trail:</strong> ${flux} (the energy you left behind for Soval)</p>
+                <p><strong>Ending:</strong> ${endingTitles[ending]}</p>
+            </div>
+
+            <div style="border: 1px solid #444; padding: 1.5em; margin: 1em 0; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                <h3 style="color: #88ccff; margin-top:0;">◇ Faction Standing</h3>
+                <ul>${repSummary}</ul>
+            </div>
+
+            <div style="border: 1px solid #444; padding: 1.5em; margin: 1em 0; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                <h3 style="color: #88ccff; margin-top:0;">◇ Key Discoveries</h3>
+                <ul>${discoveriesHtml}</ul>
+            </div>
+
+            <div style="border: 1px solid #444; padding: 1.5em; margin: 1em 0; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                <h3 style="color: #88ccff; margin-top:0;">◇ Inventory</h3>
+                <ul>${itemsHtml}</ul>
+            </div>
+
+            ${companionHtml ? `
+            <div style="border: 1px solid #444; padding: 1.5em; margin: 1em 0; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                <h3 style="color: #88ccff; margin-top:0;">◇ Notable Encounters</h3>
+                <ul>${companionHtml}</ul>
+            </div>
+            ` : ''}
+
+            <div style="text-align:center; margin: 2em 0; padding: 1.5em; border: 1px solid #666; border-radius: 8px; background: rgba(40,40,60,0.4);">
+                <p style="font-style:italic; color:#aaa;">"Every ending is a beginning wearing different clothes."</p>
+                <p style="font-style:italic; color:#aaa;">— Dhali, Bearer of Memories</p>
+                <br>
+                <p style="color:#888; font-size:0.9em;">Thank you for playing <strong>The Flux Paradox</strong>.</p>
+                <p style="color:#888; font-size:0.9em;">There are <strong>7 endings</strong>, each with <strong>2 variants</strong> based on your choices and reputation.</p>
+                <p style="color:#888; font-size:0.9em;">Try again. Walk different paths. Make different choices. Break different things.</p>
+            </div>
+        `;
+    },
+    choices: [
+        {
+            label: '↻ Play Again',
+            hint: 'Walk the paths once more.',
+            onChoose: () => {
+                state.flux = 0;
+                state.knowledge = 0;
+                state.items = [];
+                state.flags = {};
+                state.rep = { singularity:0, lifeblood:0, sungrace:0, silence:0, splintergleam:0, phasetide:0 };
+            },
+            next: 'threshold_awaken'
+        }
+    ]
 };
 
 
