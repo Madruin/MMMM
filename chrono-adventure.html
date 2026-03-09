@@ -398,6 +398,206 @@
             background: var(--accent);
         }
 
+        /* ── Resource change indicators on choices ── */
+        .choice-cost {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+        .cost-tag {
+            font-size: 0.7rem;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        .cost-tag.gain {
+            color: #4aad6a;
+            background: rgba(74, 173, 106, 0.1);
+            border: 1px solid rgba(74, 173, 106, 0.25);
+        }
+        .cost-tag.loss {
+            color: #c84a4a;
+            background: rgba(200, 74, 74, 0.1);
+            border: 1px solid rgba(200, 74, 74, 0.25);
+        }
+        .cost-tag.neutral {
+            color: var(--text-dim);
+            background: rgba(110, 110, 128, 0.1);
+            border: 1px solid rgba(110, 110, 128, 0.2);
+        }
+
+        /* ── Flux bar ── */
+        #flux-bar-container {
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        #flux-bar-track {
+            width: 140px;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        #flux-bar-fill {
+            height: 100%;
+            background: var(--flux-color);
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+        #flux-bar-fill.low { background: #c84a4a; animation: fluxPulse 1.2s infinite; }
+        #flux-bar-fill.critical { background: #ff2222; animation: fluxPulse 0.5s infinite; }
+        @keyframes fluxPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .flux-warning {
+            text-align: center;
+            color: #c84a4a;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            animation: fluxPulse 1.2s infinite;
+            margin-top: 4px;
+        }
+
+        /* ── Resource change toast animation ── */
+        @keyframes resourcePop {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-20px); opacity: 0; }
+        }
+        .resource-delta {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            z-index: 300;
+            pointer-events: none;
+        }
+        .delta-item {
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 4px;
+            animation: resourcePop 1.8s ease-out forwards;
+        }
+        .delta-item.gain { color: #4aad6a; }
+        .delta-item.loss { color: #c84a4a; }
+
+        /* ── Scene banner image ── */
+        .scene-banner {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            opacity: 0.85;
+        }
+
+        /* ── Visual polish: glow effects ── */
+        .faction-glow-singularity { box-shadow: 0 0 20px rgba(168, 180, 200, 0.08); }
+        .faction-glow-lifeblood { box-shadow: 0 0 20px rgba(74, 173, 106, 0.08); }
+        .faction-glow-sungrace { box-shadow: 0 0 20px rgba(212, 138, 58, 0.08); }
+        .faction-glow-silence { box-shadow: 0 0 20px rgba(138, 94, 200, 0.08); }
+        .faction-glow-splintergleam { box-shadow: 0 0 20px rgba(212, 168, 67, 0.08); }
+        .faction-glow-phasetide { box-shadow: 0 0 20px rgba(58, 106, 212, 0.08); }
+
+        /* ── Header visual polish ── */
+        #header h1 {
+            background: linear-gradient(135deg, var(--text-bright), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── Divider line between narrative and choices ── */
+        .scene-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 18px 0 14px;
+            opacity: 0.5;
+        }
+
+        /* ── Leaderboard styles ── */
+        .leaderboard {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.2em;
+            margin: 1.5em 0;
+            background: rgba(18, 18, 26, 0.8);
+        }
+        .leaderboard h3 {
+            color: var(--accent);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .lb-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(42, 42, 58, 0.3);
+        }
+        .lb-row:last-child { border-bottom: none; }
+        .lb-rank { width: 24px; font-size: 0.75rem; color: var(--text-dim); text-align: center; }
+        .lb-name { flex: 1; font-size: 0.82rem; color: var(--text); }
+        .lb-bar-track {
+            width: 100px;
+            height: 5px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .lb-bar-fill { height: 100%; border-radius: 2px; }
+        .lb-count { width: 36px; font-size: 0.72rem; color: var(--text-dim); text-align: right; }
+        .lb-pct { width: 36px; font-size: 0.7rem; color: var(--text-dim); text-align: right; }
+
+        /* ── CTA banner ── */
+        .cta-banner {
+            text-align: center;
+            padding: 1.5em;
+            margin: 1.5em 0;
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            background: rgba(74, 124, 255, 0.05);
+        }
+        .cta-banner h3 {
+            color: var(--accent);
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        .cta-banner p {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+        .cta-btn {
+            display: inline-block;
+            padding: 10px 28px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .cta-btn:hover { background: #5a8cff; }
+
         /* ── Scrollbar ── */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
@@ -409,7 +609,7 @@
 <div id="game-container">
     <div id="header">
         <h1>The Braided Path</h1>
-        <div class="subtitle">A Chrono CCG Narrative</div>
+        <div class="subtitle">A Chrono CCG Interactive Experience &mdash; Coming Soon to Steam & Epic</div>
         <div id="status-bar"></div>
     </div>
     <div id="location-badge"><span class="location-name" id="location-name">...</span></div>
@@ -433,10 +633,16 @@
 //  CORE ENGINE
 // ═══════════════════════════════════════════════════════════════
 
+const MAX_FLUX = 30;
+const FLUX_WARN_THRESHOLD = 8;
+const FLUX_CRITICAL_THRESHOLD = 4;
+
 const GameState = {
     currentScene: 'threshold_awaken',
     flux: 0,
+    maxFlux: MAX_FLUX,
     knowledge: 0,
+    trust: 0,
     reputation: {
         singularity: 0,
         lifeblood: 0,
@@ -451,13 +657,15 @@ const GameState = {
         energyCells: 0,
         memoryShards: 0,
         kintsuShards: 0,
-        tideMarks: 0
+        tideMarks: 0,
+        chronoShards: 0
     },
     inventory: [],
     flags: {},
     taskCounts: {},
     history: [],
-    sceneCount: 0
+    sceneCount: 0,
+    diveCount: 0
 };
 
 function deepCopy(obj) {
@@ -522,10 +730,61 @@ function setFlag(key, val) { state.flags[key] = val !== undefined ? val : true; 
 function getFlag(key) { return state.flags[key]; }
 function addItem(item) { if (!state.inventory.includes(item)) state.inventory.push(item); }
 function hasItem(item) { return state.inventory.includes(item); }
-function addFlux(n) { state.flux += n; }
+
+// Flux economy: dives GENERATE flux; actions on timelines SPEND flux
+function addFlux(n) {
+    state.flux = Math.max(0, Math.min(state.maxFlux || MAX_FLUX, state.flux + n));
+}
+function spendFlux(n) {
+    state.flux = Math.max(0, state.flux - n);
+    if (state.flux <= 0) {
+        // Check for Out of Time — but defer to after scene renders
+        setTimeout(() => checkOutOfTime(), 100);
+    }
+}
+function diveFlux() {
+    // Each dive generates flux — you're punching holes in causality
+    const baseGain = 5;
+    state.diveCount = (state.diveCount || 0) + 1;
+    addFlux(baseGain);
+    return baseGain;
+}
+function checkOutOfTime() {
+    if (state.flux <= 0 && state.currentScene !== 'ending_out_of_time'
+        && state.currentScene !== 'epilogue'
+        && !state.currentScene.startsWith('ending_')
+        && !state.currentScene.startsWith('threshold_awaken')
+        && state.diveCount > 0) {
+        renderScene('ending_out_of_time');
+    }
+}
 function addKnowledge(n) { state.knowledge += n; }
+function addTrust(n) { state.trust = (state.trust || 0) + n; }
 function addRep(faction, n) {
     state.reputation[faction] = Math.max(0, Math.min(100, (state.reputation[faction] || 0) + n));
+}
+
+// ── Resource delta display ──
+let pendingDeltas = [];
+function trackDelta(label, amount) {
+    if (amount !== 0) {
+        pendingDeltas.push({ label, amount });
+    }
+}
+function showDeltas() {
+    if (pendingDeltas.length === 0) return;
+    const container = document.createElement('div');
+    container.className = 'resource-delta';
+    pendingDeltas.forEach((d, i) => {
+        const el = document.createElement('div');
+        el.className = 'delta-item ' + (d.amount > 0 ? 'gain' : 'loss');
+        el.textContent = (d.amount > 0 ? '+' : '') + d.amount + ' ' + d.label;
+        el.style.animationDelay = (i * 0.15) + 's';
+        container.appendChild(el);
+    });
+    document.body.appendChild(container);
+    setTimeout(() => container.remove(), 2200);
+    pendingDeltas = [];
 }
 
 // ── Resource & task helpers ──
@@ -535,7 +794,8 @@ const RESOURCE_NAMES = {
     energyCells: { label: 'Energy Cells', faction: 'sungrace', color: 'var(--orange)' },
     memoryShards: { label: 'Memory Shards', faction: 'silence', color: 'var(--purple)' },
     kintsuShards: { label: 'Kintsu Shards', faction: 'splintergleam', color: 'var(--gold)' },
-    tideMarks: { label: 'Tide Marks', faction: 'phasetide', color: 'var(--blue)' }
+    tideMarks: { label: 'Tide Marks', faction: 'phasetide', color: 'var(--blue)' },
+    chronoShards: { label: 'Chrono Shards', faction: null, color: 'var(--text-bright)' }
 };
 
 function addResource(type, n) {
@@ -598,7 +858,10 @@ function renderInventory() {
 
     // Stats
     html += '<h3>Status</h3>';
-    html += `<div class="inv-item">Flux: <span style="color:var(--flux-color)">${state.flux}</span> &nbsp; Knowledge: <span style="color:var(--accent)">${state.knowledge}</span></div>`;
+    html += `<div class="inv-item">Flux: <span style="color:var(--flux-color)">${state.flux}/${state.maxFlux || MAX_FLUX}</span> &nbsp; Knowledge: <span style="color:var(--accent)">${state.knowledge}</span>${state.trust > 0 ? ` &nbsp; Trust: <span style="color:var(--green)">${state.trust}</span>` : ''}</div>`;
+    if (state.diveCount > 0) {
+        html += `<div class="inv-item" style="font-size:0.72rem; color:var(--text-dim)">Dives: ${state.diveCount} &nbsp; Chrono Shards: <span style="color:var(--gold)">${getResource('chronoShards')}</span></div>`;
+    }
 
     // Items
     if (state.inventory.length > 0) {
@@ -668,13 +931,12 @@ function renderInventory() {
 // ── Status bar ──
 function renderStatusBar() {
     const bar = document.getElementById('status-bar');
-    // Detect current faction from scene id
-    let resourceHtml = '';
     const sceneId = state.currentScene || '';
     const factionMap = {
         singularity: 'dataFragments', lifeblood: 'rootTokens', sungrace: 'energyCells',
         silence: 'memoryShards', splintergleam: 'kintsuShards', phasetide: 'tideMarks'
     };
+    let resourceHtml = '';
     for (const [faction, resKey] of Object.entries(factionMap)) {
         if (sceneId.startsWith(faction + '_') && getResource(resKey) > 0) {
             const info = RESOURCE_NAMES[resKey];
@@ -682,11 +944,52 @@ function renderStatusBar() {
             break;
         }
     }
+
+    // Flux bar
+    const fluxPct = Math.max(0, Math.min(100, (state.flux / (state.maxFlux || MAX_FLUX)) * 100));
+    let fluxClass = '';
+    let fluxWarnHtml = '';
+    if (state.flux <= FLUX_CRITICAL_THRESHOLD && state.diveCount > 0) {
+        fluxClass = 'critical';
+        fluxWarnHtml = '<div class="flux-warning">FLUX CRITICAL — STRANDING IMMINENT</div>';
+    } else if (state.flux <= FLUX_WARN_THRESHOLD && state.diveCount > 0) {
+        fluxClass = 'low';
+        fluxWarnHtml = '<div class="flux-warning">Flux reserves low</div>';
+    }
+
     bar.innerHTML = `
-        <span class="stat stat-flux">Flux: <span class="stat-value">${state.flux}</span></span>
+        <span class="stat stat-flux">Flux: <span class="stat-value">${state.flux}/${state.maxFlux || MAX_FLUX}</span></span>
         <span class="stat stat-knowledge">Knowledge: <span class="stat-value">${state.knowledge}</span></span>
+        ${state.trust > 0 ? `<span class="stat">Trust: <span class="stat-value" style="color:var(--green)">${state.trust}</span></span>` : ''}
         ${resourceHtml}
     `;
+
+    // Flux bar below stats (only show after first dive)
+    if (state.diveCount > 0) {
+        bar.innerHTML += `
+            <div id="flux-bar-container" style="width:100%">
+                <span style="font-size:0.65rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em;">Flux</span>
+                <div id="flux-bar-track">
+                    <div id="flux-bar-fill" class="${fluxClass}" style="width:${fluxPct}%"></div>
+                </div>
+                <span style="font-size:0.65rem; color:var(--flux-color);">${state.flux}</span>
+            </div>
+            ${fluxWarnHtml}
+        `;
+    }
+}
+
+// ── Build cost tags HTML for a choice ──
+function buildCostTags(costs) {
+    if (!costs || costs.length === 0) return '';
+    let html = '<div class="choice-cost">';
+    costs.forEach(c => {
+        const cls = c.amount > 0 ? 'gain' : (c.amount < 0 ? 'loss' : 'neutral');
+        const prefix = c.amount > 0 ? '+' : '';
+        html += `<span class="cost-tag ${cls}">${prefix}${c.amount} ${c.label}</span>`;
+    });
+    html += '</div>';
+    return html;
 }
 
 // ── Scene renderer ──
@@ -703,16 +1006,46 @@ function renderScene(sceneId) {
     // Run scene setup if it has one
     if (scene.onEnter) scene.onEnter();
 
+    // Show resource deltas from onEnter
+    showDeltas();
+
     // Location
     document.getElementById('location-name').textContent = scene.location || '???';
+
+    // Detect faction for glow effect
+    const container = document.getElementById('game-container');
+    container.className = ''; // reset
+    const factions = ['singularity','lifeblood','sungrace','silence','splintergleam','phasetide'];
+    for (const f of factions) {
+        if (sceneId.startsWith(f + '_')) {
+            container.className = 'faction-glow-' + f;
+            break;
+        }
+    }
 
     // Narrative
     const narrativeEl = document.getElementById('narrative');
     narrativeEl.innerHTML = '';
+
+    // Scene banner image (if scene specifies one)
+    if (scene.banner) {
+        const img = document.createElement('img');
+        img.className = 'scene-banner';
+        img.src = scene.banner;
+        img.alt = scene.location || '';
+        img.onerror = function() { this.style.display = 'none'; };
+        narrativeEl.appendChild(img);
+    }
+
     const block = document.createElement('div');
     block.className = 'narrative-block scene-transition';
     block.innerHTML = typeof scene.text === 'function' ? scene.text() : scene.text;
     narrativeEl.appendChild(block);
+
+    // Divider before choices
+    const divider = document.createElement('hr');
+    divider.className = 'scene-divider';
+    narrativeEl.appendChild(divider);
 
     // Choices
     const choicesEl = document.getElementById('choices');
@@ -723,19 +1056,53 @@ function renderScene(sceneId) {
 
     if (choices && choices.length > 0) {
         choices.forEach(choice => {
-            // Check conditional
             if (choice.condition && !choice.condition()) return;
+
+            // Check if player can afford the choice
+            const canAfford = !choice.costs || choice.costs.every(c => {
+                if (c.amount >= 0) return true; // gains always affordable
+                if (c.resource === 'flux') return state.flux >= Math.abs(c.amount);
+                if (c.resource === 'knowledge') return state.knowledge >= Math.abs(c.amount);
+                return true;
+            });
 
             const btn = document.createElement('button');
             btn.className = 'choice-btn';
             if (choice.faction) btn.classList.add('faction-' + choice.faction);
+            if (!canAfford) {
+                btn.style.opacity = '0.4';
+                btn.style.cursor = 'not-allowed';
+            }
 
             let inner = '';
             if (choice.label) inner += `<span class="choice-label">${choice.label}</span>`;
             if (choice.hint) inner += `<span class="choice-hint">${choice.hint}</span>`;
+            if (choice.costs) inner += buildCostTags(choice.costs);
             btn.innerHTML = inner || choice.text || '...';
 
             btn.addEventListener('click', () => {
+                if (!canAfford) {
+                    showToast('Not enough resources.');
+                    return;
+                }
+                // Apply costs
+                if (choice.costs) {
+                    choice.costs.forEach(c => {
+                        if (c.resource === 'flux') {
+                            if (c.amount > 0) addFlux(c.amount);
+                            else spendFlux(Math.abs(c.amount));
+                        } else if (c.resource === 'knowledge') {
+                            addKnowledge(c.amount);
+                        } else if (c.resource === 'trust') {
+                            addTrust(c.amount);
+                        } else if (c.resource === 'rep' && c.faction) {
+                            addRep(c.faction, c.amount);
+                        } else if (RESOURCE_NAMES[c.resource]) {
+                            addResource(c.resource, c.amount);
+                        }
+                        trackDelta(c.label, c.amount);
+                    });
+                }
                 if (choice.onChoose) choice.onChoose();
                 if (choice.next) renderScene(choice.next);
             });
@@ -748,7 +1115,6 @@ function renderScene(sceneId) {
     renderInventory();
     autoSave();
 
-    // Scroll to top of narrative
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -818,6 +1184,7 @@ SCENES['threshold_core'] = {
         <p>The moment you hold it, the humming stops.</p>
         <p>The silence is enormous. Then the Core shivers in your palm and projects a single image into the air between you and the nearest pillar: a branching tree of light, splitting and splitting and splitting, each branch a different color, each one a different <em>when</em>.</p>
         <div class="lore-note">Chrono Core — A portable time-displacement device. Each dive punches a hole through causality, generating neutrino-scale energy called Flux. Cores are the most dangerous and most coveted technology in the braided multiverse.</div>
+        <div class="lore-note" style="color:var(--flux-color);">WARNING: Every dive generates Flux — temporal displacement energy. You'll need Flux to navigate timelines, make choices, and survive. But Flux is finite. If your reserves reach zero while on a timeline, you may be stranded there forever. Manage your Flux carefully.</div>
         <p>The tree of light fades. The Core's glow settles to a steady, patient pulse, synchronized to your heartbeat.</p>
         <p>From somewhere — everywhere — a voice. Not sound exactly. More like words pressed into the still air, arriving fully formed in your mind:</p>
         <div class="speaker">The Archivist</div>
@@ -856,12 +1223,22 @@ SCENES['threshold_archivist'] = {
         {
             label: '"Tell me about the six syndicates."',
             hint: 'Learn before you leap.',
+            costs: [{ label: 'Knowledge', amount: 1, resource: 'knowledge' }],
             next: 'threshold_briefing'
         },
         {
             label: '"What is the thing that grows?"',
             hint: 'Ask about Soval.',
+            costs: [{ label: 'Knowledge', amount: 2, resource: 'knowledge' }],
             next: 'threshold_soval'
+        },
+        {
+            label: 'Examine the crystal pillars',
+            hint: 'The humming crystals might hold something useful.',
+            costs: [{ label: 'Chrono Shard', amount: 1 }, { label: 'Knowledge', amount: 1 }],
+            condition: () => !getFlag('examined_pillars'),
+            onChoose: () => { setFlag('examined_pillars', true); },
+            next: 'threshold_pillars'
         }
     ]
 };
@@ -895,6 +1272,63 @@ SCENES['threshold_soval'] = {
     ]
 };
 
+// ── 1.5b: Examine the crystal pillars ──
+SCENES['threshold_pillars'] = {
+    location: 'The Threshold',
+    onEnter: () => {
+        addKnowledge(1);
+        addResource('chronoShards', 1);
+        trackDelta('Knowledge', 1);
+        trackDelta('Chrono Shard', 1);
+    },
+    text: `
+        <p>You approach the nearest pillar and press your hand against it. The crystal is warm — not from heat, but from <em>potential</em>. You can feel timelines flowing through it like blood through veins, each one a different temperature, a different texture.</p>
+        <p>The pillar's hum shifts to match the frequency of your Core. For a disorienting moment, you see through it: a cascade of branching futures, each one flickering like a candle in wind. Most are too fast to follow. But one image holds — a crystalline shard, small as a fingernail, falling from the junction where two timelines split.</p>
+        <p>When you pull your hand back, the shard is in your palm. Real. Solid. Cool to the touch.</p>
+        <div class="lore-note">Chrono Shard — A fragment of crystallized temporal potential. Found at junction points where timelines diverge. Can be converted into Flux at the Threshold, or traded for faction resources on timelines.</div>
+        <div class="system-message">+1 Knowledge — The crystal pillars are junction points. Where timelines split, energy crystallizes.</div>
+        <div class="system-message">+1 Chrono Shard — Temporal potential, solidified.</div>
+    `,
+    choices: [
+        {
+            label: 'Continue exploring the Threshold',
+            hint: 'There may be more to find.',
+            next: 'threshold_briefing'
+        }
+    ]
+};
+
+// ── 1.5c: Convert Chrono Shards to Flux ──
+SCENES['threshold_shard_conversion'] = {
+    location: 'The Threshold — Crystal Forge',
+    onEnter: () => {
+        const shards = getResource('chronoShards');
+        if (shards >= 2) {
+            addResource('chronoShards', -2);
+            addFlux(5);
+            trackDelta('Chrono Shards', -2);
+            trackDelta('Flux', 5);
+        }
+    },
+    text: () => {
+        return `
+            <p>You hold the Chrono Shards above the central point of the Threshold — the exact spot where all six paths converge. The shards resonate, vibrating faster and faster until they blur into light.</p>
+            <p>The light sinks into your Core. You feel it charge — a warmth spreading through the device, the hairline fractures glowing brighter.</p>
+            <div class="speaker">The Archivist</div>
+            <div class="dialogue">"Clever. The shards are crystallized potential — temporal energy that never committed to a timeline. By dissolving them here, at the nexus, you're reclaiming that uncommitted energy as Flux."</div>
+            <div class="dialogue">"Most divers never figure that out. They just spend and spend until the Core goes dark."</div>
+            <div class="system-message">-2 Chrono Shards → +5 Flux — Temporal potential converted.</div>
+        `;
+    },
+    choices: [
+        {
+            label: 'Continue',
+            hint: 'Your Core hums with renewed energy.',
+            next: 'threshold_briefing'
+        }
+    ]
+};
+
 // ── 1.6: Syndicate briefing ──
 SCENES['threshold_briefing'] = {
     location: 'The Threshold',
@@ -923,26 +1357,32 @@ SCENES['threshold_briefing'] = {
             label: 'The Chrome Path — Singularity',
             hint: '"Can I let go of self to become something greater?"',
             faction: 'singularity',
+            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            onChoose: () => { diveFlux(); },
             next: 'singularity_arrival'
         },
         {
             label: 'The Green Path — Lifeblood',
             hint: '"Can I find peace in impermanence?"',
             faction: 'lifeblood',
-            onChoose: () => { setFlag('chose_lifeblood_first', true); },
+            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            onChoose: () => { setFlag('chose_lifeblood_first', true); diveFlux(); },
             next: 'lifeblood_arrival'
         },
         {
             label: 'The Amber Path — Sungrace',
             hint: '"Can human ingenuity triumph over the inevitable?"',
             faction: 'sungrace',
-            onChoose: () => { setFlag('chose_sungrace_first', true); },
+            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            onChoose: () => { setFlag('chose_sungrace_first', true); diveFlux(); },
             next: 'sungrace_arrival'
         },
         {
             label: 'The Violet Path — Silence',
             hint: '"Can I make peace with being alone?"',
             faction: 'silence',
+            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            onChoose: () => { diveFlux(); },
             next: 'silence_arrival'
         }
     ]
@@ -959,8 +1399,8 @@ SCENES['singularity_arrival'] = {
     location: 'Shianu City — Biological Preserve 3184',
     onEnter: () => {
         setFlag('met_singularity', true);
-        addFlux(1);
         setFlag('lore_flux_generation', 'Every temporal dive generates Flux — supernova-scale neutrino energy. Your arrival here was a dive. It cost something.');
+        trackDelta('Flux (dive)', 5);
     },
     text: `
         <p>The Chrome Path swallows you.</p>
@@ -1455,22 +1895,26 @@ SCENES['singularity_hub'] = {
         choices.push({
             label: 'Patrol with Raiz at Koya Crossing',
             hint: 'Help the crossing guard keep people safe.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Data Fragment', amount: 1 }, { label: 'Trust', amount: 1 }],
             next: 'singularity_task_patrol'
         });
         choices.push({
             label: 'Visit the Foundries',
             hint: 'See where Singularity builds her creations.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Data Fragment', amount: 1 }, { label: 'Knowledge', amount: 1 }],
             next: 'singularity_task_foundry'
         });
         choices.push({
             label: 'Observe the city\'s automated systems',
             hint: 'Watch how Singularity manages everything.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Data Fragment', amount: 1 }, { label: 'Knowledge', amount: 1 }],
             next: 'singularity_task_systems'
         });
         if (!getFlag('met_amalgams')) {
             choices.push({
                 label: 'Investigate a disturbance in the scrap district',
                 hint: 'Something is moving that shouldn\'t be.',
+                costs: [{ label: 'Flux', amount: -2 }, { label: 'Knowledge', amount: 2 }],
                 next: 'singularity_encounter_amalgams'
             });
         }
@@ -1478,14 +1922,22 @@ SCENES['singularity_hub'] = {
             choices.push({
                 label: 'Follow a strange signal from the deep archives',
                 hint: 'A voice that is many voices...',
+                costs: [{ label: 'Flux', amount: -2 }, { label: 'Knowledge', amount: 2 }],
                 next: 'singularity_encounter_herald'
             });
         }
+        choices.push({
+            label: 'Search the alleys for temporal residue',
+            hint: 'Timeline junctions leave crystallized energy behind.',
+            costs: [{ label: 'Flux', amount: -1, resource: 'flux' }, { label: 'Chrono Shard', amount: 1, resource: 'chronoShards' }],
+            next: 'singularity_hub'
+        });
         if (getResource('dataFragments') >= 3) {
             choices.push({
                 label: 'Go to the Erudite Beacon',
                 hint: 'You\'re ready to meet Singularity properly.',
                 faction: 'singularity',
+                costs: [{ label: 'Flux', amount: -1 }],
                 next: 'singularity_erudite_approach'
             });
         }
@@ -1497,9 +1949,11 @@ SCENES['singularity_hub'] = {
 SCENES['singularity_task_patrol'] = {
     location: 'Koya Crossing — Shianu City',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('singularity_patrol');
         addResource('dataFragments', 1);
         addRep('singularity', 3);
+        addTrust(1);
     },
     text: () => {
         const count = getTaskCount('singularity_patrol');
@@ -1544,6 +1998,7 @@ SCENES['singularity_task_patrol'] = {
 SCENES['singularity_task_foundry'] = {
     location: 'The Foundries — Singularity\'s Industrial Heart',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('singularity_foundry');
         addResource('dataFragments', 1);
         addRep('singularity', 3);
@@ -1594,6 +2049,7 @@ SCENES['singularity_task_foundry'] = {
 SCENES['singularity_task_systems'] = {
     location: 'City Management Core — Shianu City',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('singularity_systems');
         addResource('dataFragments', 1);
         addRep('singularity', 3);
@@ -1641,6 +2097,7 @@ SCENES['singularity_task_systems'] = {
 SCENES['singularity_encounter_amalgams'] = {
     location: 'Scrap District — Shianu City Outskirts',
     onEnter: () => {
+        spendFlux(2);
         setFlag('met_amalgams', true);
         addKnowledge(2);
         addRep('singularity', 5);
@@ -1678,6 +2135,7 @@ SCENES['singularity_encounter_amalgams'] = {
 SCENES['singularity_encounter_herald'] = {
     location: 'Deep Archive Sub-Level — Erudite Beacon',
     onEnter: () => {
+        spendFlux(2);
         setFlag('met_herald', true);
         addKnowledge(2);
         addRep('singularity', 5);
@@ -1711,7 +2169,8 @@ SCENES['singularity_encounter_herald'] = {
 SCENES['threshold_return'] = {
     location: 'The Threshold',
     onEnter: () => {
-        addFlux(1);
+        addFlux(2); // returning to threshold recovers some flux
+        trackDelta('Flux (threshold recovery)', 2);
     },
     text: () => {
         const accepted = getFlag('accepted_singularity_mission');
@@ -1737,26 +2196,42 @@ SCENES['threshold_return'] = {
             label: 'The Green Path — Lifeblood',
             hint: '"Can I find peace in impermanence?"',
             faction: 'lifeblood',
+            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            onChoose: () => { diveFlux(); },
             next: 'lifeblood_arrival'
         });
         choices.push({
             label: 'The Amber Path — Sungrace',
             hint: '"Can human ingenuity triumph over the inevitable?"',
             faction: 'sungrace',
+            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            onChoose: () => { diveFlux(); },
             next: 'sungrace_arrival'
         });
         choices.push({
             label: 'The Violet Path — Silence',
             hint: '"Can I make peace with being alone?"',
             faction: 'silence',
+            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            onChoose: () => { diveFlux(); },
             next: 'silence_arrival'
         });
         choices.push({
             label: 'The Golden Path — Splintergleam',
             hint: '"Can broken things find purpose?"',
             faction: 'splintergleam',
+            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            onChoose: () => { diveFlux(); },
             next: 'splintergleam_arrival'
         });
+        if (getResource('chronoShards') >= 2) {
+            choices.push({
+                label: 'Convert Chrono Shards to Flux',
+                hint: 'Dissolve 2 shards at the nexus point to recharge your Core.',
+                costs: [{ label: 'Chrono Shards', amount: -2 }, { label: 'Flux', amount: 5 }],
+                next: 'threshold_shard_conversion'
+            });
+        }
         return choices;
     }
 };
@@ -1771,7 +2246,7 @@ SCENES['lifeblood_arrival'] = {
     location: 'The Beating Heart — Lifeblood Territory',
     onEnter: () => {
         setFlag('met_lifeblood', true);
-        addFlux(1);
+        trackDelta('Flux (dive)', 5);
     },
     text: `
         <p>The Green Path does not carry you. It <em>grows</em> you.</p>
@@ -2128,22 +2603,26 @@ SCENES['lifeblood_hub'] = {
         choices.push({
             label: 'Tend the spore groves with Jenny',
             hint: 'Help the fungal specialist spread Lifeblood\'s web.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Root Token', amount: 1 }, { label: 'Trust', amount: 1 }],
             next: 'lifeblood_task_groves'
         });
         choices.push({
             label: 'Patrol with the Saurians',
             hint: 'Walk the perimeter with Arra\'s brood.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Root Token', amount: 1 }, { label: 'Knowledge', amount: 1 }],
             next: 'lifeblood_task_saurian'
         });
         choices.push({
             label: 'Tend the gardens with Oswald',
             hint: 'The horticulturist tends timelines like garden plots.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Root Token', amount: 1 }, { label: 'Knowledge', amount: 1 }],
             next: 'lifeblood_task_gardens'
         });
         if (!getFlag('met_ecoterrrorists')) {
             choices.push({
                 label: 'Investigate smoke at the forest edge',
                 hint: 'Something is burning where nothing should burn.',
+                costs: [{ label: 'Flux', amount: -2 }, { label: 'Knowledge', amount: 2 }],
                 next: 'lifeblood_encounter_ecoterrorists'
             });
         }
@@ -2151,14 +2630,22 @@ SCENES['lifeblood_hub'] = {
             choices.push({
                 label: 'Follow a howl into the deep Wilds',
                 hint: 'A sound raw and untamed...',
+                costs: [{ label: 'Flux', amount: -2 }, { label: 'Knowledge', amount: 2 }],
                 next: 'lifeblood_encounter_wilds'
             });
         }
+        choices.push({
+            label: 'Dig for crystallized time among the roots',
+            hint: 'The forest floor hides temporal residue from ancient dives.',
+            costs: [{ label: 'Flux', amount: -1, resource: 'flux' }, { label: 'Chrono Shard', amount: 1, resource: 'chronoShards' }],
+            next: 'lifeblood_hub'
+        });
         if (getResource('rootTokens') >= 3) {
             choices.push({
                 label: 'Return to the Oakmother',
                 hint: 'You\'ve earned the right to deeper truths.',
                 faction: 'lifeblood',
+                costs: [{ label: 'Flux', amount: -1 }],
                 next: 'lifeblood_oakmother_return'
             });
         }
@@ -2170,6 +2657,7 @@ SCENES['lifeblood_hub'] = {
 SCENES['lifeblood_task_groves'] = {
     location: 'The Spore Groves — The Beating Heart',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('lifeblood_groves');
         addResource('rootTokens', 1);
         addRep('lifeblood', 3);
@@ -2216,6 +2704,7 @@ SCENES['lifeblood_task_groves'] = {
 SCENES['lifeblood_task_saurian'] = {
     location: 'The Perimeter — The Beating Heart',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('lifeblood_saurian');
         addResource('rootTokens', 1);
         addRep('lifeblood', 3);
@@ -2264,6 +2753,7 @@ SCENES['lifeblood_task_saurian'] = {
 SCENES['lifeblood_task_gardens'] = {
     location: 'The Temporal Gardens — The Beating Heart',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('lifeblood_gardens');
         addResource('rootTokens', 1);
         addRep('lifeblood', 3);
@@ -2314,6 +2804,7 @@ SCENES['lifeblood_task_gardens'] = {
 SCENES['lifeblood_encounter_ecoterrorists'] = {
     location: 'The Forest Edge — The Beating Heart',
     onEnter: () => {
+        spendFlux(2);
         setFlag('met_ecoterrrorists', true);
         addKnowledge(2);
         addRep('lifeblood', 5);
@@ -2346,6 +2837,7 @@ SCENES['lifeblood_encounter_ecoterrorists'] = {
 SCENES['lifeblood_encounter_wilds'] = {
     location: 'The Deep Wilds — The Beating Heart',
     onEnter: () => {
+        spendFlux(2);
         setFlag('met_wilds_boof', true);
         addKnowledge(2);
         addRep('lifeblood', 5);
@@ -2411,7 +2903,6 @@ SCENES['sungrace_arrival'] = {
     location: 'Clarion Station — Edge of Time',
     onEnter: () => {
         setFlag('met_sungrace', true);
-        addFlux(1);
     },
     text: `
         <p>The Amber Path burns.</p>
@@ -2643,22 +3134,26 @@ SCENES['sungrace_hub'] = {
         choices.push({
             label: 'Assist Boltz with fleet maintenance',
             hint: 'The Chaos Conductor always needs extra hands.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Energy Cell', amount: 1 }, { label: 'Trust', amount: 1 }],
             next: 'sungrace_task_fleet'
         });
         choices.push({
             label: 'Serve at the Solar Gardens with Gentle Frank',
             hint: 'Guard duty at the energy farms.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Energy Cell', amount: 1 }, { label: 'Knowledge', amount: 1 }],
             next: 'sungrace_task_gardens'
         });
         choices.push({
             label: 'Run diagnostics at the observation array',
             hint: 'Monitor the boundary where time meets nothing.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Energy Cell', amount: 1 }, { label: 'Knowledge', amount: 1 }],
             next: 'sungrace_task_observation'
         });
         if (!getFlag('met_penitent_star')) {
             choices.push({
                 label: 'Investigate a strange energy signature in the outer ring',
                 hint: 'Something alive. Something burning.',
+                costs: [{ label: 'Flux', amount: -2 }, { label: 'Knowledge', amount: 2 }],
                 next: 'sungrace_encounter_penitent'
             });
         }
@@ -2666,14 +3161,22 @@ SCENES['sungrace_hub'] = {
             choices.push({
                 label: 'Visit the Memorial Deck',
                 hint: 'Where Sungrace honors its fallen.',
+                costs: [{ label: 'Flux', amount: -2 }, { label: 'Knowledge', amount: 2 }],
                 next: 'sungrace_encounter_quaid'
             });
         }
+        choices.push({
+            label: 'Scan the station hull for temporal fractures',
+            hint: 'Entropy damage sometimes crystallizes temporal energy.',
+            costs: [{ label: 'Flux', amount: -1, resource: 'flux' }, { label: 'Chrono Shard', amount: 1, resource: 'chronoShards' }],
+            next: 'sungrace_hub'
+        });
         if (getResource('energyCells') >= 3) {
             choices.push({
                 label: 'Report to Khaela',
                 hint: 'You\'ve earned the right to see the deep void.',
                 faction: 'sungrace',
+                costs: [{ label: 'Flux', amount: -1 }],
                 next: 'sungrace_observatory'
             });
         }
@@ -2685,6 +3188,7 @@ SCENES['sungrace_hub'] = {
 SCENES['sungrace_task_fleet'] = {
     location: 'Engineering Bay — Clarion Station',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('sungrace_fleet');
         addResource('energyCells', 1);
         addRep('sungrace', 3);
@@ -2733,6 +3237,7 @@ SCENES['sungrace_task_fleet'] = {
 SCENES['sungrace_task_gardens'] = {
     location: 'Solar Gardens — Clarion Station Exterior',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('sungrace_gardens');
         addResource('energyCells', 1);
         addRep('sungrace', 3);
@@ -2787,6 +3292,7 @@ SCENES['sungrace_task_gardens'] = {
 SCENES['sungrace_task_observation'] = {
     location: 'Observation Array Delta — Clarion Station',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('sungrace_observation');
         addResource('energyCells', 1);
         addRep('sungrace', 3);
@@ -2830,6 +3336,7 @@ SCENES['sungrace_task_observation'] = {
 SCENES['sungrace_encounter_penitent'] = {
     location: 'Outer Ring — Clarion Station',
     onEnter: () => {
+        spendFlux(2);
         setFlag('met_penitent_star', true);
         addKnowledge(2);
         addRep('sungrace', 5);
@@ -2864,6 +3371,7 @@ SCENES['sungrace_encounter_penitent'] = {
 SCENES['sungrace_encounter_quaid'] = {
     location: 'Memorial Deck — Clarion Station',
     onEnter: () => {
+        spendFlux(2);
         setFlag('met_quaid', true);
         addKnowledge(2);
         addRep('sungrace', 5);
@@ -3086,7 +3594,7 @@ SCENES['sungrace_departure'] = {
 // ── Hub: Threshold Return 2 (post Lifeblood/Sungrace) ──
 SCENES['threshold_return_2'] = {
     location: 'The Threshold',
-    onEnter: () => { addFlux(1); },
+    onEnter: () => { addFlux(2); trackDelta('Flux (threshold recovery)', 2); },
     text: () => {
         const completedLB = getFlag('completed_lifeblood');
         const completedSG = getFlag('completed_sungrace');
@@ -3120,6 +3628,8 @@ SCENES['threshold_return_2'] = {
                 label: 'The Chrome Path — Singularity',
                 hint: '"Can I let go of self to become something greater?"',
                 faction: 'singularity',
+                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                onChoose: () => { diveFlux(); },
                 next: 'singularity_arrival'
             });
         }
@@ -3128,6 +3638,8 @@ SCENES['threshold_return_2'] = {
                 label: 'The Green Path — Lifeblood',
                 hint: '"Can I find peace in impermanence?"',
                 faction: 'lifeblood',
+                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                onChoose: () => { diveFlux(); },
                 next: 'lifeblood_arrival'
             });
         }
@@ -3136,6 +3648,8 @@ SCENES['threshold_return_2'] = {
                 label: 'The Amber Path — Sungrace',
                 hint: '"Can human ingenuity triumph over the inevitable?"',
                 faction: 'sungrace',
+                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                onChoose: () => { diveFlux(); },
                 next: 'sungrace_arrival'
             });
         }
@@ -3143,20 +3657,34 @@ SCENES['threshold_return_2'] = {
             label: 'The Violet Path — Silence',
             hint: '"Can I make peace with being alone?"',
             faction: 'silence',
+            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            onChoose: () => { diveFlux(); },
             next: 'silence_arrival'
         });
         choices.push({
             label: 'The Golden Path — Splintergleam',
             hint: '"Can broken things find purpose?"',
             faction: 'splintergleam',
+            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            onChoose: () => { diveFlux(); },
             next: 'splintergleam_arrival'
         });
         choices.push({
             label: 'The Blue Path — Phasetide',
             hint: '"Can I find comfort in believing there\'s a right answer?"',
             faction: 'phasetide',
+            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            onChoose: () => { diveFlux(); },
             next: 'phasetide_arrival'
         });
+        if (getResource('chronoShards') >= 2) {
+            choices.push({
+                label: 'Convert Chrono Shards to Flux',
+                hint: 'Dissolve 2 shards at the nexus point to recharge your Core.',
+                costs: [{ label: 'Chrono Shards', amount: -2 }, { label: 'Flux', amount: 5 }],
+                next: 'threshold_shard_conversion'
+            });
+        }
         return choices;
     }
 };
@@ -3171,7 +3699,6 @@ SCENES['silence_arrival'] = {
     location: 'Between — Liminal Space',
     onEnter: () => {
         setFlag('met_silence', true);
-        addFlux(1);
     },
     text: `
         <p>The Violet Path doesn't take you anywhere. It takes you <em>between</em>.</p>
@@ -3314,22 +3841,26 @@ SCENES['silence_hub'] = {
         choices.push({
             label: 'Catalog scrolls with Dhali',
             hint: 'Help the Bearer of Memories preserve knowledge.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Memory Shard', amount: 1 }, { label: 'Trust', amount: 1 }],
             next: 'silence_task_catalog'
         });
         choices.push({
             label: 'Tend the graves with Indara',
             hint: 'Every tombstone honored the same.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Memory Shard', amount: 1 }, { label: 'Knowledge', amount: 1 }],
             next: 'silence_task_graves'
         });
         choices.push({
             label: 'Run a message through the Whisper Network',
             hint: 'Carry words through the spaces between.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Memory Shard', amount: 1 }, { label: 'Knowledge', amount: 1 }],
             next: 'silence_task_whisper'
         });
         if (!getFlag('met_myths')) {
             choices.push({
                 label: 'Follow Greyl into the restricted stacks',
                 hint: 'The cat goes where it pleases. Today it wants company.',
+                costs: [{ label: 'Flux', amount: -2 }, { label: 'Knowledge', amount: 2 }],
                 next: 'silence_encounter_myths'
             });
         }
@@ -3337,14 +3868,22 @@ SCENES['silence_hub'] = {
             choices.push({
                 label: 'A summons from the deep archives',
                 hint: 'Someone wants to see you. Someone powerful.',
+                costs: [{ label: 'Flux', amount: -2 }, { label: 'Knowledge', amount: 2 }],
                 next: 'silence_encounter_council'
             });
         }
+        choices.push({
+            label: 'Search the liminal margins for time crystals',
+            hint: 'The spaces between bookshelves sometimes crystallize.',
+            costs: [{ label: 'Flux', amount: -1, resource: 'flux' }, { label: 'Chrono Shard', amount: 1, resource: 'chronoShards' }],
+            next: 'silence_hub'
+        });
         if (getResource('memoryShards') >= 3) {
             choices.push({
                 label: 'Return to Dhali\'s chamber',
                 hint: 'You\'ve proven yourself. Time for the deep truths.',
                 faction: 'silence',
+                costs: [{ label: 'Flux', amount: -1 }],
                 next: 'silence_greyl'
             });
         }
@@ -3356,6 +3895,7 @@ SCENES['silence_hub'] = {
 SCENES['silence_task_catalog'] = {
     location: 'Archive Wing — The Hidden Library',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('silence_catalog');
         addResource('memoryShards', 1);
         addRep('silence', 3);
@@ -3402,6 +3942,7 @@ SCENES['silence_task_catalog'] = {
 SCENES['silence_task_graves'] = {
     location: 'The Remembrance Garden — Hidden Sanctuary',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('silence_graves');
         addResource('memoryShards', 1);
         addRep('silence', 3);
@@ -3455,6 +3996,7 @@ SCENES['silence_task_graves'] = {
 SCENES['silence_task_whisper'] = {
     location: 'The Spaces Between — Whisper Network',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('silence_whisper');
         addResource('memoryShards', 1);
         addRep('silence', 3);
@@ -3503,6 +4045,7 @@ SCENES['silence_task_whisper'] = {
 SCENES['silence_encounter_myths'] = {
     location: 'Restricted Stacks — The Hidden Library',
     onEnter: () => {
+        spendFlux(2);
         setFlag('met_myths', true);
         addKnowledge(2);
         addRep('silence', 5);
@@ -3534,6 +4077,7 @@ SCENES['silence_encounter_myths'] = {
 SCENES['silence_encounter_council'] = {
     location: 'Deep Archives — The Hidden Library',
     onEnter: () => {
+        spendFlux(2);
         setFlag('met_talia', true);
         addKnowledge(2);
         addRep('silence', 5);
@@ -3869,7 +4413,6 @@ SCENES['splintergleam_arrival'] = {
     location: 'The Arena — Splintergleam Territory',
     onEnter: () => {
         setFlag('met_splintergleam', true);
-        addFlux(1);
     },
     text: `
         <p>The Golden Path <em>breaks</em> you through.</p>
@@ -4089,22 +4632,26 @@ SCENES['splintergleam_hub'] = {
         choices.push({
             label: 'Train in the Arena with Brant',
             hint: 'The Bloody teaches breaking — and healing.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Kintsu Shard', amount: 1 }, { label: 'Trust', amount: 1 }],
             next: 'splintergleam_task_arena'
         });
         choices.push({
             label: 'Scavenge the wastes with Corvus',
             hint: 'The Nostradans find treasure in wreckage.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Kintsu Shard', amount: 1 }, { label: 'Knowledge', amount: 1 }],
             next: 'splintergleam_task_scavenge'
         });
         choices.push({
             label: 'Study runes with the Kintsu-Kai',
             hint: 'Blood magic and golden inscriptions.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Kintsu Shard', amount: 1 }, { label: 'Knowledge', amount: 1 }],
             next: 'splintergleam_task_runes'
         });
         if (!getFlag('met_lavaborn')) {
             choices.push({
                 label: 'Follow the heat toward Mount Veraki',
                 hint: 'Something ancient burns in the volcano.',
+                costs: [{ label: 'Flux', amount: -2 }, { label: 'Knowledge', amount: 2 }],
                 next: 'splintergleam_encounter_lavaborn'
             });
         }
@@ -4112,14 +4659,22 @@ SCENES['splintergleam_hub'] = {
             choices.push({
                 label: 'A commotion in the Nostradan camp',
                 hint: 'Someone is causing trouble. Gleefully.',
+                costs: [{ label: 'Flux', amount: -2 }, { label: 'Knowledge', amount: 2 }],
                 next: 'splintergleam_encounter_sarah'
             });
         }
+        choices.push({
+            label: 'Sift through the Arena sand for time-shards',
+            hint: 'Golden veins sometimes yield temporal crystals.',
+            costs: [{ label: 'Flux', amount: -1, resource: 'flux' }, { label: 'Chrono Shard', amount: 1, resource: 'chronoShards' }],
+            next: 'splintergleam_hub'
+        });
         if (getResource('kintsuShards') >= 3) {
             choices.push({
                 label: 'Return to the Champion\'s Terrace',
                 hint: 'Time for the deep secrets of Kintsu.',
                 faction: 'splintergleam',
+                costs: [{ label: 'Flux', amount: -1 }],
                 next: 'splintergleam_kintsu_talk'
             });
         }
@@ -4131,6 +4686,7 @@ SCENES['splintergleam_hub'] = {
 SCENES['splintergleam_task_arena'] = {
     location: 'Training Pit — The Arena',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('splintergleam_arena');
         addResource('kintsuShards', 1);
         addRep('splintergleam', 3);
@@ -4179,6 +4735,7 @@ SCENES['splintergleam_task_arena'] = {
 SCENES['splintergleam_task_scavenge'] = {
     location: 'The Nostradan Wastes',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('splintergleam_scavenge');
         addResource('kintsuShards', 1);
         addRep('splintergleam', 3);
@@ -4229,6 +4786,7 @@ SCENES['splintergleam_task_scavenge'] = {
 SCENES['splintergleam_task_runes'] = {
     location: 'The Rune Chamber — Mount Veraki',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('splintergleam_runes');
         addResource('kintsuShards', 1);
         addRep('splintergleam', 3);
@@ -4275,6 +4833,7 @@ SCENES['splintergleam_task_runes'] = {
 SCENES['splintergleam_encounter_lavaborn'] = {
     location: 'Mount Veraki — Lower Slopes',
     onEnter: () => {
+        spendFlux(2);
         setFlag('met_lavaborn', true);
         addKnowledge(2);
         addRep('splintergleam', 5);
@@ -4306,6 +4865,7 @@ SCENES['splintergleam_encounter_lavaborn'] = {
 SCENES['splintergleam_encounter_sarah'] = {
     location: 'Nostradan Camp — The Wastes',
     onEnter: () => {
+        spendFlux(2);
         setFlag('met_sarah', true);
         addKnowledge(2);
         addRep('splintergleam', 5);
@@ -4511,7 +5071,7 @@ SCENES['splintergleam_departure'] = {
 // ── Hub: Threshold Return 3 (post Silence/Splintergleam) ──
 SCENES['threshold_return_3'] = {
     location: 'The Threshold',
-    onEnter: () => { addFlux(1); },
+    onEnter: () => { addFlux(2); trackDelta('Flux (threshold recovery)', 2); },
     text: () => {
         const completed = ['completed_lifeblood', 'completed_sungrace', 'completed_silence', 'completed_splintergleam'].filter(f => getFlag(f)).length;
         const metSing = getFlag('met_singularity') ? 1 : 0;
@@ -4551,6 +5111,8 @@ SCENES['threshold_return_3'] = {
                 label: 'The Chrome Path — Singularity',
                 hint: '"Can I let go of self to become something greater?"',
                 faction: 'singularity',
+                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                onChoose: () => { diveFlux(); },
                 next: 'singularity_arrival'
             });
         }
@@ -4559,6 +5121,8 @@ SCENES['threshold_return_3'] = {
                 label: 'The Green Path — Lifeblood',
                 hint: '"Can I find peace in impermanence?"',
                 faction: 'lifeblood',
+                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                onChoose: () => { diveFlux(); },
                 next: 'lifeblood_arrival'
             });
         }
@@ -4567,6 +5131,8 @@ SCENES['threshold_return_3'] = {
                 label: 'The Amber Path — Sungrace',
                 hint: '"Can human ingenuity triumph over the inevitable?"',
                 faction: 'sungrace',
+                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                onChoose: () => { diveFlux(); },
                 next: 'sungrace_arrival'
             });
         }
@@ -4575,6 +5141,8 @@ SCENES['threshold_return_3'] = {
                 label: 'The Violet Path — Silence',
                 hint: '"Can I make peace with being alone?"',
                 faction: 'silence',
+                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                onChoose: () => { diveFlux(); },
                 next: 'silence_arrival'
             });
         }
@@ -4583,6 +5151,8 @@ SCENES['threshold_return_3'] = {
                 label: 'The Golden Path — Splintergleam',
                 hint: '"Can broken things find purpose?"',
                 faction: 'splintergleam',
+                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                onChoose: () => { diveFlux(); },
                 next: 'splintergleam_arrival'
             });
         }
@@ -4590,8 +5160,18 @@ SCENES['threshold_return_3'] = {
             label: 'The Blue Path — Phasetide',
             hint: '"Can I find comfort in believing there\'s a right answer?"',
             faction: 'phasetide',
+            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            onChoose: () => { diveFlux(); },
             next: 'phasetide_arrival'
         });
+        if (getResource('chronoShards') >= 2) {
+            choices.push({
+                label: 'Convert Chrono Shards to Flux',
+                hint: 'Dissolve 2 shards at the nexus point to recharge your Core.',
+                costs: [{ label: 'Chrono Shards', amount: -2 }, { label: 'Flux', amount: 5 }],
+                next: 'threshold_shard_conversion'
+            });
+        }
         return choices;
     }
 };
@@ -4606,7 +5186,6 @@ SCENES['phasetide_arrival'] = {
     location: 'The Monastery of Tides',
     onEnter: () => {
         setFlag('met_phasetide', true);
-        addFlux(1);
     },
     text: `
         <p>The Blue Path pulls you like a current.</p>
@@ -4828,22 +5407,26 @@ SCENES['phasetide_hub'] = {
         choices.push({
             label: 'Serve temple duties with Priestess Minia',
             hint: 'The pastoral heart of the Faith.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Tide Mark', amount: 1 }, { label: 'Trust', amount: 1 }],
             next: 'phasetide_task_temple'
         });
         choices.push({
             label: 'Walk the Cathedral-City with Boof',
             hint: 'The faithful hound knows every street.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Tide Mark', amount: 1 }, { label: 'Knowledge', amount: 1 }],
             next: 'phasetide_task_city'
         });
         choices.push({
             label: 'Study the Tidepool readings',
             hint: 'Learn how Phasetide reads the future.',
+            costs: [{ label: 'Flux', amount: -1 }, { label: 'Tide Mark', amount: 1 }, { label: 'Knowledge', amount: 1 }],
             next: 'phasetide_task_tidepool'
         });
         if (!getFlag('met_dakad')) {
             choices.push({
                 label: 'A disturbance at the monastery gates',
                 hint: 'Someone is being brought in. Not gently.',
+                costs: [{ label: 'Flux', amount: -2 }, { label: 'Knowledge', amount: 2 }],
                 next: 'phasetide_encounter_dakad'
             });
         }
@@ -4851,14 +5434,22 @@ SCENES['phasetide_hub'] = {
             choices.push({
                 label: 'A stranger in the refectory with a magnificent mustache',
                 hint: 'Not everyone here is what they seem.',
+                costs: [{ label: 'Flux', amount: -2 }, { label: 'Knowledge', amount: 2 }],
                 next: 'phasetide_encounter_stache'
             });
         }
+        choices.push({
+            label: 'Meditate by the tidepool for temporal crystals',
+            hint: 'Where past and future meet, time crystallizes.',
+            costs: [{ label: 'Flux', amount: -1, resource: 'flux' }, { label: 'Chrono Shard', amount: 1, resource: 'chronoShards' }],
+            next: 'phasetide_hub'
+        });
         if (getResource('tideMarks') >= 3) {
             choices.push({
                 label: 'Return to the Wavemother',
                 hint: 'You\'ve earned the right to challenge the theology.',
                 faction: 'phasetide',
+                costs: [{ label: 'Flux', amount: -1 }],
                 next: 'phasetide_philosophy'
             });
         }
@@ -4870,6 +5461,7 @@ SCENES['phasetide_hub'] = {
 SCENES['phasetide_task_temple'] = {
     location: 'The Temple — The Monastery of Tides',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('phasetide_temple');
         addResource('tideMarks', 1);
         addRep('phasetide', 3);
@@ -4919,6 +5511,7 @@ SCENES['phasetide_task_temple'] = {
 SCENES['phasetide_task_city'] = {
     location: 'Novus Primus — Cathedral-City',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('phasetide_city');
         addResource('tideMarks', 1);
         addRep('phasetide', 3);
@@ -4969,6 +5562,7 @@ SCENES['phasetide_task_city'] = {
 SCENES['phasetide_task_tidepool'] = {
     location: 'The Tidechamber — The Monastery of Tides',
     onEnter: () => {
+        spendFlux(1);
         incrementTask('phasetide_tidepool');
         addResource('tideMarks', 1);
         addRep('phasetide', 3);
@@ -5020,6 +5614,7 @@ SCENES['phasetide_task_tidepool'] = {
 SCENES['phasetide_encounter_dakad'] = {
     location: 'Monastery Gates — The Monastery of Tides',
     onEnter: () => {
+        spendFlux(2);
         setFlag('met_dakad', true);
         addKnowledge(2);
         addRep('phasetide', 5);
@@ -5054,6 +5649,7 @@ SCENES['phasetide_encounter_dakad'] = {
 SCENES['phasetide_encounter_stache'] = {
     location: 'Refectory — The Monastery of Tides',
     onEnter: () => {
+        spendFlux(2);
         setFlag('met_stache', true);
         addKnowledge(2);
         addRep('phasetide', 5);
@@ -5400,7 +5996,7 @@ SCENES['phasetide_departure'] = {
 // ── 8.1: The Final Threshold ──
 SCENES['final_threshold'] = {
     location: 'The Threshold — Endgame',
-    onEnter: () => { addFlux(2); },
+    onEnter: () => { addFlux(3); trackDelta('Flux (endgame surge)', 3); },
     text: () => {
         const flux = state.flux;
         const knowledge = state.knowledge;
@@ -5488,7 +6084,7 @@ SCENES['final_threshold'] = {
 // ── Ending: Singularity ──
 SCENES['ending_singularity'] = {
     location: 'The Upload — Singularity Ending',
-    onEnter: () => { setFlag('ending', 'singularity'); },
+    onEnter: () => { setFlag('ending', 'singularity'); recordEnding('singularity'); },
     text: () => {
         const highRep = (state.reputation.singularity || 0) >= 20;
         const accepted = getFlag('accepted_singularity_mission');
@@ -5520,7 +6116,7 @@ SCENES['ending_singularity'] = {
 // ── Ending: Lifeblood ──
 SCENES['ending_lifeblood'] = {
     location: 'The Cycle — Lifeblood Ending',
-    onEnter: () => { setFlag('ending', 'lifeblood'); },
+    onEnter: () => { setFlag('ending', 'lifeblood'); recordEnding('lifeblood'); },
     text: () => {
         const highRep = (state.reputation.lifeblood || 0) >= 20;
 
@@ -5550,7 +6146,7 @@ SCENES['ending_lifeblood'] = {
 // ── Ending: Sungrace ──
 SCENES['ending_sungrace'] = {
     location: 'The Sun-Lance — Sungrace Ending',
-    onEnter: () => { setFlag('ending', 'sungrace'); },
+    onEnter: () => { setFlag('ending', 'sungrace'); recordEnding('sungrace'); },
     text: () => {
         const highRep = (state.reputation.sungrace || 0) >= 20;
         const hasWeapon = getFlag('lore_sungrace_project');
@@ -5583,7 +6179,7 @@ SCENES['ending_sungrace'] = {
 // ── Ending: Silence ──
 SCENES['ending_silence'] = {
     location: 'The Severance — Silence Ending',
-    onEnter: () => { setFlag('ending', 'silence'); },
+    onEnter: () => { setFlag('ending', 'silence'); recordEnding('silence'); },
     text: () => {
         const highRep = (state.reputation.silence || 0) >= 20;
         const hasSpecs = hasItem('Silence Dampening Specs');
@@ -5617,7 +6213,7 @@ SCENES['ending_silence'] = {
 // ── Ending: Splintergleam ──
 SCENES['ending_splintergleam'] = {
     location: 'The Gambit — Splintergleam Ending',
-    onEnter: () => { setFlag('ending', 'splintergleam'); },
+    onEnter: () => { setFlag('ending', 'splintergleam'); recordEnding('splintergleam'); },
     text: () => {
         const highRep = (state.reputation.splintergleam || 0) >= 20;
         const hasDerelict = getFlag('lore_derelict');
@@ -5653,7 +6249,7 @@ SCENES['ending_splintergleam'] = {
 // ── Ending: Phasetide ──
 SCENES['ending_phasetide'] = {
     location: 'The Convergence — Phasetide Ending',
-    onEnter: () => { setFlag('ending', 'phasetide'); },
+    onEnter: () => { setFlag('ending', 'phasetide'); recordEnding('phasetide'); },
     text: () => {
         const highRep = (state.reputation.phasetide || 0) >= 20;
         const knowsWeakness = getFlag('knows_engine_weakness');
@@ -5689,7 +6285,7 @@ SCENES['ending_phasetide'] = {
 // ── Ending: Refuse ──
 SCENES['ending_refuse'] = {
     location: 'The Refusal',
-    onEnter: () => { setFlag('ending', 'refuse'); },
+    onEnter: () => { setFlag('ending', 'refuse'); recordEnding('refuse'); },
     text: () => {
         const knowledge = state.knowledge;
         const flux = state.flux;
@@ -5736,7 +6332,8 @@ SCENES['epilogue'] = {
             silence: 'The Severance',
             splintergleam: 'The Gambit',
             phasetide: 'The Convergence',
-            refuse: 'The Seventh Path'
+            refuse: 'The Seventh Path',
+            out_of_time: 'Out of Time'
         };
 
         // Calculate faction standings
@@ -5815,13 +6412,22 @@ SCENES['epilogue'] = {
             </div>
             ` : ''}
 
+            ${renderLeaderboardHtml()}
+
             <div style="text-align:center; margin: 2em 0; padding: 1.5em; border: 1px solid #666; border-radius: 8px; background: rgba(40,40,60,0.4);">
                 <p style="font-style:italic; color:#aaa;">"Every ending is a beginning wearing different clothes."</p>
                 <p style="font-style:italic; color:#aaa;">— Dhali, Bearer of Memories</p>
                 <br>
-                <p style="color:#888; font-size:0.9em;">Thank you for playing <strong>The Flux Paradox</strong>.</p>
-                <p style="color:#888; font-size:0.9em;">There are <strong>7 endings</strong>, each with <strong>2 variants</strong> based on your choices and reputation.</p>
-                <p style="color:#888; font-size:0.9em;">Try again. Walk different paths. Make different choices. Break different things.</p>
+                <p style="color:#888; font-size:0.9em;">Thank you for playing <strong>The Braided Path</strong>.</p>
+                <p style="color:#888; font-size:0.9em;">There are <strong>8 endings</strong> (including the fail state), each with <strong>2 variants</strong> based on your choices and reputation.</p>
+                <p style="color:#888; font-size:0.9em;">Try again. Walk different paths. Manage your Flux. Break different things.</p>
+            </div>
+
+            <div class="cta-banner">
+                <h3>The Chronoverse Awaits</h3>
+                <p>This is only a glimpse. The full Chrono CCG — with all six syndicates, hundreds of cards, and competitive multiplayer — is coming soon to Steam and Epic Games Store.</p>
+                <p style="color:var(--text); font-size:0.9rem;">Wishlist now to be notified at launch.</p>
+                <a class="cta-btn" href="#" onclick="showToast('Wishlist link coming soon!'); return false;">Wishlist on Steam</a>
             </div>
         `;
     },
@@ -5832,14 +6438,126 @@ SCENES['epilogue'] = {
             onChoose: () => {
                 state.flux = 0;
                 state.knowledge = 0;
+                state.trust = 0;
                 state.inventory = [];
                 state.flags = {};
                 state.reputation = { singularity:0, lifeblood:0, sungrace:0, silence:0, splintergleam:0, phasetide:0 };
+                state.resources = { dataFragments:0, rootTokens:0, energyCells:0, memoryShards:0, kintsuShards:0, tideMarks:0, chronoShards:0 };
+                state.taskCounts = {};
+                state.diveCount = 0;
+                state.sceneCount = 0;
             },
             next: 'threshold_awaken'
         }
     ]
 };
+
+
+// ═══════════════════════════════════════════════════════════════
+//  OUT OF TIME — FAIL STATE ENDING
+// ═══════════════════════════════════════════════════════════════
+
+SCENES['ending_out_of_time'] = {
+    location: 'Stranded',
+    onEnter: () => { setFlag('ending', 'out_of_time'); recordEnding('out_of_time'); },
+    text: () => {
+        const sceneId = state.history && state.history.length > 0 ? state.history[state.history.length - 1] : state.currentScene;
+        // Detect which timeline they're on
+        const factions = ['singularity','lifeblood','sungrace','silence','splintergleam','phasetide'];
+        let strandedFaction = 'an unknown';
+        const factionFullNames = {
+            singularity: 'Singularity\'s chrome city', lifeblood: 'Lifeblood\'s living forest',
+            sungrace: 'Sungrace\'s orbital station', silence: 'Silence\'s hidden library',
+            splintergleam: 'Splintergleam\'s broken arena', phasetide: 'Phasetide\'s blue monastery'
+        };
+        for (const f of factions) {
+            if (sceneId && sceneId.startsWith(f)) { strandedFaction = factionFullNames[f] || f; break; }
+        }
+
+        return `
+            <p>Your Chrono Core flickers. Dims. Goes dark.</p>
+            <p>You shake it. Press it against your palm. Will it to ignite. Nothing. The hairline fractures that once glowed blue are now just cracks in dead crystal.</p>
+            <p>The realization arrives slowly, then all at once: <em>you have no Flux left.</em></p>
+            <p>No Flux means no dive. No dive means no return to the Threshold. No Threshold means no other paths. You are here — on this timeline, in ${strandedFaction} — forever.</p>
+            <div class="flavor">"The Archivist warned you. Every dive costs something. Every choice on a timeline burns through what little temporal energy your Core can hold. You spent it all — and now the multiverse moves on without you."</div>
+            <p>Around you, life continues. The people of this timeline don't notice that you're trapped here. To them, you're just another stranger who arrived and never left. There are millions like you across the braided multiverse — divers who ran dry, stranded between seconds, living out borrowed time on borrowed ground.</p>
+            <p>Your Core is a paperweight now. A memento of a journey cut short.</p>
+            <p>Somewhere, at the end of everything, Soval grows a fraction larger on the Flux you fed it. Somewhere, the Archivist notes your absence and does not mourn — they never mourn. They simply record.</p>
+            <div class="system-message" style="color:var(--red);">ENDING: OUT OF TIME — Flux depleted. Core dead. Stranded forever on a timeline that is not your own. The multiverse will not wait for you.</div>
+            <p class="flavor">"Every diver knows the risk. Not every diver respects it. The ones who don't? They become locals. Involuntarily."</p>
+        `;
+    },
+    choices: [
+        { label: 'Accept your fate', hint: 'See your final record.', next: 'epilogue' }
+    ]
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+//  LEADERBOARD SYSTEM
+// ═══════════════════════════════════════════════════════════════
+
+const LEADERBOARD_API = 'https://api.jsonbin.io/v3/b';
+const LEADERBOARD_BIN_ID = '67ce0000-0000-0000-0000-000000000000'; // placeholder
+const LEADERBOARD_KEY = 'chrono_ccg_leaderboard';
+
+// Local leaderboard (works without API; aggregates across sessions via localStorage)
+function getLocalLeaderboard() {
+    try {
+        return JSON.parse(localStorage.getItem(LEADERBOARD_KEY)) || {};
+    } catch (e) { return {}; }
+}
+
+function recordEnding(ending) {
+    const lb = getLocalLeaderboard();
+    lb[ending] = (lb[ending] || 0) + 1;
+    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(lb));
+}
+
+function renderLeaderboardHtml() {
+    const lb = getLocalLeaderboard();
+    const endingNames = {
+        singularity: { name: 'The Upload', color: 'var(--chrome)' },
+        lifeblood: { name: 'The Cycle', color: 'var(--green)' },
+        sungrace: { name: 'The Sun-Lance', color: 'var(--orange)' },
+        silence: { name: 'The Severance', color: 'var(--purple)' },
+        splintergleam: { name: 'The Gambit', color: 'var(--gold)' },
+        phasetide: { name: 'The Convergence', color: 'var(--blue)' },
+        refuse: { name: 'The Seventh Path', color: 'var(--text-bright)' },
+        out_of_time: { name: 'Out of Time', color: 'var(--red)' }
+    };
+
+    const total = Object.values(lb).reduce((a, b) => a + b, 0);
+    if (total === 0) return '';
+
+    // Sort by count descending
+    const sorted = Object.entries(endingNames)
+        .map(([key, info]) => ({ key, ...info, count: lb[key] || 0 }))
+        .filter(e => e.count > 0)
+        .sort((a, b) => b.count - a.count);
+
+    const maxCount = sorted[0]?.count || 1;
+
+    let rows = sorted.map((e, i) => {
+        const pct = total > 0 ? Math.round((e.count / total) * 100) : 0;
+        const barWidth = Math.round((e.count / maxCount) * 100);
+        return `<div class="lb-row">
+            <span class="lb-rank">${i + 1}</span>
+            <span class="lb-name" style="color:${e.color}">${e.name}</span>
+            <div class="lb-bar-track"><div class="lb-bar-fill" style="width:${barWidth}%; background:${e.color}"></div></div>
+            <span class="lb-count">${e.count}</span>
+            <span class="lb-pct">${pct}%</span>
+        </div>`;
+    }).join('');
+
+    return `
+        <div class="leaderboard">
+            <h3>Ending Leaderboard</h3>
+            <div style="text-align:center; font-size:0.7rem; color:var(--text-dim); margin-bottom:10px;">${total} total endings recorded across all playthroughs</div>
+            ${rows}
+        </div>
+    `;
+}
 
 
 // ═══════════════════════════════════════════════════════════════
