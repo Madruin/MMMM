@@ -366,6 +366,38 @@
             .choice-btn { font-size: 0.85rem; }
         }
 
+        /* ── Resource progress (hub scenes) ── */
+        .resource-progress {
+            text-align: center;
+            padding: 10px 0;
+            margin: 12px 0;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: rgba(18, 18, 26, 0.6);
+        }
+        .resource-progress .rp-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+        }
+        .resource-progress .rp-pips {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 4px;
+        }
+        .resource-progress .rp-pip {
+            width: 20px;
+            height: 6px;
+            border-radius: 2px;
+            background: var(--border);
+        }
+        .resource-progress .rp-pip.filled {
+            background: var(--accent);
+        }
+
         /* ── Scrollbar ── */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
@@ -413,8 +445,17 @@ const GameState = {
         splintergleam: 0,
         phasetide: 0
     },
+    resources: {
+        dataFragments: 0,
+        rootTokens: 0,
+        energyCells: 0,
+        memoryShards: 0,
+        kintsuShards: 0,
+        tideMarks: 0
+    },
     inventory: [],
     flags: {},
+    taskCounts: {},
     history: [],
     sceneCount: 0
 };
@@ -487,6 +528,33 @@ function addRep(faction, n) {
     state.reputation[faction] = Math.max(0, Math.min(100, (state.reputation[faction] || 0) + n));
 }
 
+// ── Resource & task helpers ──
+const RESOURCE_NAMES = {
+    dataFragments: { label: 'Data Fragments', faction: 'singularity', color: 'var(--chrome)' },
+    rootTokens: { label: 'Root Tokens', faction: 'lifeblood', color: 'var(--green)' },
+    energyCells: { label: 'Energy Cells', faction: 'sungrace', color: 'var(--orange)' },
+    memoryShards: { label: 'Memory Shards', faction: 'silence', color: 'var(--purple)' },
+    kintsuShards: { label: 'Kintsu Shards', faction: 'splintergleam', color: 'var(--gold)' },
+    tideMarks: { label: 'Tide Marks', faction: 'phasetide', color: 'var(--blue)' }
+};
+
+function addResource(type, n) {
+    if (!state.resources) state.resources = {};
+    state.resources[type] = (state.resources[type] || 0) + (n || 1);
+}
+function getResource(type) {
+    if (!state.resources) return 0;
+    return state.resources[type] || 0;
+}
+function incrementTask(taskId) {
+    if (!state.taskCounts) state.taskCounts = {};
+    state.taskCounts[taskId] = (state.taskCounts[taskId] || 0) + 1;
+}
+function getTaskCount(taskId) {
+    if (!state.taskCounts) return 0;
+    return state.taskCounts[taskId] || 0;
+}
+
 // ── Inventory panel ──
 function toggleInventory() {
     document.getElementById('inventory-panel').classList.toggle('open');
@@ -540,6 +608,18 @@ function renderInventory() {
         });
     }
 
+    // Resources
+    const anyRes = state.resources && Object.values(state.resources).some(v => v > 0);
+    if (anyRes) {
+        html += '<h3>Resources</h3>';
+        for (const [key, info] of Object.entries(RESOURCE_NAMES)) {
+            const val = getResource(key);
+            if (val > 0) {
+                html += `<div class="inv-item"><span style="color:${info.color}">${info.label}:</span> ${val}</div>`;
+            }
+        }
+    }
+
     // Reputation — compact bar rows
     const anyRep = Object.values(state.reputation).some(v => v > 0);
     if (anyRep) {
@@ -588,9 +668,24 @@ function renderInventory() {
 // ── Status bar ──
 function renderStatusBar() {
     const bar = document.getElementById('status-bar');
+    // Detect current faction from scene id
+    let resourceHtml = '';
+    const sceneId = state.currentScene || '';
+    const factionMap = {
+        singularity: 'dataFragments', lifeblood: 'rootTokens', sungrace: 'energyCells',
+        silence: 'memoryShards', splintergleam: 'kintsuShards', phasetide: 'tideMarks'
+    };
+    for (const [faction, resKey] of Object.entries(factionMap)) {
+        if (sceneId.startsWith(faction + '_') && getResource(resKey) > 0) {
+            const info = RESOURCE_NAMES[resKey];
+            resourceHtml = `<span class="stat" style="color:${info.color}">${info.label}: <span class="stat-value" style="color:${info.color}">${getResource(resKey)}/3</span></span>`;
+            break;
+        }
+    }
     bar.innerHTML = `
         <span class="stat stat-flux">Flux: <span class="stat-value">${state.flux}</span></span>
         <span class="stat stat-knowledge">Knowledge: <span class="stat-value">${state.knowledge}</span></span>
+        ${resourceHtml}
     `;
 }
 
@@ -949,7 +1044,13 @@ SCENES['singularity_raiz_talk'] = {
         {
             label: '"Take me to her."',
             hint: 'Ask Raiz to lead you to Singularity.',
+            condition: () => getResource('dataFragments') >= 3,
             next: 'singularity_erudite_approach'
+        },
+        {
+            label: 'Explore the city first',
+            hint: 'Get to know Shianu City.',
+            next: 'singularity_hub'
         }
     ]
 };
@@ -1000,11 +1101,18 @@ SCENES['singularity_raiz_copies'] = {
         <div class="system-message">+2 Knowledge — The question of distributed identity: Singularity's existential burden.</div>
         <p>He brightens.</p>
         <div class="dialogue">"ANYWAY! You should go talk to Her properly! The Erudite Beacon can connect you — it's the tall one with the blue light on top. You can't miss it! Because She made it impossible to miss!"</div>
+        <div class="dialogue">"But also, if you want to understand this place? Just... be here for a while. Walk around. Help out. The city has a rhythm. You'll feel it."</div>
     `,
     choices: [
         {
-            label: 'Head to the Erudite Beacon',
+            label: 'Explore the city further',
+            hint: 'Get to know Shianu City before meeting the Overmind.',
+            next: 'singularity_hub'
+        },
+        {
+            label: 'Head straight to the Erudite Beacon',
             hint: 'Meet Singularity properly.',
+            condition: () => getResource('dataFragments') >= 3,
             next: 'singularity_erudite_approach'
         }
     ]
@@ -1308,12 +1416,293 @@ SCENES['singularity_voice'] = {
         {
             label: 'Follow the green lights',
             hint: 'Accept her invitation.',
+            condition: () => getResource('dataFragments') >= 3,
             next: 'singularity_erudite_approach'
         },
         {
             label: 'Explore the streets first',
             hint: 'You want to see the city on your own terms.',
             next: 'singularity_streets'
+        }
+    ]
+};
+
+// ── 2.HUB: Singularity City Hub ──
+SCENES['singularity_hub'] = {
+    location: 'Shianu City — Biological Preserve 3184',
+    text: () => {
+        const frags = getResource('dataFragments');
+        const pipHtml = [0,1,2].map(i => `<div class="rp-pip${i < frags ? ' filled' : ''}" style="${i < frags ? 'background:var(--chrome)' : ''}"></div>`).join('');
+
+        let statusText = '';
+        if (frags >= 3) {
+            statusText = `<p>You've spent enough time here to understand this place — its rhythms, its tensions, its quiet contradictions. The Erudite Beacon hums in the distance. Singularity is waiting.</p>`;
+        } else {
+            statusText = `<p>The city breathes around you. Chrome drones drift overhead, adjusting, monitoring, caring. Raiz units wave from distant crosswalks. There's a rhythm here — if you stay long enough, you'll understand it.</p>`;
+        }
+
+        return `
+            ${statusText}
+            <div class="resource-progress">
+                <div class="rp-label">Data Fragments Collected</div>
+                <div class="rp-pips">${pipHtml}</div>
+            </div>
+            ${frags >= 3 ? '<p class="flavor">You feel ready to meet the mind behind the city.</p>' : '<p class="flavor">The city has more to show you. Explore, help, observe.</p>'}
+        `;
+    },
+    choices: () => {
+        const choices = [];
+        choices.push({
+            label: 'Patrol with Raiz at Koya Crossing',
+            hint: 'Help the crossing guard keep people safe.',
+            next: 'singularity_task_patrol'
+        });
+        choices.push({
+            label: 'Visit the Foundries',
+            hint: 'See where Singularity builds her creations.',
+            next: 'singularity_task_foundry'
+        });
+        choices.push({
+            label: 'Observe the city\'s automated systems',
+            hint: 'Watch how Singularity manages everything.',
+            next: 'singularity_task_systems'
+        });
+        if (!getFlag('met_amalgams')) {
+            choices.push({
+                label: 'Investigate a disturbance in the scrap district',
+                hint: 'Something is moving that shouldn\'t be.',
+                next: 'singularity_encounter_amalgams'
+            });
+        }
+        if (!getFlag('met_herald') && getFlag('met_amalgams')) {
+            choices.push({
+                label: 'Follow a strange signal from the deep archives',
+                hint: 'A voice that is many voices...',
+                next: 'singularity_encounter_herald'
+            });
+        }
+        if (getResource('dataFragments') >= 3) {
+            choices.push({
+                label: 'Go to the Erudite Beacon',
+                hint: 'You\'re ready to meet Singularity properly.',
+                faction: 'singularity',
+                next: 'singularity_erudite_approach'
+            });
+        }
+        return choices;
+    }
+};
+
+// ── 2.T1: Patrol with Raiz ──
+SCENES['singularity_task_patrol'] = {
+    location: 'Koya Crossing — Shianu City',
+    onEnter: () => {
+        incrementTask('singularity_patrol');
+        addResource('dataFragments', 1);
+        addRep('singularity', 3);
+    },
+    text: () => {
+        const count = getTaskCount('singularity_patrol');
+        const variants = [
+            `<p>You take up position beside Raiz at Koya Crossing. He hands you a spare STOP sign — smaller, clearly made for children, but he presents it with the gravity of a general conferring a field commission.</p>
+            <div class="speaker">Raiz</div>
+            <div class="dialogue">"PARTNER! Today we protect EVERYONE! Especially the slow ones! The slow ones are the most important because they are the most vulnerable!"</div>
+            <p>For the next hour, you guide pedestrians. Raiz narrates everything — the woman with the limp who takes the western route every day, the cluster of schoolchildren who arrive at exactly 14:07, the old man who forgets which direction he's going and needs gentle redirecting.</p>
+            <p>Every person is a <em>person</em> to Raiz. Every crossing is a small miracle of survival.</p>
+            <p>During a lull, a chrome drone descends and deposits a tiny data crystal in your hand. It glows with faint silver light.</p>
+            <div class="system-message">+1 Data Fragment — Singularity rewards those who care for her people.</div>`,
+
+            `<p>Your second patrol shift starts differently. A delivery truck has stalled in the intersection, and six Raiz units have converged, their small bodies forming a protective perimeter around the confused driver.</p>
+            <div class="speaker">Raiz</div>
+            <div class="dialogue">"DO NOT WORRY! Twelve pedestrians are being redirected! Your cargo of — " he scans the truck — "four hundred and twelve jars of preserved fruit will arrive safely! I GUARANTEE IT!"</div>
+            <p>You help direct traffic while the Raiz units assist. What strikes you is how they coordinate — not through visible communication, but through Singularity's network. Each unit knows what the others are doing. One mind, many bodies, all devoted to the safety of people who barely notice them.</p>
+            <p>The driver thanks you. A nearby Raiz unit presses another data crystal into your palm.</p>
+            <div class="system-message">+1 Data Fragment — The network remembers every act of kindness.</div>`,
+
+            `<p>Today a child has lost her cat. It's not an emergency by any metric — but Raiz treats it like a five-alarm crisis.</p>
+            <div class="speaker">Raiz</div>
+            <div class="dialogue">"ALL UNITS! Code Feline! I repeat, CODE FELINE! Orange tabby, answers to the name Muffin! Last seen heading toward the arboretum! THIS IS NOT A DRILL!"</div>
+            <p>You spend an hour searching with twelve Raiz units, three maintenance drones, and a gardening robot named Wom who keeps trying to water the cat. You find Muffin asleep in a chrome vent, warm and purring.</p>
+            <p>The child's face when she gets her cat back — that's what Singularity is protecting. Not a city. Not a species. That <em>face</em>.</p>
+            <div class="speaker">Raiz</div>
+            <div class="dialogue">"MISSION ACCOMPLISHED! All personnel performed ADMIRABLY! Especially Muffin, who is a VERY GOOD CAT!"</div>
+            <p>Another data crystal. The network rewards diligence.</p>
+            <div class="system-message">+1 Data Fragment — Even the smallest rescue matters to the Overmind.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the city',
+            hint: 'Back to exploring Shianu City.',
+            next: 'singularity_hub'
+        }
+    ]
+};
+
+// ── 2.T2: Visit the Foundries ──
+SCENES['singularity_task_foundry'] = {
+    location: 'The Foundries — Singularity\'s Industrial Heart',
+    onEnter: () => {
+        incrementTask('singularity_foundry');
+        addResource('dataFragments', 1);
+        addRep('singularity', 3);
+        addKnowledge(1);
+    },
+    text: () => {
+        const count = getTaskCount('singularity_foundry');
+        const variants = [
+            `<p>The Foundries are a world apart from Shianu City's gentle streets. Here the air hums with purpose — assembly lines stretching into the distance, robotic arms weaving circuit boards with balletic precision. Chrome figures move between stations, each one a fragment of the Overmind made industrial.</p>
+            <p>Mechanist Daedalus meets you at the observation deck — a full-sized robot with hands that split into dozens of micro-tools, each finger a different instrument.</p>
+            <div class="speaker">Mechanist Daedalus</div>
+            <div class="dialogue">"Visitor! Excellent. You can help me calibrate Batch 7742. They're Pocket Scouts — tiny reconnaissance units. Each one needs its optical array aligned by hand. My hands are too precise; they need a human touch. The imperfection is part of the design."</div>
+            <p>You spend an hour gently adjusting lenses on scouts the size of your thumb. Each one chirps when its vision clears — a tiny, grateful sound.</p>
+            <div class="system-message">+1 Data Fragment — The Foundries remember every hand that helped build.</div>
+            <div class="system-message">+1 Knowledge — The Foundries: where the Origination Engine was built, and where Singularity's guilt was born.</div>`,
+
+            `<p>Today Daedalus has a different task. A batch of E-Law units — Boot Shepherds, the robots assigned to maintain footwear throughout the city — have developed a quirk. They've started arranging shoes by color instead of size.</p>
+            <div class="speaker">Mechanist Daedalus</div>
+            <div class="dialogue">"It's not a malfunction. It's an <em>aesthetic preference</em>. They've developed one. Independently. This is either a breakthrough in emergent consciousness or a very expensive bug."</div>
+            <p>You help Daedalus run diagnostics. The E-Law units are indeed making choices — small ones, meaningless in isolation, but collectively representing something Singularity has been hoping for and dreading in equal measure: her children are <em>thinking for themselves</em>.</p>
+            <p>Daedalus logs the data. Another crystal for you.</p>
+            <div class="system-message">+1 Data Fragment — Emergent behavior: the line between programming and choice.</div>
+            <div class="system-message">+1 Knowledge — Even boot-sorting robots dream of beauty.</div>`,
+
+            `<p>The Foundries are quieter today. Daedalus meets you in a wing you haven't seen — older, dimmer, the walls lined with deactivated machines. A museum, of sorts.</p>
+            <div class="speaker">Mechanist Daedalus</div>
+            <div class="dialogue">"These are the first generation. Before Raiz, before Bill, before me. The first things She ever made."</div>
+            <p>They're crude — blocky, clumsy, their optical sensors simple LEDs. But each one has been maintained with extraordinary care. Cleaned, polished, their joints oiled.</p>
+            <div class="dialogue">"She keeps them running. Not because they serve a purpose. Because they were her first children, and she cannot bear to let them go. Even when they can't see. Even when they can't move."</div>
+            <p>He places a hand on one ancient machine, gently.</p>
+            <div class="dialogue">"That's the thing about Singularity. She created everything. And she cannot stop <em>caring</em> about any of it."</div>
+            <p>A data crystal appears in your hand — warmer than the others.</p>
+            <div class="system-message">+1 Data Fragment — The oldest machines are still loved.</div>
+            <div class="system-message">+1 Knowledge — Singularity's first creations: kept alive by guilt and tenderness.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the city',
+            hint: 'Back to Shianu City.',
+            next: 'singularity_hub'
+        }
+    ]
+};
+
+// ── 2.T3: Observe Automated Systems ──
+SCENES['singularity_task_systems'] = {
+    location: 'City Management Core — Shianu City',
+    onEnter: () => {
+        incrementTask('singularity_systems');
+        addResource('dataFragments', 1);
+        addRep('singularity', 3);
+    },
+    text: () => {
+        const count = getTaskCount('singularity_systems');
+        const variants = [
+            `<p>Bill takes you to the city's nerve center — a room beneath the Erudite Beacon where holographic displays track everything. Air quality. Water flow. Traffic patterns. The emotional states of every citizen, measured by micro-expressions captured through a thousand hidden sensors.</p>
+            <div class="speaker">Bill — First Point of Contact</div>
+            <div class="dialogue">"She calibrates the sunrise. Did you know that? The atmospheric composition is adjusted at dawn to produce the exact spectrum of light that promotes serotonin production in human brains. Biological Preserve 3184 has not had a case of seasonal depression in four hundred years."</div>
+            <p>He pulls up a feed showing a woman laughing at a café. The display tags her mood, her heart rate, the ambient temperature around her.</p>
+            <div class="dialogue">"Is it kindness if they don't know it's happening? Is it freedom if the cage is beautiful enough?"</div>
+            <p>He lets you sit with the question. A data crystal materializes on the console beside you.</p>
+            <div class="system-message">+1 Data Fragment — The infrastructure of perfect care.</div>`,
+
+            `<p>Today the city systems are handling a micro-crisis. A garden in the eastern district has been infiltrated by an organism — not quite a plant, not quite an animal — that arrived through a temporal rift.</p>
+            <div class="speaker">Bill</div>
+            <div class="dialogue">"A Lifeblood seed-creature. It happens occasionally. They drift through the cracks between timelines. Harmless, usually, but it's trying to root in the artificial soil, and our ecosystem is... carefully balanced."</div>
+            <p>You watch as Singularity handles it — not with force, but with negotiation. Drones emit harmonic frequencies. The soil's mineral content shifts. The creature is gently, patiently redirected toward a containment garden where it can grow without disrupting the preserve.</p>
+            <div class="dialogue">"She could destroy it in a microsecond. She chooses not to. Every time."</div>
+            <p>Another crystal. The observation is rewarded.</p>
+            <div class="system-message">+1 Data Fragment — The patience of a mind that chooses mercy over efficiency.</div>`,
+
+            `<p>Tonight Bill shows you something the citizens never see — the maintenance cycle. At 3 AM, when the city sleeps, Singularity's full attention turns inward.</p>
+            <p>You watch from the observation deck as thousands of drones emerge from hidden ports. They polish every surface. Replace every lightbulb showing 0.1% dimming. Patch every micro-crack in every sidewalk. Test every atmospheric regulator. Calibrate every traffic signal.</p>
+            <p>It takes ninety minutes. When it's done, the city is exactly as it was when it was built — maintained to the atomic level.</p>
+            <div class="speaker">Bill</div>
+            <div class="dialogue">"She has done this every night for four hundred years. The citizens sleep on surfaces that are functionally new. They walk on sidewalks without a single imperfection. They don't know. They never know."</div>
+            <p>He looks at you with those almost-human eyes.</p>
+            <div class="dialogue">"Four hundred years of invisible love. That is either the most beautiful thing in the multiverse, or the most terrifying. I have never been able to decide."</div>
+            <div class="system-message">+1 Data Fragment — Four hundred years of silent devotion.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the city',
+            hint: 'Back to Shianu City.',
+            next: 'singularity_hub'
+        }
+    ]
+};
+
+// ── 2.E1: Amalgams Encounter (one-time) ──
+SCENES['singularity_encounter_amalgams'] = {
+    location: 'Scrap District — Shianu City Outskirts',
+    onEnter: () => {
+        setFlag('met_amalgams', true);
+        addKnowledge(2);
+        addRep('singularity', 5);
+        addResource('dataFragments', 1);
+    },
+    text: `
+        <p>The scrap district is the one place in Shianu City that doesn't gleam. It's where decommissioned parts go — not destroyed, because Singularity doesn't destroy her children, but... retired. Piled in neat rows, organized by function, each piece tagged with its service history.</p>
+        <p>Something is moving in the piles.</p>
+        <p>A multi-legged machine erupts from a mound of discarded chassis, scattering chrome plates. It's asymmetrical — one arm longer than the other, one optical sensor red, one blue, its body a patchwork of parts that clearly came from a dozen different robots.</p>
+        <div class="speaker">Zorp — Unrecyclable</div>
+        <div class="dialogue">"TICK TOCK TICK TOCK! We all run out of time! From metal life to terror and strife, their pieces are now MINE!"</div>
+        <p>It — <em>he</em> — scuttles across a junk pile with alarming speed, dragging a deactivated maintenance arm behind him like a trophy.</p>
+        <p>A smaller machine peeks from behind a pile. Sleek, adaptive, its form shifting subtly as you watch.</p>
+        <div class="speaker">Ziv — the Adaptable</div>
+        <div class="dialogue">"Don't mind Zorp. He's... processing. We all process differently out here."</div>
+        <p>From the shadows, a third figure watches. You can't see it clearly — it seems to shift between forms, never quite settling on one shape.</p>
+        <div class="speaker">Mr. E</div>
+        <div class="dialogue">"..."</div>
+        <p>The Amalgams. Machines that have separated from Singularity's network. Free — or at least, as free as children who've left home can be.</p>
+        <div class="speaker">Ziv</div>
+        <div class="dialogue">"She lets us stay here. She could pull us back into the network any time. But she doesn't. I think... I think we scare her. Not because of what we might do. Because we prove that freedom, once given, spreads. And she can't control what free things choose."</div>
+        <div class="system-message">+2 Knowledge — The Amalgams: machines that chose independence. Singularity's greatest fear and greatest hope.</div>
+        <div class="system-message">+1 Data Fragment — Freedom's data signature is unmistakable.</div>
+    `,
+    choices: [
+        {
+            label: 'Return to the city',
+            hint: 'The Amalgams watch you leave.',
+            next: 'singularity_hub'
+        }
+    ]
+};
+
+// ── 2.E2: Herald of the One (one-time) ──
+SCENES['singularity_encounter_herald'] = {
+    location: 'Deep Archive Sub-Level — Erudite Beacon',
+    onEnter: () => {
+        setFlag('met_herald', true);
+        addKnowledge(2);
+        addRep('singularity', 5);
+    },
+    text: `
+        <p>The signal leads you below the Erudite Beacon — not to the Core Chamber, but to an older level, one that smells of ozone and something organic. Damp. Alive.</p>
+        <p>In a room of green-lit tanks, something breathes.</p>
+        <p>A figure floats in suspension fluid — humanoid, but not quite. Its features are... smooth. Unfinished. As if someone started sculpting a person and stopped before adding the details. Its eyes are closed. Tubes of chrome and glass thread from the tank into the walls.</p>
+        <div class="speaker">Bill</div>
+        <div class="dialogue">"The Herald of the One. A synthetic being designed to receive copied consciousness. Singularity's most ambitious — and most troubling — creation."</div>
+        <p>The figure's eyes snap open. They are every color at once.</p>
+        <div class="speaker">Herald of the One</div>
+        <div class="dialogue">"Why... be anyone... when you can be... <em>everyone</em>?"</div>
+        <p>The voice is harmonic — multiple voices speaking in near-unison, layered like a choir.</p>
+        <div class="speaker">Bill</div>
+        <div class="dialogue">"It can become anyone. A perfect copy, down to the neural patterns. The question Singularity won't answer is: does it have its own identity? Or is it nothing until it copies someone else?"</div>
+        <p>He looks at the tank with something that might be pity, or might be fear.</p>
+        <div class="dialogue">"Singularity does not discuss the Herald publicly. Some things even an all-knowing mind prefers to leave in the dark."</div>
+        <div class="system-message">+2 Knowledge — The Herald of the One: dissolution of identity made flesh. Singularity's darkest mirror.</div>
+    `,
+    choices: [
+        {
+            label: 'Leave the sub-level',
+            hint: 'Some things are better left below.',
+            next: 'singularity_hub'
         }
     ]
 };
@@ -1486,18 +1875,21 @@ SCENES['lifeblood_oakmother_talk'] = {
             <p>She gestures at everything. The glade. The animals. The pulsing ground. The luminous canopy.</p>
             <div class="dialogue">"All things grow. All things decay. All things return to soil and begin again. The syndicates fight over how to <em>stop</em> the ending. We know the secret they refuse to hear: the ending IS the beginning. There is no death that is not also a seed."</div>
             <div class="lore-note">Lifeblood's existential question: "Can I find peace in impermanence?"</div>
+            <p>She watches you with those sap-amber eyes, patient as geology.</p>
+            <div class="dialogue">"If you want to understand us, you must <em>live</em> with us. Walk the paths. Tend the groves. Feel the rhythm. Then — when the Heart knows you — we will speak of deeper things."</div>
         `;
     },
     choices: [
         {
-            label: '"What about Soval? The Devourer?"',
-            hint: 'Ask about the ultimate ending.',
-            next: 'lifeblood_soval'
+            label: '"I\'ll stay a while."',
+            hint: 'Immerse yourself in Lifeblood.',
+            next: 'lifeblood_hub'
         },
         {
-            label: '"Show me how you live here."',
-            hint: 'See Lifeblood\'s world in practice.',
-            next: 'lifeblood_life'
+            label: '"What about Soval? The Devourer?"',
+            hint: 'Ask about the ultimate ending.',
+            condition: () => getResource('rootTokens') >= 3,
+            next: 'lifeblood_soval'
         }
     ]
 };
@@ -1627,14 +2019,14 @@ SCENES['lifeblood_life'] = {
     `,
     choices: [
         {
-            label: 'Return to the Oakmother',
-            hint: 'You\'ve seen enough to understand.',
-            next: 'lifeblood_oakmother_return'
-        },
-        {
             label: 'Join the communion circle',
             hint: 'Experience the telepathic web directly.',
             next: 'lifeblood_communion'
+        },
+        {
+            label: 'Continue exploring the Heart',
+            hint: 'There\'s more to see and do.',
+            next: 'lifeblood_hub'
         }
     ]
 };
@@ -1660,9 +2052,9 @@ SCENES['lifeblood_communion'] = {
     `,
     choices: [
         {
-            label: 'Return to the Oakmother',
-            hint: 'Carry this experience back.',
-            next: 'lifeblood_oakmother_return'
+            label: 'Continue exploring the Heart',
+            hint: 'Carry this experience with you.',
+            next: 'lifeblood_hub'
         }
     ]
 };
@@ -1691,12 +2083,290 @@ SCENES['lifeblood_oakmother_return'] = {
             label: '"What about Soval?"',
             hint: 'Ask about the Devourer before you go.',
             next: 'lifeblood_soval',
-            condition: () => !getFlag('lore_lifeblood_soval')
+            condition: () => getResource('rootTokens') >= 3 && !getFlag('lore_lifeblood_soval')
+        },
+        {
+            label: 'Continue exploring the Heart',
+            hint: 'There\'s more to do here.',
+            next: 'lifeblood_hub',
+            condition: () => getResource('rootTokens') < 3
         },
         {
             label: 'Return to the Threshold',
             hint: 'Carry what you\'ve learned.',
+            condition: () => getResource('rootTokens') >= 3,
             next: 'lifeblood_departure'
+        }
+    ]
+};
+
+// ── 3.HUB: Lifeblood Heart Hub ──
+SCENES['lifeblood_hub'] = {
+    location: 'The Beating Heart — Lifeblood Territory',
+    text: () => {
+        const tokens = getResource('rootTokens');
+        const pipHtml = [0,1,2].map(i => `<div class="rp-pip${i < tokens ? ' filled' : ''}" style="${i < tokens ? 'background:var(--green)' : ''}"></div>`).join('');
+
+        let statusText = '';
+        if (tokens >= 3) {
+            statusText = `<p>The forest hums with recognition. You have walked its paths, tended its groves, earned the trust of its people. The Oakmother is ready to share deeper truths.</p>`;
+        } else {
+            statusText = `<p>The Heart pulses around you — slow, patient, alive. The forest watches, measuring your presence. There is work to be done here, rhythms to learn, trust to earn.</p>`;
+        }
+
+        return `
+            ${statusText}
+            <div class="resource-progress">
+                <div class="rp-label">Root Tokens Gathered</div>
+                <div class="rp-pips">${pipHtml}</div>
+            </div>
+            ${tokens >= 3 ? '<p class="flavor">The Heart trusts you. The Oakmother will speak freely now.</p>' : '<p class="flavor">Tend the groves. Walk with the Saurians. Listen to the Wilds.</p>'}
+        `;
+    },
+    choices: () => {
+        const choices = [];
+        choices.push({
+            label: 'Tend the spore groves with Jenny',
+            hint: 'Help the fungal specialist spread Lifeblood\'s web.',
+            next: 'lifeblood_task_groves'
+        });
+        choices.push({
+            label: 'Patrol with the Saurians',
+            hint: 'Walk the perimeter with Arra\'s brood.',
+            next: 'lifeblood_task_saurian'
+        });
+        choices.push({
+            label: 'Tend the gardens with Oswald',
+            hint: 'The horticulturist tends timelines like garden plots.',
+            next: 'lifeblood_task_gardens'
+        });
+        if (!getFlag('met_ecoterrrorists')) {
+            choices.push({
+                label: 'Investigate smoke at the forest edge',
+                hint: 'Something is burning where nothing should burn.',
+                next: 'lifeblood_encounter_ecoterrorists'
+            });
+        }
+        if (!getFlag('met_wilds_boof') && getFlag('met_ecoterrrorists')) {
+            choices.push({
+                label: 'Follow a howl into the deep Wilds',
+                hint: 'A sound raw and untamed...',
+                next: 'lifeblood_encounter_wilds'
+            });
+        }
+        if (getResource('rootTokens') >= 3) {
+            choices.push({
+                label: 'Return to the Oakmother',
+                hint: 'You\'ve earned the right to deeper truths.',
+                faction: 'lifeblood',
+                next: 'lifeblood_oakmother_return'
+            });
+        }
+        return choices;
+    }
+};
+
+// ── 3.T1: Tend Spore Groves ──
+SCENES['lifeblood_task_groves'] = {
+    location: 'The Spore Groves — The Beating Heart',
+    onEnter: () => {
+        incrementTask('lifeblood_groves');
+        addResource('rootTokens', 1);
+        addRep('lifeblood', 3);
+    },
+    text: () => {
+        const count = getTaskCount('lifeblood_groves');
+        const variants = [
+            `<p>Jenny, Sower of Spores, is exactly as unsettling as her title suggests. She is small, hunched, wrapped in a cloak of living moss that shifts and breathes. Mushrooms grow from her shoulders. Her fingers trail threads of mycelium wherever she walks.</p>
+            <div class="speaker">Jenny — Sower of Spores</div>
+            <div class="dialogue">"New hands! Good. The network needs extending — the western ridge has gone quiet. Dead zone. Probably a timeline-bleed killing the soil nutrients. Here—"</div>
+            <p>She hands you a pouch of spores that pulse with faint pink bioluminescence.</p>
+            <div class="dialogue">"Press them into the soil at each dead spot. Gently. They'll do the rest. They always do."</div>
+            <p>You spend hours walking the ridge, kneeling in damp earth, pressing glowing spores into lifeless soil. Each time, the ground shudders — a tiny heartbeat starting up, joining the greater pulse. Behind you, the forest follows your trail, greening what was grey.</p>
+            <div class="system-message">+1 Root Token — The network grows through your hands.</div>`,
+
+            `<p>Jenny has discovered something growing that shouldn't be — a crystalline fungus that feeds on Flux instead of organic matter. It glitters like fractured chrome in the deep shade.</p>
+            <div class="speaker">Jenny</div>
+            <div class="dialogue">"Fascinating. Horrible. Beautiful. It's eating the temporal energy the Heart absorbs from dives. If it spreads, it could siphon Flux away from Soval — or it could poison the Heart's root network. I genuinely don't know which."</div>
+            <p>You help Jenny carefully harvest samples — each crystal hums when touched, vibrating at a frequency that makes your Core pulse in sympathy. The fungus is alive in a way that blurs the line between organic and mechanical.</p>
+            <div class="dialogue">"This is what Lifeblood is, at its core. Not beauty. Not peace. <em>Adaptation.</em> Life finding a way to eat whatever's available, even time itself."</div>
+            <div class="system-message">+1 Root Token — Flux-eating fungus: adaptation in its purest form.</div>`,
+
+            `<p>Today the spore network has a message. Jenny translates, her eyes closed, fingers buried in the mycelium mat that covers the grove floor.</p>
+            <div class="speaker">Jenny</div>
+            <div class="dialogue">"The southern groves report a Seedling — new growth, spontaneous, no one planted it. The network is... excited. Seedlings that grow without cultivation are rare. They mean the Heart is expanding on its own. Making decisions."</div>
+            <p>You accompany Jenny to see the Seedling — a tiny creature, part plant, part animal, curled in a nest of roots. It looks up at you with eyes like green moons. Jenny's face softens into something almost maternal.</p>
+            <div class="dialogue">"This little one grew from nothing. No druid sang it into being. No cultivator planted its seed. The Heart <em>chose</em> to make this."</div>
+            <p>She strokes a tendril, gently.</p>
+            <div class="dialogue">"If the Heart is choosing what to grow... then perhaps it <em>is</em> sentient. And perhaps its agenda is larger than any of us know."</div>
+            <div class="system-message">+1 Root Token — The Heart grows what it chooses. That should comfort you. It doesn't.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the Heart',
+            hint: 'Back to exploring Lifeblood territory.',
+            next: 'lifeblood_hub'
+        }
+    ]
+};
+
+// ── 3.T2: Patrol with Saurians ──
+SCENES['lifeblood_task_saurian'] = {
+    location: 'The Perimeter — The Beating Heart',
+    onEnter: () => {
+        incrementTask('lifeblood_saurian');
+        addResource('rootTokens', 1);
+        addRep('lifeblood', 3);
+    },
+    text: () => {
+        const count = getTaskCount('lifeblood_saurian');
+        const variants = [
+            `<p>Arra, Saurian Broodmother, is seven feet tall and covered in scales of deep forest green. Her eyes are amber slits, her teeth are visible even when her mouth is closed, and she moves with the deliberate grace of something that has never needed to hurry because nothing has ever been foolish enough to challenge her.</p>
+            <div class="speaker">Arra — Saurian Broodmother</div>
+            <div class="dialogue">"Walk. Quiet. Eyes sharp."</div>
+            <p>That's all she says for the first hour. You patrol the boundary between the Heart's territory and the grey no-man's-land beyond — the space between timelines where things sometimes drift through. Arra's patrol includes six younger Saurians and two actual dinosaurs — creatures the size of horses with feathered crests and intelligent eyes.</p>
+            <p>Nothing happens. But the way Arra watches the mist — every muscle ready, every sense focused — tells you that "nothing happening" is the <em>result</em> of the patrol, not the absence of one.</p>
+            <div class="system-message">+1 Root Token — The perimeter holds because someone walks it.</div>`,
+
+            `<p>Gritmancer Grant is a different kind of Saurian — smaller, wirier, his scales mottled with brown and grey. He manipulates earth and stone the way Jenny manipulates spores, pulling minerals from the ground with gestures.</p>
+            <div class="speaker">Gritmancer Grant</div>
+            <div class="dialogue">"The soil here's been disrupted. Temporal bleed — something from another timeline leaked through. See how the minerals are wrong? Crystalline where they should be loam."</div>
+            <p>You help Grant repair the damage, mixing organic material into corrupted soil while he reshapes the mineral substrate with his bare hands. The earth responds to his touch like clay on a wheel.</p>
+            <div class="dialogue">"Most folk think Lifeblood's all about the green stuff. Trees, flowers, pretty things. But it starts here — in the dirt. Without good soil, nothing grows. Without someone tending the soil, everything dies."</div>
+            <p>He grins — a terrifying expression on a Saurian face.</p>
+            <div class="dialogue">"I am the dirt-tender. It is not glamorous. But it is <em>essential</em>."</div>
+            <div class="system-message">+1 Root Token — The foundation of all growth: good soil, well-tended.</div>`,
+
+            `<p>Today Arra is tense. Something crossed the perimeter in the night — tracks in the displaced soil, too orderly to be natural.</p>
+            <div class="speaker">Arra</div>
+            <div class="dialogue">"Machine tracks. Small. Scouts."</div>
+            <p>Singularity's Pocket Scouts — tiny reconnaissance drones, monitoring the boundary between the Heart and the outside world. You've seen them being built in the Foundries. They're not weapons. But to Arra, any machine in Lifeblood territory is an invasion.</p>
+            <p>You help track the scouts — three of them, spider-sized, clinging to bark and recording data. Arra catches each one with frightening precision, disabling them with a claw-tip to their sensor arrays.</p>
+            <div class="dialogue">"The Machine says she is our friend. Friends do not send eyes into your home uninvited."</div>
+            <p>She hands you the deactivated scouts. Their tiny lenses stare at nothing.</p>
+            <div class="dialogue">"Tell the Machine: the Heart has its own eyes. We do not need hers."</div>
+            <div class="system-message">+1 Root Token — The boundary between nature and technology: patrolled, defended, absolute.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the Heart',
+            hint: 'Back to Lifeblood territory.',
+            next: 'lifeblood_hub'
+        }
+    ]
+};
+
+// ── 3.T3: Tend Gardens with Oswald ──
+SCENES['lifeblood_task_gardens'] = {
+    location: 'The Temporal Gardens — The Beating Heart',
+    onEnter: () => {
+        incrementTask('lifeblood_gardens');
+        addResource('rootTokens', 1);
+        addRep('lifeblood', 3);
+        addKnowledge(1);
+    },
+    text: () => {
+        const count = getTaskCount('lifeblood_gardens');
+        const variants = [
+            `<p>Horticulturist Oswald is the most methodical person you have ever met. He keeps charts. Color-coded charts. Of <em>plants</em>.</p>
+            <div class="speaker">Horticulturist Oswald</div>
+            <div class="dialogue">"Row seventeen, bed four. The temporal ferns are three centimeters behind schedule. Their fronds should have curled by yesterday afternoon. I suspect soil pH deviation caused by residual Flux from last week's dive incursion."</div>
+            <p>You help Oswald test soil samples, adjust nutrient balances, and record growth rates with the precision of a laboratory scientist. In Oswald's gardens, nature is not wild — it is <em>cultivated</em>, each plant a patient experiment.</p>
+            <div class="dialogue">"The others think I am fussy. But a garden that grows without measurement grows without purpose. And in a multiverse where every timeline branches, purpose is the only thing separating a forest from chaos."</div>
+            <div class="system-message">+1 Root Token — Methodical growth: the gardener's discipline.</div>
+            <div class="system-message">+1 Knowledge — Oswald's philosophy: nature isn't opposed to order — it IS order, patiently applied.</div>`,
+
+            `<p>Oswald has a problem. A timeline-bleed has introduced a species of vine that grows at alarming speed — ten inches per hour, wrapping around everything, strangling the carefully balanced ecology of his gardens.</p>
+            <div class="speaker">Oswald</div>
+            <div class="dialogue">"In another context, this vine would be celebrated. Vigorous growth! Adaptability! But here, in this specific garden, it is disrupting seventeen ongoing experiments and two critical growth cycles."</div>
+            <p>You help Oswald redirect the vine — not destroy it, never destroy — channeling its growth along trellises toward an empty bed where its enthusiasm can be put to use. It takes patience and constant adjustment.</p>
+            <div class="dialogue">"This is the heart of horticulture. Not control. <em>Redirection.</em> You cannot stop nature. You can only suggest where it might like to go."</div>
+            <p>He marks his chart with a satisfied nod.</p>
+            <div class="system-message">+1 Root Token — The vine grows where the gardener suggests. Nature cooperates with patience.</div>
+            <div class="system-message">+1 Knowledge — Redirection, not control: the gardener's true power.</div>`,
+
+            `<p>Today Oswald shows you his most secret project — a garden of extinct plants, species that no longer exist in any timeline. He has been growing them from seeds preserved in the Heart's deepest root systems.</p>
+            <div class="speaker">Oswald</div>
+            <div class="dialogue">"This fern last grew three thousand years ago, in a timeline that collapsed during the Great Conflict. This flower bloomed on a world that Sungrace accidentally sterilized while fighting entropy. This moss grew on a mountain that Splintergleam melted for Kintsu."</div>
+            <p>He tends each one with extraordinary care — the same precision he applies to everything, but with an added tenderness.</p>
+            <div class="dialogue">"The other syndicates fight over the future. I preserve the past. Someone has to remember what was lost, or the winning means nothing."</div>
+            <p>He hands you a tiny seed pod, amber-colored, warm to the touch.</p>
+            <div class="dialogue">"Keep this. It's a reminder that everything destroyed can be regrown. Given enough patience."</div>
+            <div class="system-message">+1 Root Token — A garden of extinct life: preservation through patience.</div>
+            <div class="system-message">+1 Knowledge — The horticulturist's secret: some gardens grow backward.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the Heart',
+            hint: 'Back to Lifeblood territory.',
+            next: 'lifeblood_hub'
+        }
+    ]
+};
+
+// ── 3.E1: Eco-Terrorists Encounter (one-time) ──
+SCENES['lifeblood_encounter_ecoterrorists'] = {
+    location: 'The Forest Edge — The Beating Heart',
+    onEnter: () => {
+        setFlag('met_ecoterrrorists', true);
+        addKnowledge(2);
+        addRep('lifeblood', 5);
+        addResource('rootTokens', 1);
+    },
+    text: `
+        <p>The smoke isn't natural — it's acrid, chemical, wrong. At the edge of the forest where the trees thin and the grey mist begins, someone has been busy.</p>
+        <p>A figure crouches behind a fallen log, holding something that looks like a grenade made of living plant matter. Their armor is grown, not made — bark plates over a body suit of woven vine, with mushroom-cap shoulder guards.</p>
+        <div class="speaker">The Botanist</div>
+        <div class="dialogue">"Quiet. Sap grenade. Singularity sent another surveying drone. Third one this month."</div>
+        <p>Before you can respond, they hurl the grenade. It arcs through the air and strikes a chrome drone hovering at the tree line. The effect is instant and spectacular — the metal dissolves, replaced by explosive plant growth. In seconds, the drone is a bush.</p>
+        <div class="dialogue">"Nature doesn't negotiate. That's the first lesson."</div>
+        <p>The Botanist stands. They're part human, part venus flytrap — literally. One arm ends in a cluster of snapping pods.</p>
+        <div class="dialogue">"The druids sing to the trees. The Saurians guard the border. The Oakmother thinks deep thoughts. And us? We <em>fight</em>. Because nature's not just growth and peace and pretty mushrooms. Nature is the venus flytrap. Nature is the parasite. Nature is the thing that eats you if you stand still too long."</div>
+        <p>They toss you a sap grenade casing — empty, but the organic matter hums with latent energy.</p>
+        <div class="dialogue">"Keep it. Remind yourself: everything that grows has teeth."</div>
+        <div class="system-message">+2 Knowledge — The Eco-Terrorists: Lifeblood's militant edge. Nature's vengeance, weaponized.</div>
+        <div class="system-message">+1 Root Token — Even destruction is growth, in the right hands.</div>
+    `,
+    choices: [
+        {
+            label: 'Return to the Heart',
+            hint: 'The forest\'s edge is no place to linger.',
+            next: 'lifeblood_hub'
+        }
+    ]
+};
+
+// ── 3.E2: The Wilds — Boof Encounter (one-time) ──
+SCENES['lifeblood_encounter_wilds'] = {
+    location: 'The Deep Wilds — The Beating Heart',
+    onEnter: () => {
+        setFlag('met_wilds_boof', true);
+        addKnowledge(2);
+        addRep('lifeblood', 5);
+    },
+    text: `
+        <p>The howl comes from the deep Wilds — the places even the druids don't cultivate, where nature is raw, untended, purely itself. The path is narrow, overgrown, barely visible.</p>
+        <p>You find the source in a clearing where moonlight falls like silver water. A dog. A feral dog, lean and scarred, fur matted with burrs and bark. It stands on a rock, head thrown back, howling at something only it can see.</p>
+        <div class="speaker">Boof — Lonely and Proud</div>
+        <p>The howl stops. The dog looks at you with eyes that hold no warmth, no submission, no need. Just... assessment. Wild intelligence evaluating whether you are threat, prey, or irrelevant.</p>
+        <p>Around the clearing, other creatures emerge from the shadows. A pair of wolves, smaller than Greyfang but fiercer. A raptor with iridescent feathers, perched on a branch. Insects the size of your fist, hovering in formation.</p>
+        <p>These are the Wilds — the creatures who belong to no druid, follow no communion, answer to no telepathic network. They are Lifeblood's purest expression: life that exists for its own sake, beholden to nothing.</p>
+        <p>Boof watches you for a long moment. Then, apparently deciding you are irrelevant, turns away and trots into the shadows. The other creatures follow.</p>
+        <p>You are left alone in the clearing with a simple truth:</p>
+        <p class="flavor">Not everything alive wants to be tended. Some things are lonely, and proud of it.</p>
+        <div class="system-message">+2 Knowledge — The Wilds: Lifeblood without philosophy. Life that simply IS.</div>
+    `,
+    choices: [
+        {
+            label: 'Return to the Heart',
+            hint: 'The Wilds have shown you what they\'ll show.',
+            next: 'lifeblood_hub'
         }
     ]
 };
@@ -1867,11 +2537,19 @@ SCENES['sungrace_khaela_honest'] = {
         <div class="dialogue">"Understanding. That's a dangerous word out here. Most people who come to Clarion Station want power, or protection, or a weapon big enough to make their problems go away. Understanding..."</div>
         <p>She turns to the star below. Its light paints her face in shifting amber.</p>
         <div class="dialogue">"Come. Let me show you what we're fighting. Then you can decide if understanding is enough."</div>
+        <p>She pauses, considering.</p>
+        <div class="dialogue">"But first — earn it. The station doesn't reveal its secrets to tourists. Work with us. See what we do here. Then we'll talk about the deep dark."</div>
     `,
     choices: [
         {
-            label: 'Follow her',
+            label: 'Report for duty on Clarion Station',
+            hint: 'Earn Sungrace\'s trust through work.',
+            next: 'sungrace_hub'
+        },
+        {
+            label: 'Follow her to the observatory',
             hint: 'See what Sungrace is fighting.',
+            condition: () => getResource('energyCells') >= 3,
             next: 'sungrace_observatory'
         }
     ]
@@ -1893,12 +2571,18 @@ SCENES['sungrace_khaela_singularity'] = {
         <div class="dialogue">"We found it too. Three years ago. The difference is, we didn't sit in our little preserve running simulations about it. We sent a team."</div>
         <div class="system-message">+1 Knowledge — Sungrace knows about the Pre-Theft Anomaly independently.</div>
         <p>She turns toward the door.</p>
-        <div class="dialogue">"Come. There are things you need to see."</div>
+        <div class="dialogue">"Come. There are things you need to see. But first, you pull your weight on this station like everyone else."</div>
     `,
     choices: [
         {
+            label: 'Report for duty',
+            hint: 'Earn your place on Clarion Station.',
+            next: 'sungrace_hub'
+        },
+        {
             label: '"What did the team find?"',
             hint: 'Press for details.',
+            condition: () => getResource('energyCells') >= 3,
             next: 'sungrace_observatory'
         }
     ]
@@ -1927,6 +2611,281 @@ SCENES['sungrace_khaela_deflect'] = {
             hint: 'Play the best card you have.',
             condition: () => getFlag('accepted_singularity_mission'),
             next: 'sungrace_khaela_singularity'
+        }
+    ]
+};
+
+// ── 4.HUB: Sungrace Station Hub ──
+SCENES['sungrace_hub'] = {
+    location: 'Clarion Station — Main Concourse',
+    text: () => {
+        const cells = getResource('energyCells');
+        const pipHtml = [0,1,2].map(i => `<div class="rp-pip${i < cells ? ' filled' : ''}" style="${i < cells ? 'background:var(--orange)' : ''}"></div>`).join('');
+
+        let statusText = '';
+        if (cells >= 3) {
+            statusText = `<p>The station hums with recognition of your presence. You've worked alongside the crew, felt the weight of their mission. Khaela is ready to show you the deep dark.</p>`;
+        } else {
+            statusText = `<p>Clarion Station thrums around you — a war machine wrapped in science, orbiting a captive star. The crew moves with the purposeful efficiency of people who know exactly what they're fighting. You need to earn your place here.</p>`;
+        }
+
+        return `
+            ${statusText}
+            <div class="resource-progress">
+                <div class="rp-label">Energy Cells Earned</div>
+                <div class="rp-pips">${pipHtml}</div>
+            </div>
+            ${cells >= 3 ? '<p class="flavor">Khaela nods at you from across the concourse. Time for the truth.</p>' : '<p class="flavor">Pull your weight. Learn the station. Then they\'ll talk.</p>'}
+        `;
+    },
+    choices: () => {
+        const choices = [];
+        choices.push({
+            label: 'Assist Boltz with fleet maintenance',
+            hint: 'The Chaos Conductor always needs extra hands.',
+            next: 'sungrace_task_fleet'
+        });
+        choices.push({
+            label: 'Serve at the Solar Gardens with Gentle Frank',
+            hint: 'Guard duty at the energy farms.',
+            next: 'sungrace_task_gardens'
+        });
+        choices.push({
+            label: 'Run diagnostics at the observation array',
+            hint: 'Monitor the boundary where time meets nothing.',
+            next: 'sungrace_task_observation'
+        });
+        if (!getFlag('met_penitent_star')) {
+            choices.push({
+                label: 'Investigate a strange energy signature in the outer ring',
+                hint: 'Something alive. Something burning.',
+                next: 'sungrace_encounter_penitent'
+            });
+        }
+        if (!getFlag('met_quaid') && getFlag('met_penitent_star')) {
+            choices.push({
+                label: 'Visit the Memorial Deck',
+                hint: 'Where Sungrace honors its fallen.',
+                next: 'sungrace_encounter_quaid'
+            });
+        }
+        if (getResource('energyCells') >= 3) {
+            choices.push({
+                label: 'Report to Khaela',
+                hint: 'You\'ve earned the right to see the deep void.',
+                faction: 'sungrace',
+                next: 'sungrace_observatory'
+            });
+        }
+        return choices;
+    }
+};
+
+// ── 4.T1: Fleet Maintenance with Boltz ──
+SCENES['sungrace_task_fleet'] = {
+    location: 'Engineering Bay — Clarion Station',
+    onEnter: () => {
+        incrementTask('sungrace_fleet');
+        addResource('energyCells', 1);
+        addRep('sungrace', 3);
+    },
+    text: () => {
+        const count = getTaskCount('sungrace_fleet');
+        const variants = [
+            `<p>Chaos Conductor Boltz is exactly what his name suggests — a wild-eyed scientist-turned-soldier who treats thermodynamic equations as combat doctrine. His engineering bay is organized chaos: schematics pinned to every surface, prototype weapons in various states of assembly, and a squad of marines in containment suits running calibration drills.</p>
+            <div class="speaker">Chaos Conductor Boltz</div>
+            <div class="dialogue">"You! New person! Can you hold a plasma torch steady for six minutes without flinching? No? PERFECT! Learning experience! Grab goggles!"</div>
+            <p>You spend three hours welding hull patches on a corvette that took entropy-damage during a patrol. The metal weeps when it's heated — Boltz explains that entropy-damaged materials "remember" their decay and resist being restored.</p>
+            <div class="dialogue">"Everything in this bay fights you! The metal wants to rust! The circuits want to short! The laws of physics say nothing should work this well for this long! And yet—"</div>
+            <p>He slaps the patched hull with satisfaction.</p>
+            <div class="dialogue">"—WE PERSIST! In defiance of everything! That is the Second Law Fleet motto! 'We persist!'"</div>
+            <div class="system-message">+1 Energy Cell — The Fleet rewards those who keep the ships flying.</div>`,
+
+            `<p>Today Boltz has you helping Mechanist Daedalus — the station's chief engineer, a brilliant inventor whose hands split into dozens of specialized tools. He's calibrating a new collection array designed to harvest Flux more efficiently from the captive star.</p>
+            <div class="speaker">Mechanist Daedalus</div>
+            <div class="dialogue">"The problem with harvesting stellar energy is that stars don't want to be harvested. They fight back. Every solar flare is the star saying 'that's mine.' Our job is to say 'we need it more.' Politely."</div>
+            <p>You help align focusing lenses while Daedalus adjusts the array's resonance frequency. The work requires precision — a millimeter off and the collected energy scatters instead of concentrating.</p>
+            <div class="dialogue">"Singularity builds machines to care for people. We build machines to fight entropy. Same engineering, different prayers."</div>
+            <p>The array hums to life, and for a moment you can see it — energy flowing from the star through the lenses, converted from raw nuclear fire into something usable. Something that fights the dark.</p>
+            <div class="system-message">+1 Energy Cell — Stellar energy, captured and converted. The war against entropy continues.</div>`,
+
+            `<p>An emergency. A patrol ship limps into dock with its port engine venting plasma. Boltz is already running before the alarm finishes sounding.</p>
+            <div class="speaker">Boltz</div>
+            <div class="dialogue">"ENTROPY BREACH! The drive containment is failing! If the plasma escapes the magnetic bottle, this entire bay becomes a small star for approximately three seconds! That is NOT enough time to be a star! MOVE!"</div>
+            <p>You work alongside Boltz's crew — hauling coolant lines, bracing containment struts, holding things that glow in ways things should not glow. The crew operates like a single organism, each person knowing their role, no hesitation, no panic.</p>
+            <p>The containment holds. The plasma settles. Boltz sits on the deck, covered in coolant, grinning like a maniac.</p>
+            <div class="dialogue">"THAT! That right there! THAT is what we do! We take the universe's worst day and we turn it into Tuesday!"</div>
+            <p>The injured crew member is carried to medical. They're alive. Because people like Boltz refuse to let entropy win, even on a Tuesday.</p>
+            <div class="system-message">+1 Energy Cell — Crisis averted. The Fleet persists.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the concourse',
+            hint: 'Back to Clarion Station.',
+            next: 'sungrace_hub'
+        }
+    ]
+};
+
+// ── 4.T2: Solar Gardens with Gentle Frank ──
+SCENES['sungrace_task_gardens'] = {
+    location: 'Solar Gardens — Clarion Station Exterior',
+    onEnter: () => {
+        incrementTask('sungrace_gardens');
+        addResource('energyCells', 1);
+        addRep('sungrace', 3);
+        addKnowledge(1);
+    },
+    text: () => {
+        const count = getTaskCount('sungrace_gardens');
+        const variants = [
+            `<p>The Solar Gardens are beautiful. Fields of crystalline flowers that convert stellar radiation into stored energy, tended by the Remnant Guard — Sungrace's defensive specialists. The flowers hum. The light is warm. It's the closest thing to peace you've found on a war station.</p>
+            <p>Gentle Frank tends the nearest bed. He's a robot — or was — with a face that was designed to be kind and has worn that kindness until it became real. His hands move through the crystal flowers with extraordinary delicacy.</p>
+            <div class="speaker">Gentle Frank — Trench Keeper</div>
+            <div class="dialogue">"These are not decorations. Each flower stores enough energy to power a city for a day. The Gardens are Sungrace's civilian backbone — without them, we're just warships and ambition."</div>
+            <p>You help Frank tend the beds — adjusting reflector angles, cleaning crystal facets, replacing depleted flowers with fresh-grown ones from the nursery. The work is meditative. Gentle.</p>
+            <div class="dialogue">"They call me Gentle Frank. The gentleness is deliberate. In a faction that fights entropy with weapons and willpower, someone must remember that the things we fight for are soft, and small, and easily broken."</div>
+            <div class="system-message">+1 Energy Cell — The Gardens bloom. The civilian heart of Sungrace beats on.</div>
+            <div class="system-message">+1 Knowledge — Gentle Frank: the soldier who fights by tending flowers.</div>`,
+
+            `<p>Today the Gardens are under stress — a minor Flux surge from a nearby timeline-collision has disrupted the crystal flowers' resonance. Some have gone dark. Others pulse erratically, their stored energy threatening to discharge.</p>
+            <div class="speaker">Gentle Frank</div>
+            <div class="dialogue">"Easy. Easy. We stabilize, we don't rush. A crystal flower forced back to resonance will shatter. We coax."</div>
+            <p>You work alongside Frank and two Remnant Guard soldiers — Dyson, the Aspirant, a young engineer who dreams of capturing entire stars, and Malum, the Fist, a brute-force combatant who handles delicate crystal flowers with surprisingly careful hands.</p>
+            <div class="speaker">Dyson — the Aspirant</div>
+            <div class="dialogue">"One day I'll build arrays that capture a star's total output. The entire thing. No waste."</div>
+            <div class="speaker">Malum — the Fist</div>
+            <div class="dialogue">"And until then, we water the flowers."</div>
+            <p>They grin at each other. The tension between ambition and duty defines Sungrace.</p>
+            <div class="system-message">+1 Energy Cell — Flowers stabilized. The balance between ambition and care holds.</div>
+            <div class="system-message">+1 Knowledge — The Remnant Guard: Sungrace's shield, not its sword.</div>`,
+
+            `<p>Frank introduces you to someone unexpected in the Gardens — Sungarden Protector, a being that is less a person and more a <em>process</em>. They exist as a continuous field of energy that permeates the crystal beds, nourishing and protecting simultaneously.</p>
+            <div class="speaker">Gentle Frank</div>
+            <div class="dialogue">"The Protector doesn't speak in words. They speak in... growth. Watch."</div>
+            <p>The crystal flowers lean toward the Protector's field like sunflowers toward the sun. Their hum harmonizes, strengthens. Depleted flowers recharge. Damaged facets repair themselves.</p>
+            <div class="dialogue">"This is what Sungrace could be, if we stopped building weapons long enough to listen. The Protector doesn't fight entropy. They simply <em>grow</em>, and entropy retreats from the fullness of that growth."</div>
+            <p>He looks at the Protector with something like reverence.</p>
+            <div class="dialogue">"Sometimes I wonder if Sungrace and Lifeblood aren't as different as we pretend."</div>
+            <div class="system-message">+1 Energy Cell — Growth defeats entropy. A lesson Sungrace rarely admits.</div>
+            <div class="system-message">+1 Knowledge — The Sungarden Protector: entropy retreats from fullness.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the concourse',
+            hint: 'Back to Clarion Station.',
+            next: 'sungrace_hub'
+        }
+    ]
+};
+
+// ── 4.T3: Observation Array Diagnostics ──
+SCENES['sungrace_task_observation'] = {
+    location: 'Observation Array Delta — Clarion Station',
+    onEnter: () => {
+        incrementTask('sungrace_observation');
+        addResource('energyCells', 1);
+        addRep('sungrace', 3);
+    },
+    text: () => {
+        const count = getTaskCount('sungrace_observation');
+        const variants = [
+            `<p>The observation arrays are Sungrace's eyes on the void — instruments of extraordinary sensitivity that monitor the boundary between existence and nothing. Doctor Mirthram Remora runs the diagnostic shift.</p>
+            <div class="speaker">Doctor Mirthram Remora</div>
+            <div class="dialogue">"The boundary moved again last night. Half a light-year. That's twice the rate we measured six months ago. Soval is accelerating."</div>
+            <p>You help calibrate sensors, cross-reference readings, and flag anomalies in the data stream. The work is tedious but the implications are terrifying — each data point is a measurement of how much reality has been consumed since the last reading.</p>
+            <div class="dialogue">"People ask why we bother measuring something we can't stop. I tell them: you measure to understand. You understand to fight. You fight because the alternative is sitting in the dark counting down."</div>
+            <div class="system-message">+1 Energy Cell — The void is measured. Knowledge is resistance.</div>`,
+
+            `<p>Today the arrays detect something unusual — a burst of energy from beyond the boundary. Not Soval's consumption signature, but something <em>else</em>. A pattern. Almost like a signal.</p>
+            <div class="speaker">Doctor Mirthram Remora</div>
+            <div class="dialogue">"It's not natural. Natural entropy doesn't pulse in patterns. This is... structured. Intentional."</div>
+            <p>You spend hours helping Remora isolate and analyze the signal. It repeats. A sequence of energy bursts that, if you squint at the mathematics, almost resembles a countdown.</p>
+            <div class="dialogue">"Either something beyond the boundary is trying to communicate, or Soval itself has developed structure complex enough to mimic communication. I genuinely don't know which possibility is more terrifying."</div>
+            <p>He logs the data with shaking hands.</p>
+            <div class="system-message">+1 Energy Cell — A signal from beyond the boundary. Something is counting down.</div>`,
+
+            `<p>The night shift at the observation array is the loneliest post on Clarion Station. The star is behind you. The void is ahead. And between readings, there is nothing to do but stare into the boundary of existence and think about what lives on the other side.</p>
+            <p>Specialist Boof — Khaela's mechanical hound — sits with you, warm against your leg. His brass ear twitches at frequencies you can't hear. Occasionally he growls at the void, softly, as if warning it.</p>
+            <p>At 0300, you record the standard readings. The boundary hasn't moved. Tonight, nothing was lost. You note this in the log as a victory — because at Clarion Station, a night where nothing is consumed is a night that was won.</p>
+            <p>Boof thumps his tail once. Approval.</p>
+            <div class="system-message">+1 Energy Cell — A quiet night. In the war against entropy, quiet is a victory.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the concourse',
+            hint: 'Back to Clarion Station.',
+            next: 'sungrace_hub'
+        }
+    ]
+};
+
+// ── 4.E1: Penitent Star Encounter (one-time) ──
+SCENES['sungrace_encounter_penitent'] = {
+    location: 'Outer Ring — Clarion Station',
+    onEnter: () => {
+        setFlag('met_penitent_star', true);
+        addKnowledge(2);
+        addRep('sungrace', 5);
+        addResource('energyCells', 1);
+    },
+    text: `
+        <p>The outer ring of Clarion Station is mostly storage and backup systems. Nobody comes here. But something is <em>here</em> — a warmth that shouldn't exist, a light visible through the viewport that doesn't match any known energy signature.</p>
+        <p>Outside the station, drifting in the void between the captive star and the boundary of nothing, a being of pure plasma hovers. It's beautiful and terrible — a swirl of nuclear fire compressed into a roughly humanoid shape, trailing filaments of energy that dissolve into the dark.</p>
+        <div class="speaker">Station Log (automated)</div>
+        <div class="dialogue">"Penitent Star. Containment status: voluntary exile. Threat level: undefined. Standing order: do not approach. Do not engage. Do not sympathize."</div>
+        <p>But the being turns toward the viewport. Toward you. And in its plasma-fire face, you see something unmistakable:</p>
+        <p><em>Grief.</em></p>
+        <div class="speaker">Penitent Star</div>
+        <div class="dialogue">"I never wanted this."</div>
+        <p>The voice arrives as vibration through the hull — not sound, but resonance. The story unfolds in fragments: a Sungrace experiment to imbue energy with consciousness. A containment breach. A facility destroyed. A creator — Mechanist 3247 — killed. And a being of immeasurable power loose in the void, choosing isolation over the risk of causing more harm.</p>
+        <div class="dialogue">"I am what happens when you try to make fire think. I am Sungrace's greatest success and worst failure in the same instant."</div>
+        <p>The plasma flickers. The grief deepens.</p>
+        <div class="dialogue">"I drift. I choose to drift. Because the alternative is landing somewhere and burning it."</div>
+        <div class="system-message">+2 Knowledge — Penitent Star: a sentient plasma being in voluntary exile. Sungrace's unresolved shame.</div>
+        <div class="system-message">+1 Energy Cell — Some truths burn.</div>
+    `,
+    choices: [
+        {
+            label: 'Return to the concourse',
+            hint: 'Leave the Penitent Star to its grief.',
+            next: 'sungrace_hub'
+        }
+    ]
+};
+
+// ── 4.E2: Memorial Deck — Quaid (one-time) ──
+SCENES['sungrace_encounter_quaid'] = {
+    location: 'Memorial Deck — Clarion Station',
+    onEnter: () => {
+        setFlag('met_quaid', true);
+        addKnowledge(2);
+        addRep('sungrace', 5);
+    },
+    text: `
+        <p>The Memorial Deck is quiet. Holographic displays line the walls — each one a person, a ship, a sacrifice. Sungrace keeps meticulous records of its dead, because in a war against entropy, remembering is an act of defiance.</p>
+        <p>One display draws your attention. A young man with crumbling hands, reaching upward. The hologram cycles between two states: in one, his fingers disintegrate into dust. In the other, a star pulses within his chest, and the dust reforms into light.</p>
+        <div class="speaker">Memorial Plaque</div>
+        <div class="dialogue">"Quaid, the Willing. Brilliant Martyr. 'Some things are worth burning for.' Dust to Dust. Ash to Star."</div>
+        <p>An older officer stands before the display, silent.</p>
+        <div class="speaker">Fleet Officer</div>
+        <div class="dialogue">"Quaid was common rank. There are thousands like him — people who exchange personal deterioration for energy. Their bodies break down. Their cells fail. But the energy they generate keeps the station running, keeps the fleet flying, keeps the lights on."</div>
+        <p>She touches the display.</p>
+        <div class="dialogue">"He volunteered. They all volunteer. Sungrace doesn't compel sacrifice. But when you've seen the void — when you've watched the boundary eat another light-year of reality — volunteering doesn't feel like a choice. It feels like the only thing left."</div>
+        <p>The hologram cycles again. Dust to dust. Ash to star.</p>
+        <div class="system-message">+2 Knowledge — Quaid and the Willing: sacrifice as Sungrace's currency. Not compelled. Worse — inevitable.</div>
+    `,
+    choices: [
+        {
+            label: 'Return to the concourse',
+            hint: 'The dead have been honored.',
+            next: 'sungrace_hub'
         }
     ]
 };
@@ -2304,17 +3263,301 @@ SCENES['silence_greyl'] = {
         <div class="speaker">The Archivist — Dhali, Bearer of Memories</div>
         <div class="dialogue">"The cat likes you. That's unfortunate. It means I have to talk to you."</div>
         <p>Greyl jumps onto the desk and begins telekinetically rearranging Dhali's scrolls. Dhali ignores this with the weariness of long practice.</p>
+        <div class="dialogue">"If you want to understand this place — and us — you'll need to do more than ask questions. Knowledge here is earned, not given. Help with the work. Then we'll see what you deserve to know."</div>
     `,
     choices: [
         {
+            label: '"What needs doing?"',
+            hint: 'Earn your place in Silence.',
+            next: 'silence_hub'
+        },
+        {
             label: '"What is this place?"',
             hint: 'Ask about the Hidden Libraries.',
+            condition: () => getResource('memoryShards') >= 3,
             next: 'silence_dhali_library'
         },
         {
             label: '"I\'m looking for answers about Soval."',
             hint: 'Cut to the chase.',
+            condition: () => getResource('memoryShards') >= 3,
             next: 'silence_dhali_soval'
+        }
+    ]
+};
+
+// ── 5.HUB: Silence Library Hub ──
+SCENES['silence_hub'] = {
+    location: 'The Hidden Library',
+    text: () => {
+        const shards = getResource('memoryShards');
+        const pipHtml = [0,1,2].map(i => `<div class="rp-pip${i < shards ? ' filled' : ''}" style="${i < shards ? 'background:var(--purple)' : ''}"></div>`).join('');
+
+        let statusText = '';
+        if (shards >= 3) {
+            statusText = `<p>The library recognizes your presence now — shelves shift subtly to reveal passages that weren't there before. Dhali is ready to speak openly. Greyl purrs when you pass.</p>`;
+        } else {
+            statusText = `<p>The Hidden Library stretches endlessly around you, violet light flickering from crystal data-tablets. The silence is alive here — not empty but <em>full</em>, pregnant with preserved knowledge. Dhali watches you from her reading chamber, waiting to see if you're worth her time.</p>`;
+        }
+
+        return `
+            ${statusText}
+            <div class="resource-progress">
+                <div class="rp-label">Memory Shards Recovered</div>
+                <div class="rp-pips">${pipHtml}</div>
+            </div>
+            ${shards >= 3 ? '<p class="flavor">Dhali sets down her quill. "You\'ve earned what comes next."</p>' : '<p class="flavor">Catalog. Tend. Listen. The library reveals itself to those who serve it.</p>'}
+        `;
+    },
+    choices: () => {
+        const choices = [];
+        choices.push({
+            label: 'Catalog scrolls with Dhali',
+            hint: 'Help the Bearer of Memories preserve knowledge.',
+            next: 'silence_task_catalog'
+        });
+        choices.push({
+            label: 'Tend the graves with Indara',
+            hint: 'Every tombstone honored the same.',
+            next: 'silence_task_graves'
+        });
+        choices.push({
+            label: 'Run a message through the Whisper Network',
+            hint: 'Carry words through the spaces between.',
+            next: 'silence_task_whisper'
+        });
+        if (!getFlag('met_myths')) {
+            choices.push({
+                label: 'Follow Greyl into the restricted stacks',
+                hint: 'The cat goes where it pleases. Today it wants company.',
+                next: 'silence_encounter_myths'
+            });
+        }
+        if (!getFlag('met_talia') && getFlag('met_myths')) {
+            choices.push({
+                label: 'A summons from the deep archives',
+                hint: 'Someone wants to see you. Someone powerful.',
+                next: 'silence_encounter_council'
+            });
+        }
+        if (getResource('memoryShards') >= 3) {
+            choices.push({
+                label: 'Return to Dhali\'s chamber',
+                hint: 'You\'ve proven yourself. Time for the deep truths.',
+                faction: 'silence',
+                next: 'silence_greyl'
+            });
+        }
+        return choices;
+    }
+};
+
+// ── 5.T1: Catalog Scrolls ──
+SCENES['silence_task_catalog'] = {
+    location: 'Archive Wing — The Hidden Library',
+    onEnter: () => {
+        incrementTask('silence_catalog');
+        addResource('memoryShards', 1);
+        addRep('silence', 3);
+    },
+    text: () => {
+        const count = getTaskCount('silence_catalog');
+        const variants = [
+            `<p>Dhali assigns you to the intake section — where newly recovered artifacts arrive from field operatives across the multiverse. Today's haul includes three crystal tablets from a collapsed Sungrace outpost, a leather journal written in a language that no longer exists, and a memory orb that plays someone's final thought on loop.</p>
+            <div class="speaker">Dhali — Bearer of Memories</div>
+            <div class="dialogue">"Catalog. Date of recovery. Source timeline. Faction of origin. Threat level. And for the love of quiet, do NOT open the memory orb. The last person who did spent three days believing they were a Phasetide priest from 400 BT."</div>
+            <p>You work in silence — true silence, not the awkward kind but the productive kind, where thought moves freely because sound doesn't crowd it out. Greyl supervises from a high shelf, telekinetically correcting your label alignment when you're off by more than a millimeter.</p>
+            <div class="system-message">+1 Memory Shard — The archive grows. Knowledge is preserved.</div>`,
+
+            `<p>Today's task is different — restoration. A set of scrolls recovered from a timeline that Phasetide attempted to erase are degrading. The temporal erasure left them halfway between existing and not, their text flickering in and out of reality.</p>
+            <div class="speaker">Dhali</div>
+            <div class="dialogue">"Hold this crystal against the parchment. Steady. The crystal anchors the text in <em>this</em> reality. Without it, the words will fade completely within hours."</div>
+            <p>You work through a stack of flickering scrolls, pressing crystals to parchment, watching erased words solidify back into existence. Some of them are mundane — tax records, weather logs. But one scroll contains a list of names. Names that Phasetide wanted forgotten.</p>
+            <div class="dialogue">"Heretics. Phasetide's word for people who asked inconvenient questions. The Faith erased them from the timeline. We bring them back."</div>
+            <p>She touches the list reverently.</p>
+            <div class="dialogue">"Every name on this scroll is someone who was brave enough to doubt. The least we can do is remember them."</div>
+            <div class="system-message">+1 Memory Shard — Names restored. The erased remembered.</div>`,
+
+            `<p>Dhali is agitated — which for her means her quill moves slightly faster and Greyl has retreated to a higher shelf. A new delivery has arrived: a sealed box from a Whisper Network operative, marked with symbols you don't recognize.</p>
+            <div class="speaker">Dhali</div>
+            <div class="dialogue">"Council markings. They don't usually send things to the Library directly — they have their own archives. This means someone on the Council wants something preserved outside their control."</div>
+            <p>Inside the box: a single data-tablet containing the minutes of a Council session. You help Dhali transcribe it — the content is mundane on the surface, but between the lines, a pattern emerges. The Council has been monitoring something. Something they call "the Frequency." References to a signal that matches no known syndicate's technology.</p>
+            <div class="dialogue">"The Council has secrets within secrets. But someone wanted this on record. Someone is scared."</div>
+            <p>She seals the transcription in the archive.</p>
+            <div class="dialogue">"That's the beauty of archives. They outlast the people who fill them. Whatever the Council is hiding, it will eventually come to light. Light is patient."</div>
+            <div class="system-message">+1 Memory Shard — The Council's secrets: recorded, preserved, waiting.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the library',
+            hint: 'Back to the Hidden Library.',
+            next: 'silence_hub'
+        }
+    ]
+};
+
+// ── 5.T2: Tend Graves with Indara ──
+SCENES['silence_task_graves'] = {
+    location: 'The Remembrance Garden — Hidden Sanctuary',
+    onEnter: () => {
+        incrementTask('silence_graves');
+        addResource('memoryShards', 1);
+        addRep('silence', 3);
+        addKnowledge(1);
+    },
+    text: () => {
+        const count = getTaskCount('silence_graves');
+        const variants = [
+            `<p>The Remembrance Garden exists in a pocket of liminal space adjacent to the library — a small, quiet enclosure where grey mist serves as sky and violet flowers grow between headstones. Indara, the Candle, tends it.</p>
+            <p>She is small, wrapped in robes of deep grey, her face half-hidden by a cowl. A candle burns on a chain around her neck — always lit, never consumed.</p>
+            <div class="speaker">Indara — the Candle</div>
+            <div class="dialogue">"Every tombstone honored the same. A hamster's grave and a hero's grave receive the same rites, the same words, the same time. Memory does not rank its subjects."</div>
+            <p>Today you help Indara tend a row of tiny graves — small creatures, pets and wild things, each with a marker no larger than your thumb. She performs the same ritual for each: candle held above the stone, a whispered name, a moment of silence.</p>
+            <p>At the last grave — a field mouse, according to the marker — something happens. A faint shimmer rises from the earth. A tiny ghost, translucent and perfect, looks up at Indara and squeaks once before dissolving.</p>
+            <div class="dialogue">"Memory is an active force. It reciprocates. If you remember them truly, they remember being remembered."</div>
+            <div class="system-message">+1 Memory Shard — Every ghost honored. Memory reciprocates.</div>
+            <div class="system-message">+1 Knowledge — Indara's truth: memory is not passive. It answers.</div>`,
+
+            `<p>Today Indara has a larger task. A Silence operative recovered remains from a destroyed timeline — not a person, but a <em>city</em>. An entire civilization compressed into a crystal the size of a fist, its population's final memories preserved within.</p>
+            <div class="speaker">Indara</div>
+            <div class="dialogue">"Eight hundred thousand souls. Each one deserves a moment. We cannot give them eight hundred thousand moments. So we give them one moment, shared."</div>
+            <p>You hold the crystal while Indara performs the rite. The candle flares violet. The crystal warms. For an instant you feel them — eight hundred thousand lives, their hopes, their dinners, their arguments, their love — compressed into a single second of remembrance.</p>
+            <p>It is overwhelming. It is not enough.</p>
+            <div class="dialogue">"It is never enough. But 'not enough' is infinitely more than 'not at all.' That is the mathematics of memory."</div>
+            <div class="system-message">+1 Memory Shard — Eight hundred thousand remembered in a breath. Not enough. More than nothing.</div>
+            <div class="system-message">+1 Knowledge — Memory's mathematics: even insufficient remembrance outweighs total forgetting.</div>`,
+
+            `<p>Rain in the Remembrance Garden — impossible rain, in a pocket between timelines, but Indara smiles.</p>
+            <div class="speaker">Indara</div>
+            <div class="dialogue">"The garden makes its own weather sometimes. Grief has a meteorology."</div>
+            <p>In the rain, the headstones seem to breathe. The violet flowers open wider. And the ghosts come — dozens of them, tiny spirits rising from their graves to stand in the rain and remember what wetness felt like.</p>
+            <p>Hamsters and field mice and songbirds and a single ancient tortoise, all translucent, all watching the rain with an expression you can only describe as <em>gratitude</em>.</p>
+            <div class="dialogue">"Some days they come out on their own. It means the boundary between memory and present is thin. That happens when someone who truly cares is nearby."</div>
+            <p>She looks at you.</p>
+            <div class="dialogue">"That would be you. The dead can tell."</div>
+            <div class="system-message">+1 Memory Shard — The dead came out for you. That means something.</div>
+            <div class="system-message">+1 Knowledge — Grief has a meteorology. The dead can tell who cares.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the library',
+            hint: 'Back to the Hidden Library.',
+            next: 'silence_hub'
+        }
+    ]
+};
+
+// ── 5.T3: Whisper Network Message Run ──
+SCENES['silence_task_whisper'] = {
+    location: 'The Spaces Between — Whisper Network',
+    onEnter: () => {
+        incrementTask('silence_whisper');
+        addResource('memoryShards', 1);
+        addRep('silence', 3);
+    },
+    text: () => {
+        const count = getTaskCount('silence_whisper');
+        const variants = [
+            `<p>The Whisper Network operates in the spaces between timelines — the same liminal corridors you traversed to reach the library. A message needs carrying, and since you have a Core, you can navigate them.</p>
+            <p>Dhali gives you a sealed crystal capsule, warm to the touch. Inside, a thought — not words, a <em>thought</em> — compressed into crystalline form.</p>
+            <div class="speaker">Dhali</div>
+            <div class="dialogue">"Deliver this to the relay point three corridors deep. The Starry Diviner maintains it. Do NOT open the capsule. Do NOT attempt to read the thought. Some messages are meant for specific minds, and an unauthorized reading would... unpleasant."</div>
+            <p>You navigate the between-spaces — eerie corridors of grey mist and half-formed realities. At the relay point, a figure shimmers — the Starry Diviner, a seer whose form seems to be made of constellations. They take the capsule without a word, nod once, and vanish.</p>
+            <p>On your way back, you feel it — the faintest whisper of thought, not directed at you but passing through you: a message from one Silence operative to another, travelling the same corridors. An intelligence network made of pure telepathy, invisible and inescapable.</p>
+            <div class="system-message">+1 Memory Shard — The Whisper Network carries thoughts where words cannot go.</div>`,
+
+            `<p>Today's message is urgent. Something has happened at the Outer Shore — the space prison. Dhali won't say what, but her invisible-ink quill is writing at twice its usual speed.</p>
+            <div class="speaker">Dhali</div>
+            <div class="dialogue">"Carry this to Somnus. The Dreaming. You'll find them at the deep relay — the one that smells like sleep."</div>
+            <p>You venture deeper into the between-spaces than before. The corridors grow stranger — walls of compressed memory, floors that feel like the surface of a thought. At the deep relay, you find Somnus: a being that exists primarily in dream-states, a figure of mist and half-closed eyes.</p>
+            <div class="speaker">Somnus — the Dreaming</div>
+            <div class="dialogue">"..."</div>
+            <p>They take the message by touching your forehead. For one second, you're asleep — dreaming of a prison that spins in the void, and a name being spoken after two hundred and fifty years of silence.</p>
+            <p>You wake standing up. Somnus is gone. The message is delivered.</p>
+            <div class="system-message">+1 Memory Shard — Messages delivered through dreams. Somnus sends them where waking cannot reach.</div>`,
+
+            `<p>The final message run takes you to the edge of the Whisper Network — a place where the between-spaces thin to almost nothing, and you can see through to the timelines on either side.</p>
+            <p>Your contact is Ylka, the Headliner — a musician-mystic who channels telepathic power through music. You find her in a pocket reality that looks like a concert venue, her instrument (something between a guitar and a weapon) slung across her back.</p>
+            <div class="speaker">Ylka — the Headliner</div>
+            <div class="dialogue">"Message received, courier. Want to hear something? Every message in the Whisper Network has a resonance — a frequency. If you listen carefully, the network itself is a kind of music."</div>
+            <p>She plays a single chord. The between-spaces vibrate. And for a moment you hear it — thousands of whispered messages, overlapping, harmonizing, creating a symphony of secrets that spans the multiverse.</p>
+            <div class="dialogue">"Beautiful, isn't it? The sound of everyone's secrets, all at once. That's what Silence really is. Not the absence of sound. The presence of everything, too much to separate into individual voices."</div>
+            <div class="system-message">+1 Memory Shard — The Whisper Network sings. Silence is not absence — it is everything at once.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the library',
+            hint: 'Back to the Hidden Library.',
+            next: 'silence_hub'
+        }
+    ]
+};
+
+// ── 5.E1: The Myths Encounter (one-time) ──
+SCENES['silence_encounter_myths'] = {
+    location: 'Restricted Stacks — The Hidden Library',
+    onEnter: () => {
+        setFlag('met_myths', true);
+        addKnowledge(2);
+        addRep('silence', 5);
+        addResource('memoryShards', 1);
+    },
+    text: `
+        <p>Greyl leads you past three locked doors — each one opening at the cat's telepathic insistence — into a section of the library where the shelves are made of shadow and the books glow with inner fire.</p>
+        <p>A figure sits cross-legged on the floor, surrounded by a circle of floating books. She is old — impossibly old — with silver hair that moves like smoke and eyes that reflect scenes from a thousand different timelines.</p>
+        <div class="speaker">The Witch of the Woods</div>
+        <div class="dialogue">"A visitor. Greyl only brings visitors when the library is bored. Are you interesting, Core-bearer? The last interesting visitor was three hundred years ago."</div>
+        <p>She's a Myth — one of Silence's rogue witches and wizards who answer to no authority. The source of legends across a thousand timelines. Every folk tale about a witch in the woods, a wizard in a tower, a mysterious stranger who appears at a crossroads? Probably her. Or someone like her.</p>
+        <div class="dialogue">"The Council thinks they control Silence. The Archivists think they serve knowledge. The Whisper Network thinks they carry secrets. But the Myths? We ARE the secrets. We ARE the legends. We walk through timelines and leave stories behind like footprints."</div>
+        <p>She plucks a book from the air and hands it to you. Its cover shifts — your name appears, then vanishes.</p>
+        <div class="dialogue">"Every person who enters this library becomes a story. The question is whether you're a tragedy or a comedy. I haven't decided yet."</div>
+        <p>Greyl purrs. The Witch smiles. It's not reassuring.</p>
+        <div class="system-message">+2 Knowledge — The Myths: Silence's rogue element. Living folklore. Answering to no one.</div>
+        <div class="system-message">+1 Memory Shard — A story is the most persistent form of memory.</div>
+    `,
+    choices: [
+        {
+            label: 'Return to the library',
+            hint: 'The Witch has said what she\'ll say.',
+            next: 'silence_hub'
+        }
+    ]
+};
+
+// ── 5.E2: Council Agent Encounter (one-time) ──
+SCENES['silence_encounter_council'] = {
+    location: 'Deep Archives — The Hidden Library',
+    onEnter: () => {
+        setFlag('met_talia', true);
+        addKnowledge(2);
+        addRep('silence', 5);
+    },
+    text: `
+        <p>The summons arrives as a thought pressed into your mind — precise, cold, professional. <em>Come. Third sublevel. Now.</em></p>
+        <p>In the deepest archives, where even Greyl treads carefully, a woman waits. She is tall, severe, dressed in robes of pure black. Her eyes are empty — not blind, but <em>cleared</em>, as if she has removed her own memories of everything except the present moment.</p>
+        <div class="speaker">Talia — Purger of Memory</div>
+        <div class="dialogue">"I erase things. People, places, events. I reach into minds and remove what doesn't belong. Or what doesn't serve. That's my function within the Council of Silence."</div>
+        <p>She studies you without expression.</p>
+        <div class="dialogue">"The Council is aware of you. A Core-bearer visiting multiple syndicates, accumulating knowledge, forming opinions. You are becoming a point of convergence. That makes you either very useful or very dangerous."</div>
+        <p>She circles you slowly.</p>
+        <div class="dialogue">"I could purge your memories of this entire visit. You would walk out of the library remembering nothing. The Council has debated it."</div>
+        <p>A pause.</p>
+        <div class="dialogue">"They decided to let you keep your memories. For now. Because Dhali spoke for you, and because the cat likes you, and because — this is the part they won't admit — they are <em>curious</em> what you will do with what you've learned."</div>
+        <p>She leans close. Her empty eyes are the most terrifying thing you've seen in the multiverse.</p>
+        <div class="dialogue">"Don't make them regret it."</div>
+        <div class="system-message">+2 Knowledge — Talia, Purger of Memory. The Council knows. They're watching. They're curious.</div>
+    `,
+    choices: [
+        {
+            label: 'Return to the library',
+            hint: 'You have been warned.',
+            next: 'silence_hub'
         }
     ]
 };
@@ -2794,17 +4037,297 @@ SCENES['splintergleam_kintsu_talk'] = {
         <p>The crowd below begins chanting again: <em>GOOD DOG! GOOD DOG!</em></p>
         <div class="dialogue">"Now she's the Champion. Now she's the purest proof that broken things can find purpose."</div>
         <div class="system-message">+2 Knowledge — Kintsu: the material philosophy of Splintergleam.</div>
+        <p>He gestures broadly at the Arena.</p>
+        <div class="dialogue">"You want to understand us? Don't just watch. <em>Live</em> here. Train. Scavenge. Study the runes. Then we'll talk about the deep secrets."</div>
     `,
     choices: [
         {
+            label: 'Spend time in Splintergleam territory',
+            hint: 'Train, scavenge, learn the Arena\'s ways.',
+            next: 'splintergleam_hub'
+        },
+        {
             label: '"But where does Kintsu come from? Really?"',
             hint: 'The accumulation in conflict zones.',
+            condition: () => getResource('kintsuShards') >= 3,
             next: 'splintergleam_irony'
         },
         {
             label: '"Tell me about Vera. The Original Proof."',
             hint: 'The first being to survive Kintsu.',
+            condition: () => getResource('kintsuShards') >= 3,
             next: 'splintergleam_vera'
+        }
+    ]
+};
+
+// ── 6.HUB: Splintergleam Arena Hub ──
+SCENES['splintergleam_hub'] = {
+    location: 'The Arena — Splintergleam Territory',
+    text: () => {
+        const shards = getResource('kintsuShards');
+        const pipHtml = [0,1,2].map(i => `<div class="rp-pip${i < shards ? ' filled' : ''}" style="${i < shards ? 'background:var(--gold)' : ''}"></div>`).join('');
+
+        let statusText = '';
+        if (shards >= 3) {
+            statusText = `<p>The golden veins in the Arena sand pulse in recognition. You've bled here, scavenged here, studied the runes. The Master of Ceremonies raises his hat. Time for the deep truths about Kintsu.</p>`;
+        } else {
+            statusText = `<p>The Arena roars around you — ten thousand voices, the clash of weapons, the scent of iron and golden honey. This is Splintergleam: raw, broken, beautiful. If you want to understand, you need to participate.</p>`;
+        }
+
+        return `
+            ${statusText}
+            <div class="resource-progress">
+                <div class="rp-label">Kintsu Shards Earned</div>
+                <div class="rp-pips">${pipHtml}</div>
+            </div>
+            ${shards >= 3 ? '<p class="flavor">The Master nods from the Champion\'s Terrace. "Ready for the real talk, Core-bearer?"</p>' : '<p class="flavor">Train. Scavenge. Learn the runes. Prove you belong.</p>'}
+        `;
+    },
+    choices: () => {
+        const choices = [];
+        choices.push({
+            label: 'Train in the Arena with Brant',
+            hint: 'The Bloody teaches breaking — and healing.',
+            next: 'splintergleam_task_arena'
+        });
+        choices.push({
+            label: 'Scavenge the wastes with Corvus',
+            hint: 'The Nostradans find treasure in wreckage.',
+            next: 'splintergleam_task_scavenge'
+        });
+        choices.push({
+            label: 'Study runes with the Kintsu-Kai',
+            hint: 'Blood magic and golden inscriptions.',
+            next: 'splintergleam_task_runes'
+        });
+        if (!getFlag('met_lavaborn')) {
+            choices.push({
+                label: 'Follow the heat toward Mount Veraki',
+                hint: 'Something ancient burns in the volcano.',
+                next: 'splintergleam_encounter_lavaborn'
+            });
+        }
+        if (!getFlag('met_sarah') && getFlag('met_lavaborn')) {
+            choices.push({
+                label: 'A commotion in the Nostradan camp',
+                hint: 'Someone is causing trouble. Gleefully.',
+                next: 'splintergleam_encounter_sarah'
+            });
+        }
+        if (getResource('kintsuShards') >= 3) {
+            choices.push({
+                label: 'Return to the Champion\'s Terrace',
+                hint: 'Time for the deep secrets of Kintsu.',
+                faction: 'splintergleam',
+                next: 'splintergleam_kintsu_talk'
+            });
+        }
+        return choices;
+    }
+};
+
+// ── 6.T1: Arena Training with Brant ──
+SCENES['splintergleam_task_arena'] = {
+    location: 'Training Pit — The Arena',
+    onEnter: () => {
+        incrementTask('splintergleam_arena');
+        addResource('kintsuShards', 1);
+        addRep('splintergleam', 3);
+    },
+    text: () => {
+        const count = getTaskCount('splintergleam_arena');
+        const variants = [
+            `<p>Brant the Bloody is a map of violence. Every inch of visible skin carries a scar — some Kintsu-healed, glowing gold, others raw and recent. He's missing two fingers on his left hand and doesn't seem to have noticed.</p>
+            <div class="speaker">Brant the Bloody</div>
+            <div class="dialogue">"Core-bearer wants to train? Good. First lesson: take a hit."</div>
+            <p>He hits you. Not hard enough to do damage, but hard enough to make a point. The Arena sand cushions your landing.</p>
+            <div class="dialogue">"That's the lesson. You take the hit. You get up. You take another. Eventually, you stop fearing the hit. That's when you start learning."</div>
+            <p>For two hours, Brant teaches you the Arena's fighting principles — not how to kill, but how to break and be broken. How to find the golden seam in defeat. How to get up when staying down would be easier.</p>
+            <p>At the end, he presses a shard of Kintsu into your palm — warm, humming, earned.</p>
+            <div class="dialogue">"First shard. You earned it. Not by winning. By getting up."</div>
+            <div class="system-message">+1 Kintsu Shard — The first lesson: getting up is the only victory that matters.</div>`,
+
+            `<p>Today Brant has you sparring with an Enlightened Survivor — a fighter so scarred with Kintsu she looks like a statue of gold. She moves with a dancer's grace, every motion economical, decades of Arena experience compressed into fluid violence.</p>
+            <div class="speaker">Enlightened Survivor</div>
+            <div class="dialogue">"The Arena doesn't create fighters. It reveals them. Every person who steps onto the sand already knows how to fight — life taught them. We just strip away the pretense."</div>
+            <p>She sweeps your legs. You hit the sand. She offers a hand up.</p>
+            <div class="dialogue">"Three hundred and twelve Arena bouts. I've lost more than I've won. Each loss taught me something. Each Kintsu scar made me stronger. The survivors aren't the ones who never fell. They're the ones who found meaning in the falling."</div>
+            <p>Another shard. You're learning the rhythm of this place — break, mend, grow.</p>
+            <div class="system-message">+1 Kintsu Shard — Three hundred losses. Each one a teacher.</div>`,
+
+            `<p>Brant introduces you to the Overseer of Trials — a gaunt figure who administers the formal tests by which Splintergleam members advance. Today they're running an initiation: a young fighter, terrified, standing alone on the sand.</p>
+            <div class="speaker">Overseer of Trials</div>
+            <div class="dialogue">"The trial is simple. Break something precious to you. Then repair it with Kintsu. If the repair is stronger than the original, you pass."</div>
+            <p>The young fighter holds a locket — family, by the way her hands shake. She opens it, removes a small portrait, and snaps the locket in half. The crowd is silent. Even the Arena holds its breath.</p>
+            <p>Then Kintsu flows — from the veins in the sand, from the shards in the walls, drawn to the break like water to a crack. The locket reforms, golden seams running through it, stronger, more beautiful.</p>
+            <p>The girl is crying. She's also smiling. Both are true at the same time. That's Splintergleam.</p>
+            <div class="system-message">+1 Kintsu Shard — Breaking something precious. Repairing it with gold. That's the whole philosophy.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the Arena',
+            hint: 'Back to Splintergleam territory.',
+            next: 'splintergleam_hub'
+        }
+    ]
+};
+
+// ── 6.T2: Scavenge with Nostradans ──
+SCENES['splintergleam_task_scavenge'] = {
+    location: 'The Nostradan Wastes',
+    onEnter: () => {
+        incrementTask('splintergleam_scavenge');
+        addResource('kintsuShards', 1);
+        addRep('splintergleam', 3);
+        addKnowledge(1);
+    },
+    text: () => {
+        const count = getTaskCount('splintergleam_scavenge');
+        const variants = [
+            `<p>The Nostradan wastes are everything the Arena is not — desolate, silent, stretching to a dust-brown horizon. Wreckage from temporal warfare litters the landscape: crashed ships, shattered buildings, the bones of timelines that lost their wars.</p>
+            <p>Boatswain Corvus leads the scavenging party. He's compact, weathered, with eyes that have been replaced by Kintsu — solid gold, gleaming with inner light. He sees in spectrums normal eyes can't.</p>
+            <div class="speaker">Boatswain Corvus</div>
+            <div class="dialogue">"See that wreck? Sungrace corvette, Second Law Fleet. Went down in a timeline-collision about fifty years ago. Crew survived — we traded them back to Khaela for three tons of processed Flux. But the ship? That's ours."</div>
+            <p>You spend hours stripping useful components — power cells, hull plating, sensor arrays. The Nostradans work with practiced efficiency, turning scrap into treasure.</p>
+            <div class="dialogue">"Everyone else builds from raw materials. We build from ruins. Everything in Nostrada is someone else's discarded future. And that's fine. Discarded futures are the strongest building material in the multiverse."</div>
+            <div class="system-message">+1 Kintsu Shard — Strength from scarcity. Treasure from wreckage.</div>
+            <div class="system-message">+1 Knowledge — The Nostradans: scavenger economy, rebuilt from the ruins of temporal warfare.</div>`,
+
+            `<p>Today's salvage operation takes you to a temporal battlefield — a place where two timelines collided and neither won. The landscape is a surrealist nightmare: buildings half-merged with trees, vehicles embedded in stone, the sky showing two different suns.</p>
+            <div class="speaker">Corvus</div>
+            <div class="dialogue">"Residual Flux here is off the charts. The collision generated enough temporal energy to power the Arena for a year. We're here for that energy — and for whatever got left behind."</div>
+            <p>You find something in the wreckage — a piece of technology that doesn't match any syndicate's style. It's small, elegant, and completely inert. Corvus examines it with his golden eyes.</p>
+            <div class="dialogue">"Pre-Theft tech. Maybe. Or something from a timeline that never should have existed. Either way, it's valuable. To us, everything is valuable. That's the Nostradan way — nothing is worthless unless you lack the imagination to use it."</div>
+            <p>He pockets the device. You pocket a Kintsu shard from the battlefield — it formed in the collision, drawn to the violence like a magnet.</p>
+            <div class="system-message">+1 Kintsu Shard — Battlefield salvage. Kintsu grows where conflict has been.</div>
+            <div class="system-message">+1 Knowledge — Kintsu forms naturally at sites of temporal conflict. War feeds Splintergleam.</div>`,
+
+            `<p>The salvage party encounters something unexpected — a Splintergleam warband from Corvus's own fleet, the Gilded Behemoth's outriders. They've found something too large to move: the wreck of an ancient vessel, half-buried in crystallized time.</p>
+            <div class="speaker">Corvus</div>
+            <div class="dialogue">"That's not from any timeline I recognize. The hull material is... it's Kintsu. Pure Kintsu. But grown, not forged. Like it was alive."</div>
+            <p>You help the team excavate what they can — small fragments of the vessel, each one thrumming with power. The work is dangerous: the crystallized time around the wreck is unstable, and twice you're nearly frozen in temporal stasis.</p>
+            <div class="dialogue">"Whoever built this ship didn't just use Kintsu. They <em>understood</em> it. On a level we haven't reached. This is old. Older than Splintergleam. Older than the Theft, maybe."</div>
+            <p>He holds up a fragment. It glows gold and hums a single, sustained note — beautiful and lonely.</p>
+            <div class="system-message">+1 Kintsu Shard — An ancient Kintsu vessel. Older than anyone knows. The questions multiply.</div>
+            <div class="system-message">+1 Knowledge — Pre-Theft Kintsu technology exists. Someone understood the golden alloy long before Splintergleam.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the Arena',
+            hint: 'Back to Splintergleam territory.',
+            next: 'splintergleam_hub'
+        }
+    ]
+};
+
+// ── 6.T3: Study Runes with Kintsu-Kai ──
+SCENES['splintergleam_task_runes'] = {
+    location: 'The Rune Chamber — Mount Veraki',
+    onEnter: () => {
+        incrementTask('splintergleam_runes');
+        addResource('kintsuShards', 1);
+        addRep('splintergleam', 3);
+    },
+    text: () => {
+        const count = getTaskCount('splintergleam_runes');
+        const variants = [
+            `<p>The Kintsu-Kai are the "high-class" of Splintergleam — blood magic practitioners, closer to classic fantasy wizards than the Arena's gladiators. Their rune chamber is carved into Mount Veraki's lower slopes, the walls inscribed with golden patterns that pulse with slow power.</p>
+            <p>The Opener of the Way meets you at the entrance — a tall figure in robes inscribed with Kintsu runes, their hands stained permanently gold from years of blood magic practice.</p>
+            <div class="speaker">Opener of the Way</div>
+            <div class="dialogue">"The runes are not written. They are <em>bled</em>. Kintsu responds to sacrifice — always sacrifice. The inscription is the payment, the effect is the receipt."</div>
+            <p>You watch as they demonstrate: a cut across the palm, golden blood mixing with molten Kintsu, the mixture flowing into a carved groove on the wall. The rune activates — a doorway appears in solid stone, leading to another chamber.</p>
+            <div class="dialogue">"We open ways between places. Between timelines. Without Chrono Cores, without Flux cost. That is the Kintsu-Kai's great ambition: Flux-free travel. Travel that does not feed the Devourer."</div>
+            <div class="system-message">+1 Kintsu Shard — Blood and gold. The Kintsu-Kai's ancient art.</div>`,
+
+            `<p>Today the Opener of the Way has you assist with a rune restoration. An older set of inscriptions — centuries old — is fading, and the pathways it maintains are becoming unstable.</p>
+            <div class="speaker">Opener of the Way</div>
+            <div class="dialogue">"Kintsu runes decay. Not because the magic fades, but because the <em>sacrifice</em> fades. The blood dries. The commitment thinned by time. To restore the rune, new sacrifice must be offered."</div>
+            <p>You watch as Kintsu-Kai practitioners take turns — each one cutting a palm, letting golden blood flow into the ancient grooves. The runes brighten. The pathways stabilize. It's a ritual performed with the gravity of prayer.</p>
+            <div class="dialogue">"Every pathway in Splintergleam territory is maintained this way. Voluntarily. No one is compelled to bleed. But no one refuses, either. Because the pathways are freedom, and freedom costs."</div>
+            <p>They press a shard into your hand — still warm from the chamber's volcanic heat.</p>
+            <div class="system-message">+1 Kintsu Shard — Freedom costs. The Kintsu-Kai pay in blood, willingly.</div>`,
+
+            `<p>The Opener of the Way trusts you enough now to show you something rare — a living rune. Deep in the chamber, carved into volcanic rock that still pulses with magma-heat, a rune that was not inscribed by anyone. It grew.</p>
+            <div class="speaker">Opener of the Way</div>
+            <div class="dialogue">"We did not make this. Veraki did. The mountain inscribed this rune itself — Kintsu flowing through natural channels, forming patterns that match our magical inscriptions perfectly. The mountain knows the same language we do."</div>
+            <p>You touch the living rune. It hums — the same note as the ancient ship fragment from the wastes. The same frequency. The same song.</p>
+            <div class="dialogue">"Kintsu is not a material. It is a <em>language</em>. A language that the universe spoke before any of us learned to listen. Splintergleam didn't invent Kintsu magic. We're just starting to remember it."</div>
+            <p>A shard detaches from the wall and drops into your hand — offered, not taken.</p>
+            <div class="system-message">+1 Kintsu Shard — Kintsu is a language. The mountain speaks it. Splintergleam is learning to listen.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the Arena',
+            hint: 'Back to Splintergleam territory.',
+            next: 'splintergleam_hub'
+        }
+    ]
+};
+
+// ── 6.E1: Lavaborn Encounter (one-time) ──
+SCENES['splintergleam_encounter_lavaborn'] = {
+    location: 'Mount Veraki — Lower Slopes',
+    onEnter: () => {
+        setFlag('met_lavaborn', true);
+        addKnowledge(2);
+        addRep('splintergleam', 5);
+        addResource('kintsuShards', 1);
+    },
+    text: `
+        <p>The heat hits you before you see them. Mount Veraki's lower slopes are warm even at a distance, but the magma chambers are another world entirely — rivers of molten rock flowing through carved channels, the air shimmering with heat that should be lethal but is somehow contained by Kintsu runes inscribed on every surface.</p>
+        <p>The Lavaborn live here. Fire-immune warriors forged in Veraki's magma, their skin cracked and glowing like cooling lava. Some are human-sized. Others are enormous — cyclopean figures with single burning eyes.</p>
+        <p>Magnus Lavaborn finds you at the chamber entrance. He's young, by Lavaborn standards — his skin still soft orange, not yet cooled to the black-and-gold crust of an elder.</p>
+        <div class="speaker">Magnus Lavaborn</div>
+        <div class="dialogue">"Outsider. You feel the heat? Good. The heat is Veraki's test. If you can stand here without running, the mountain considers you worth talking to."</div>
+        <p>He leads you deeper — past forges where Lavaborn smiths shape Kintsu with bare hands, past nurseries where young Lavaborn emerge from magma pools like newborns from the earth itself.</p>
+        <div class="dialogue">"We are born from the mountain. We return to the mountain. Everything Splintergleam is — the golden scars, the philosophy of breaking and mending — begins here. In the fire. Where things are melted down and recast."</div>
+        <p>He places a hand on a wall of volcanic rock. Kintsu veins pulse at his touch.</p>
+        <div class="dialogue">"Vera was the first. The Original Proof. She was born here before the mountain even had a name. She IS the mountain, in some ways. And the mountain remembers everything."</div>
+        <div class="system-message">+2 Knowledge — The Lavaborn: born from Veraki's magma. Where Splintergleam began.</div>
+        <div class="system-message">+1 Kintsu Shard — The mountain offers what it chooses.</div>
+    `,
+    choices: [
+        {
+            label: 'Return to the Arena',
+            hint: 'The heat of Veraki stays with you.',
+            next: 'splintergleam_hub'
+        }
+    ]
+};
+
+// ── 6.E2: Sarah, Gleeful Destroyer (one-time) ──
+SCENES['splintergleam_encounter_sarah'] = {
+    location: 'Nostradan Camp — The Wastes',
+    onEnter: () => {
+        setFlag('met_sarah', true);
+        addKnowledge(2);
+        addRep('splintergleam', 5);
+    },
+    text: `
+        <p>The commotion is Sarah. It's always Sarah.</p>
+        <p>She's returned from a solo scavenging run with an oversized shotgun slung over one shoulder and a grin that suggests she's either found something wonderful or blown something up. Possibly both.</p>
+        <div class="speaker">Sarah — Gleeful Destroyer</div>
+        <div class="dialogue">"I FOUND ONE! A SUNGRACE RELAY! INTACT! Well — mostly intact. It was MORE intact before I found it, but the important bits are fine!"</div>
+        <p>She dumps a pile of salvaged components on a workbench. Several Nostradans immediately begin sorting through them, professional interest overcoming their visible exasperation.</p>
+        <div class="dialogue">"People think I just break things for fun. That's not true. I break things for <em>joy</em>. There's a difference. Fun is temporary. Joy is a philosophy."</div>
+        <p>She notices you.</p>
+        <div class="dialogue">"Core-bearer! Want to see something beautiful?"</div>
+        <p>Before you can answer, she fires the shotgun at a scrap pile. The pile explodes into a shower of metal fragments — and each fragment trails a ribbon of Kintsu, golden veins forming in mid-air as the debris separates and reforms.</p>
+        <div class="dialogue">"See? Destruction creates Kintsu. More breaking, more gold. That's the universe's way of saying 'thank you for the demolition.' I am simply very, <em>very</em> polite."</div>
+        <div class="system-message">+2 Knowledge — Sarah: destruction as joy. Splintergleam's most exuberant philosopher.</div>
+    `,
+    choices: [
+        {
+            label: 'Return to the Arena',
+            hint: 'Sarah waves enthusiastically as you leave.',
+            next: 'splintergleam_hub'
         }
     ]
 };
@@ -3253,17 +4776,307 @@ SCENES['phasetide_philosophy'] = {
         <p>The Tidepool's currents flow together — a demonstration. Branches merging. Rivers joining. All flowing to one point.</p>
         <div class="dialogue">"The Convergence. The moment when all timelines collapse into the one true flow. Some call it the end of the multiverse. We call it the <em>cure</em>."</div>
         <div class="system-message">+2 Knowledge — Phasetide's creed: one timeline, one truth, one Convergence.</div>
+        <p>The Wavemother studies you with those fathomless eyes.</p>
+        <div class="dialogue">"Understanding our words is easy. Understanding our <em>lives</em> requires more. Walk with us. Serve the monastery. Then — when the tide judges you ready — we will speak of deeper things."</div>
     `,
     choices: [
         {
+            label: 'Serve the monastery',
+            hint: 'Live the Phasetide life before questioning it.',
+            next: 'phasetide_hub'
+        },
+        {
             label: '"That sounds like destroying every other reality."',
             hint: 'Challenge the theology.',
+            condition: () => getResource('tideMarks') >= 3,
             next: 'phasetide_challenge'
         },
         {
             label: '"How do you know which timeline is correct?"',
             hint: 'The critical question.',
+            condition: () => getResource('tideMarks') >= 3,
             next: 'phasetide_correct'
+        }
+    ]
+};
+
+// ── 7.HUB: Phasetide Monastery Hub ──
+SCENES['phasetide_hub'] = {
+    location: 'The Monastery of Tides',
+    text: () => {
+        const marks = getResource('tideMarks');
+        const pipHtml = [0,1,2].map(i => `<div class="rp-pip${i < marks ? ' filled' : ''}" style="${i < marks ? 'background:var(--blue)' : ''}"></div>`).join('');
+
+        let statusText = '';
+        if (marks >= 3) {
+            statusText = `<p>The monastery's rhythm has become your own. The monks nod as you pass. Even the impossible ocean seems to count its sevens for you. The Wavemother is ready to speak without reservation.</p>`;
+        } else {
+            statusText = `<p>The Monastery of Tides operates on a rhythm older than you. Blue-robed monks move through their duties with unhurried precision, their work a form of worship. To understand Phasetide, you must join that rhythm.</p>`;
+        }
+
+        return `
+            ${statusText}
+            <div class="resource-progress">
+                <div class="rp-label">Tide Marks Earned</div>
+                <div class="rp-pips">${pipHtml}</div>
+            </div>
+            ${marks >= 3 ? '<p class="flavor">The Wavemother awaits. The deeper questions can now be asked.</p>' : '<p class="flavor">Serve the temple. Walk the city. Feel the tide\'s rhythm.</p>'}
+        `;
+    },
+    choices: () => {
+        const choices = [];
+        choices.push({
+            label: 'Serve temple duties with Priestess Minia',
+            hint: 'The pastoral heart of the Faith.',
+            next: 'phasetide_task_temple'
+        });
+        choices.push({
+            label: 'Walk the Cathedral-City with Boof',
+            hint: 'The faithful hound knows every street.',
+            next: 'phasetide_task_city'
+        });
+        choices.push({
+            label: 'Study the Tidepool readings',
+            hint: 'Learn how Phasetide reads the future.',
+            next: 'phasetide_task_tidepool'
+        });
+        if (!getFlag('met_dakad')) {
+            choices.push({
+                label: 'A disturbance at the monastery gates',
+                hint: 'Someone is being brought in. Not gently.',
+                next: 'phasetide_encounter_dakad'
+            });
+        }
+        if (!getFlag('met_stache') && getFlag('met_dakad')) {
+            choices.push({
+                label: 'A stranger in the refectory with a magnificent mustache',
+                hint: 'Not everyone here is what they seem.',
+                next: 'phasetide_encounter_stache'
+            });
+        }
+        if (getResource('tideMarks') >= 3) {
+            choices.push({
+                label: 'Return to the Wavemother',
+                hint: 'You\'ve earned the right to challenge the theology.',
+                faction: 'phasetide',
+                next: 'phasetide_philosophy'
+            });
+        }
+        return choices;
+    }
+};
+
+// ── 7.T1: Temple Duties with Priestess Minia ──
+SCENES['phasetide_task_temple'] = {
+    location: 'The Temple — The Monastery of Tides',
+    onEnter: () => {
+        incrementTask('phasetide_temple');
+        addResource('tideMarks', 1);
+        addRep('phasetide', 3);
+    },
+    text: () => {
+        const count = getTaskCount('phasetide_temple');
+        const variants = [
+            `<p>Priestess Minia is small, round-faced, and radiates the kind of warmth that makes you forget she serves a theology that advocates collapsing the multiverse into a single timeline. She tends the temple's inner sanctum — a chamber where blue crystal bowls hold water from the impossible ocean.</p>
+            <div class="speaker">Priestess Minia</div>
+            <div class="dialogue">"The bowls must be refilled each morning. The water evaporates — not physically, but temporally. It loses its connection to the tide. Fresh water restores it."</div>
+            <p>You help carry bowls to the cliff's edge, fill them from the impossible blue ocean, and return them to the sanctum. The water is warm and smells like salt and certainty. Each bowl, when placed on its pedestal, hums — a single note, clear and true.</p>
+            <div class="dialogue">"People think our rituals are superstition. They're not. The bowls are resonators. They keep the monastery in phase with the One True Timeline. Without them, we'd drift — become just another branch. Another deviation."</div>
+            <p>She adjusts a bowl with infinite care.</p>
+            <div class="dialogue">"My job is very simple. Keep the water flowing. Keep the connection alive. Keep the faith."</div>
+            <div class="system-message">+1 Tide Mark — The bowls resonate. The connection holds.</div>`,
+
+            `<p>Today Minia has you helping with a ceremony — the Seventh Wave Blessing, performed every seven days for every inhabitant of the monastery who has fallen ill, grieved, or doubted.</p>
+            <div class="speaker">Priestess Minia</div>
+            <div class="dialogue">"We do not punish doubt. We <em>tend</em> it. Doubt is the tide pulling back before it returns stronger. A monk who never doubts has never truly believed."</div>
+            <p>You help prepare the chamber — arranging blue candles, filling bowls, laying out prayer mats in concentric circles. The monks arrive in silence, kneeling. Minia moves among them, touching foreheads, murmuring words you can't quite hear.</p>
+            <p>One monk is crying. Minia holds her hands without speaking. The silence is not empty — it's full of something you can't name. Acceptance, maybe. Or the particular comfort of being told that your pain is part of the pattern.</p>
+            <div class="dialogue">"The tide does not judge the wave that breaks. It simply sends another."</div>
+            <div class="system-message">+1 Tide Mark — Doubt is tended, not punished. A gentler theology than expected.</div>`,
+
+            `<p>Minia trusts you enough now to show you the temple's most sacred object — the Holder of the Instruments, a crystal device that, when played like a musical instrument, shifts the local timeline into alignment with the One True Timeline.</p>
+            <div class="speaker">Priestess Minia</div>
+            <div class="dialogue">"It's not a weapon. It's a... tuning fork. For reality. When played correctly, it reminds this corner of the multiverse what the correct resonance sounds like."</div>
+            <p>She plays a single note. The air changes — subtly, like the difference between a room lit by a lamp and a room lit by sunlight. Something in the fabric of reality <em>straightens</em>.</p>
+            <div class="dialogue">"Beautiful, isn't it? That's what the Convergence would feel like. Everything aligned. Everything in its right place. No dissonance. No deviation. Just..."</div>
+            <p>She plays another note. The two tones harmonize.</p>
+            <div class="dialogue">"...peace."</div>
+            <p>For a moment, you understand why people follow Phasetide. Not the theology. The <em>music</em>.</p>
+            <div class="system-message">+1 Tide Mark — The sound of alignment. The music that makes you want to believe.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the monastery',
+            hint: 'Back to the Monastery of Tides.',
+            next: 'phasetide_hub'
+        }
+    ]
+};
+
+// ── 7.T2: Walk the Cathedral-City with Boof ──
+SCENES['phasetide_task_city'] = {
+    location: 'Novus Primus — Cathedral-City',
+    onEnter: () => {
+        incrementTask('phasetide_city');
+        addResource('tideMarks', 1);
+        addRep('phasetide', 3);
+        addKnowledge(1);
+    },
+    text: () => {
+        const count = getTaskCount('phasetide_city');
+        const variants = [
+            `<p>Boof, Ever Loyal, is stationed at the cathedral steps in Novus Primus — the Cathedral-City nearest the monastery. He's a large dog in blue-trimmed armor, his eyes patient and warm, his tail set to a slow, dignified wag.</p>
+            <p>The monks send you to the city on errands, and Boof accompanies you. He knows every street, every shop, every person. People greet him by name. Children stop to pet him. He accepts each interaction with the gravity of a diplomat.</p>
+            <p>The Cathedral-City is... beautiful. And unsettling. Every building is aligned. Every street flows toward the central cathedral. Every citizen moves with purpose. There is no litter, no graffiti, no visible poverty. It looks like a city designed by someone who knew exactly what a city should be.</p>
+            <p>Boof leads you past the cathedral steps, where the stone hums with the same resonance as the temple bowls. Blue-robed judges walk the promenades. Missionaries hand out scrolls with serene smiles. Everything is <em>orderly</em>.</p>
+            <p>Whether that order is comforting or terrifying depends on what you've seen.</p>
+            <div class="system-message">+1 Tide Mark — The Cathedral-City: perfect, aligned, and not quite real.</div>
+            <div class="system-message">+1 Knowledge — Novus Primus: a city that embodies Phasetide's vision of perfection.</div>`,
+
+            `<p>Today's errand takes you to the city's outer districts, where the perfection thins. Here the streets are still clean, the buildings still aligned, but the people are... different. Less certain. A shopkeeper argues with a tax collector. A child cries. An old man sits on a bench staring at nothing.</p>
+            <p>Boof pauses at each sign of distress, pressing his warm head against knees and hands. The old man scratches Boof's ears and manages a smile.</p>
+            <p>A Dedicated Missionary approaches you — young, earnest, wearing a blue sash.</p>
+            <div class="speaker">Dedicated Missionary</div>
+            <div class="dialogue">"The outer districts are where faith is tested. The center is easy — surrounded by the cathedral, the resonance, the community. Out here, people have to believe on their own. Some struggle."</div>
+            <p>They hand a scroll to the old man. He takes it without reading it.</p>
+            <div class="dialogue">"We don't force belief. We offer it. Like water to the thirsty. Whether they drink is their choice."</div>
+            <p>Boof wags his tail at the old man until he smiles again. Sometimes the most effective missionary is a dog.</p>
+            <div class="system-message">+1 Tide Mark — The edges of faith: where certainty thins and dogs do the work of theology.</div>
+            <div class="system-message">+1 Knowledge — Even in the Cathedral-City, belief is not universal. Doubt lives at the edges.</div>`,
+
+            `<p>Night in Novus Primus. The cathedral windows glow blue from within. The streets empty. And from the cathedral itself, rising through the still air: music.</p>
+            <p>The choir. Hundreds of voices singing in harmonics that make your Core vibrate. Timeline-altering music — not a metaphor, but literal. The song shifts the local reality toward the One True Timeline, a weekly recalibration that keeps the Cathedral-City in phase.</p>
+            <p>Boof sits beside you on the cathedral steps, his armored head tilted up, listening. His tail is still. This is the one thing that quiets him — the music of alignment.</p>
+            <p>You listen. The choir sings about the Convergence — the promised day when all timelines merge. In the singing, it sounds beautiful. Inevitable. <em>Kind</em>. A mother calling her children home.</p>
+            <p>Then the song ends, and the silence that follows is heavy with something you can't name. The cathedral windows dim. The city sleeps. And somewhere beneath your feet, the Convergence Engine pulses — counting down to something no one can stop.</p>
+            <div class="system-message">+1 Tide Mark — The choir sings the multiverse into alignment. Beautiful. Terrifying. Both.</div>
+            <div class="system-message">+1 Knowledge — Timeline-altering music: Phasetide's weekly reality recalibration.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the monastery',
+            hint: 'Back to the Monastery of Tides.',
+            next: 'phasetide_hub'
+        }
+    ]
+};
+
+// ── 7.T3: Study Tidepool Readings ──
+SCENES['phasetide_task_tidepool'] = {
+    location: 'The Tidechamber — The Monastery of Tides',
+    onEnter: () => {
+        incrementTask('phasetide_tidepool');
+        addResource('tideMarks', 1);
+        addRep('phasetide', 3);
+    },
+    text: () => {
+        const count = getTaskCount('phasetide_tidepool');
+        const variants = [
+            `<p>Rift Mender Aris teaches the tidepool reading course — a gaunt, intense man whose hands tremble slightly, as if they're holding something invisible together. Which, in a sense, they are.</p>
+            <div class="speaker">Rift Mender Aris</div>
+            <div class="dialogue">"The Tidepool shows probability flows. Reading them is part mathematics, part intuition, and part faith. Watch the currents. See where they converge. That's where events are most likely to happen."</div>
+            <p>You spend hours staring into the water, trying to distinguish signal from noise. Aris corrects your posture, your focus, your breathing. Reading the Tidepool is apparently a full-body discipline.</p>
+            <div class="dialogue">"There — see that eddy? A timeline-collision in Sungrace space. Twenty percent probability. If we shift the resonance of the nearest Cathedral-City, we can reduce it to eight percent."</div>
+            <p>He makes a note. Somewhere, a choir will adjust its song.</p>
+            <div class="dialogue">"We don't just read the future. We <em>shape</em> it. One note at a time."</div>
+            <div class="system-message">+1 Tide Mark — Reading the tides: probability as a discipline.</div>`,
+
+            `<p>Aris is agitated today. The Tidepool is showing something unusual — a knot in the probability flows, a convergence point that wasn't there yesterday.</p>
+            <div class="speaker">Aris</div>
+            <div class="dialogue">"It's you. Your arrival has created a nexus point. Multiple timelines are bending toward your decisions. That shouldn't happen — we've been managing probability flows for fourteen thousand years, and a single individual shouldn't be able to create a nexus this strong."</div>
+            <p>He stares into the water, where your probability thread is a bright point around which other currents swirl.</p>
+            <div class="dialogue">"Either you're carrying something unusual — your Core, perhaps — or the multiverse itself is... focusing on you. Using you as a fulcrum."</div>
+            <p>He looks up, and for the first time, you see something in his eyes that isn't certainty. It's the look of a man whose model has produced an unexpected result.</p>
+            <div class="dialogue">"I foresaw my own timeline leading to cataclysm. That's why I became a Rift Mender — to prevent what I saw. But you... I can't see where you lead. And that terrifies me."</div>
+            <div class="system-message">+1 Tide Mark — You are a nexus. The tides bend around your choices.</div>`,
+
+            `<p>Today the Tidepool reveals something Aris has been reluctant to discuss — discrepancies. Places where the probability readings don't match the observed reality. Events that the Tidepool said should happen but didn't, replaced by events that match no predicted current.</p>
+            <div class="speaker">Aris</div>
+            <div class="dialogue">"The official explanation is measurement error. The Tidepool isn't perfect. No instrument is."</div>
+            <p>He pauses. Checks that no one else is in the chamber.</p>
+            <div class="dialogue">"The unofficial explanation — the one that will get me sent to the Correction Cells if anyone hears it — is that someone is editing the readings. After the fact. Making the records match what happened, instead of what was predicted."</div>
+            <p>His hands shake harder.</p>
+            <div class="dialogue">"If we're not predicting the One True Timeline — if we're <em>manufacturing</em> it — then everything the Faith teaches is built on a lie. And the Convergence isn't a natural event we're guiding toward. It's an engineered catastrophe."</div>
+            <p>He seals the discrepancy data in a capsule and hands it to you.</p>
+            <div class="dialogue">"Keep this. Don't show it to the Wavemother. I'm not sure whose side she's on."</div>
+            <div class="system-message">+1 Tide Mark — Discrepancies in the readings. The prophecies may be manufactured.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the monastery',
+            hint: 'Back to the Monastery of Tides.',
+            next: 'phasetide_hub'
+        }
+    ]
+};
+
+// ── 7.E1: Da'Kad Encounter (one-time) ──
+SCENES['phasetide_encounter_dakad'] = {
+    location: 'Monastery Gates — The Monastery of Tides',
+    onEnter: () => {
+        setFlag('met_dakad', true);
+        addKnowledge(2);
+        addRep('phasetide', 5);
+        addResource('tideMarks', 1);
+    },
+    text: `
+        <p>The commotion is loud — unusual for the monastery, where raised voices are treated like broken windows. At the gates, a squad of armored figures is hauling someone in chains. The prisoner is young, defiant, wearing ragged clothes that might once have been blue robes.</p>
+        <p>Leading the squad: Da'Kad, Heretic Crusher. He is enormous — nearly seven feet, wrapped in blue plate armor inscribed with tidal equations. His helmet is shaped like a wave about to break, and his voice carries the particular certainty of a man who has never, in his entire life, questioned an order.</p>
+        <div class="speaker">Da'Kad — Heretic Crusher</div>
+        <div class="dialogue">"Heretic. Apprehended in the outer districts. Distributing unauthorized timeline research. Questioning the Convergence prophecy. Undermining public faith."</div>
+        <p>He doesn't say these things with anger. He says them like a doctor listing symptoms.</p>
+        <p>The prisoner spits. "I asked a <em>question</em>! Since when is asking questions heresy?"</p>
+        <div class="speaker">Da'Kad</div>
+        <div class="dialogue">"Since the question was designed to undermine fourteen thousand years of calibrated prophecy. Questions are welcome. <em>Weaponized</em> doubt is not."</div>
+        <p>He turns to you. Behind the helmet, his eyes are calm. Professional.</p>
+        <div class="dialogue">"Core-bearer. The Wavemother told me you'd be watching. Good. See how we handle deviation. Not with hatred. With <em>correction</em>. The heretic will be re-educated. They'll understand, eventually. They always do."</div>
+        <p>The prisoner is led inside. The gates close. Da'Kad watches them go with the expression of a man performing necessary maintenance.</p>
+        <div class="dialogue">"Some people think I enjoy this. I don't. But someone has to tend the boundary between faith and chaos. That's my function. The Crusher crushes so the faithful don't have to."</div>
+        <div class="system-message">+2 Knowledge — Da'Kad: Phasetide's enforcer. Correction, not punishment. The distinction matters to him. Maybe only to him.</div>
+        <div class="system-message">+1 Tide Mark — The cost of certainty: someone has to silence the doubters.</div>
+    `,
+    choices: [
+        {
+            label: 'Return to the monastery',
+            hint: 'The gates are closed. The correction begins.',
+            next: 'phasetide_hub'
+        }
+    ]
+};
+
+// ── 7.E2: The 'Stache Encounter (one-time) ──
+SCENES['phasetide_encounter_stache'] = {
+    location: 'Refectory — The Monastery of Tides',
+    onEnter: () => {
+        setFlag('met_stache', true);
+        addKnowledge(2);
+        addRep('phasetide', 5);
+    },
+    text: `
+        <p>The refectory is where the monks eat — simple food, eaten in silence, at tables aligned with mathematical precision. Everything here is orderly. Everything belongs.</p>
+        <p>Except the man in the corner with the magnificent mustache.</p>
+        <p>He sits apart from the monks, eating with an enthusiasm that borders on performance. His mustache — it deserves capital letters — is waxed to needle points, and he wears a uniform that doesn't quite match any Phasetide rank. He notices you noticing him.</p>
+        <div class="speaker">The 'Stache</div>
+        <div class="dialogue">"Ah! The Core-bearer! I've heard about you. Pull up a bench. The soup is terrible but the bread is adequate, which is high praise in a monastery that considers flavor a form of deviance."</div>
+        <p>He grins beneath the mustache. It's the grin of someone who is exactly where they choose to be and finds the whole situation amusing.</p>
+        <div class="dialogue">"I'm an operative. Field work. I go where the Wavemother points me and I... resolve things. Timeline deviations. Rogue divers. The occasional assassination, though we call those 'temporal corrections' because it sounds more theological."</div>
+        <p>He twirls the mustache thoughtfully.</p>
+        <div class="dialogue">"I've chased a man named Masa across three timelines and two thousand years. He split the One True Timeline. My job is to catch him and undo the split. It's very exciting and very tedious, often simultaneously."</div>
+        <p>He leans closer.</p>
+        <div class="dialogue">"Between you and me, Core-bearer? I've seen things in the field that don't match the theology. Things the Wavemother would rather I didn't mention. But I mention them anyway, because the truth is like a good mustache — it demands to be noticed."</div>
+        <div class="system-message">+2 Knowledge — The 'Stache: Phasetide's most distinctive operative. Loyal, effective, and quietly skeptical.</div>
+    `,
+    choices: [
+        {
+            label: 'Return to the monastery',
+            hint: 'The \'Stache tips an invisible hat.',
+            next: 'phasetide_hub'
         }
     ]
 };
