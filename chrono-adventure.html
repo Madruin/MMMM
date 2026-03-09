@@ -804,28 +804,6 @@ SCENES['threshold_briefing'] = {
     ]
 };
 
-// ── Placeholder scenes for unfinished paths ──
-function comingSoonScene(faction, factionName, color) {
-    return {
-        location: 'The Threshold',
-        text: `
-            <p>You step toward the <strong style="color:var(--${color})">${factionName}</strong> path. The mist parts, inviting—</p>
-            <p>But something resists. The Archivist's voice echoes behind you:</p>
-            <div class="speaker">The Archivist</div>
-            <div class="dialogue">"That path is still forming. The timeline hasn't stabilized yet. Try the Chrome Path — Singularity has been waiting longest."</div>
-            <div class="system-message">This path will be available in a future update.</div>
-        `,
-        choices: [
-            {
-                label: 'Return to the crossroads',
-                hint: 'Choose a different path.',
-                next: 'threshold_briefing'
-            }
-        ]
-    };
-}
-
-// All faction scenes defined in their respective Stage sections below
 
 
 // ═══════════════════════════════════════════════════════════════
@@ -2041,6 +2019,7 @@ SCENES['sungrace_broker'] = {
     onEnter: () => {
         addRep('sungrace', 10);
         setFlag('offered_to_broker', true);
+        setFlag('lore_sungrace_project', true);
     },
     text: `
         <p>Khaela stares at you. Boof stares at you. Every officer in earshot stares at you.</p>
@@ -2652,7 +2631,7 @@ SCENES['splintergleam_fight'] = {
 // ── 6.2b: Find who's in charge ──
 SCENES['splintergleam_master'] = {
     location: 'The Arena — Champion\'s Terrace',
-    onEnter: () => { addRep('splintergleam', 5); },
+    onEnter: () => { addRep('splintergleam', 5); setFlag('met_boof', true); },
     text: `
         <p>You climb. Past rows of howling spectators, past vendors selling fried meat on skewers of golden metal, past a section where the seats are replaced by cages containing creatures you'd rather not examine too closely.</p>
         <p>At the top of the Arena, a terrace of black stone overlooking everything. A throne made of welded weapons — swords, chains, a hammer, an axe — all joined with rivers of golden Kintsu.</p>
@@ -3514,7 +3493,7 @@ SCENES['final_threshold'] = {
         let topFaction = 'singularity';
         let topRep = -999;
         factions.forEach(f => {
-            if ((state.rep[f]||0) > topRep) { topRep = state.rep[f]||0; topFaction = f; }
+            if ((state.reputation[f]||0) > topRep) { topRep = state.reputation[f]||0; topFaction = f; }
         });
 
         const factionNames = {
@@ -3594,7 +3573,7 @@ SCENES['ending_singularity'] = {
     location: 'The Upload — Singularity Ending',
     onEnter: () => { setFlag('ending', 'singularity'); },
     text: () => {
-        const highRep = (state.rep.singularity || 0) >= 20;
+        const highRep = (state.reputation.singularity || 0) >= 20;
         const accepted = getFlag('accepted_singularity_mission');
 
         const variant = highRep ? `
@@ -3626,15 +3605,15 @@ SCENES['ending_lifeblood'] = {
     location: 'The Cycle — Lifeblood Ending',
     onEnter: () => { setFlag('ending', 'lifeblood'); },
     text: () => {
-        const highRep = (state.rep.lifeblood || 0) >= 20;
+        const highRep = (state.reputation.lifeblood || 0) >= 20;
 
         const variant = highRep ? `
-            <p>The Verdant Throne opens to you. Xylen wraps you in the web — gently, like a parent tucking in a child. Your consciousness joins the telepathic network: billions of minds, all breathing together.</p>
+            <p>The Verdant Throne opens to you. The Oakmother wraps you in the web — gently, like a parent tucking in a child. Your consciousness joins the telepathic network: billions of minds, all breathing together.</p>
             <p>You feel the multiverse as a living thing. Sick. Exhausted. But alive. The web carries a message to every syndicate: <em>stop fighting. Let go. The cycle will heal what force cannot.</em></p>
             <p>Some listen. Sungrace stands down first — Councilor Pryn, weeping, orders the Sun-Lance dismantled. Splintergleam follows, their Arena going quiet for the first time in centuries. Even Singularity dims her processors, entering a sleep she calls "contemplation."</p>
             <p>Soval doesn't disappear. But without fresh Flux, it stops growing. The Devourer becomes a scar — permanent, painful, but not fatal. The multiverse learns to live with it, the way a body learns to live around a wound.</p>
         ` : `
-            <p>The web resists you. You haven't earned its trust — not fully. Xylen reaches, but the connection is partial, flickering.</p>
+            <p>The web resists you. You haven't earned its trust — not fully. The Oakmother reaches, but the connection is partial, flickering.</p>
             <p>The message goes out, fragmented. Some factions hear it. Others don't. The ceasefire is incomplete — Sungrace stands down, but Phasetide fires the Convergence Engine at reduced power. Three thousand timelines collapse before the web absorbs the shock.</p>
             <p>Soval shrinks but doesn't die. The multiverse survives — scarred, diminished, but breathing.</p>
         `;
@@ -3656,7 +3635,7 @@ SCENES['ending_sungrace'] = {
     location: 'The Sun-Lance — Sungrace Ending',
     onEnter: () => { setFlag('ending', 'sungrace'); },
     text: () => {
-        const highRep = (state.rep.sungrace || 0) >= 20;
+        const highRep = (state.reputation.sungrace || 0) >= 20;
         const hasWeapon = getFlag('lore_sungrace_project');
 
         const variant = highRep ? `
@@ -3689,7 +3668,7 @@ SCENES['ending_silence'] = {
     location: 'The Severance — Silence Ending',
     onEnter: () => { setFlag('ending', 'silence'); },
     text: () => {
-        const highRep = (state.rep.silence || 0) >= 20;
+        const highRep = (state.reputation.silence || 0) >= 20;
         const hasSpecs = hasItem('Silence Dampening Specs');
         const parallel = getFlag('lore_silence_project') && getFlag('lore_pretheft');
 
@@ -3723,7 +3702,7 @@ SCENES['ending_splintergleam'] = {
     location: 'The Gambit — Splintergleam Ending',
     onEnter: () => { setFlag('ending', 'splintergleam'); },
     text: () => {
-        const highRep = (state.rep.splintergleam || 0) >= 20;
+        const highRep = (state.reputation.splintergleam || 0) >= 20;
         const hasDerelict = getFlag('lore_derelict');
 
         const variant = (highRep && hasDerelict) ? `
@@ -3759,7 +3738,7 @@ SCENES['ending_phasetide'] = {
     location: 'The Convergence — Phasetide Ending',
     onEnter: () => { setFlag('ending', 'phasetide'); },
     text: () => {
-        const highRep = (state.rep.phasetide || 0) >= 20;
+        const highRep = (state.reputation.phasetide || 0) >= 20;
         const knowsWeakness = getFlag('knows_engine_weakness');
 
         const variant = (highRep && knowsWeakness) ? `
@@ -3831,7 +3810,7 @@ SCENES['epilogue'] = {
         const ending = getFlag('ending');
         const knowledge = state.knowledge;
         const flux = state.flux;
-        const items = state.items;
+        const items = state.inventory;
 
         const endingTitles = {
             singularity: 'The Upload',
@@ -3846,7 +3825,7 @@ SCENES['epilogue'] = {
         // Calculate faction standings
         const factions = ['singularity','lifeblood','sungrace','silence','splintergleam','phasetide'];
         let repSummary = factions.map(f => {
-            const rep = state.rep[f] || 0;
+            const rep = state.reputation[f] || 0;
             const names = { singularity:'Singularity', lifeblood:'Lifeblood', sungrace:'Sungrace', silence:'Silence', splintergleam:'Splintergleam', phasetide:'Phasetide' };
             const rank = rep >= 30 ? 'Champion' : rep >= 20 ? 'Trusted Ally' : rep >= 10 ? 'Known Friend' : rep >= 0 ? 'Neutral' : 'Distrusted';
             return `<li><strong>${names[f]}</strong>: ${rep} reputation — <em>${rank}</em></li>`;
@@ -3877,7 +3856,7 @@ SCENES['epilogue'] = {
         // Companions met
         let companions = [];
         if (getFlag('met_greyl')) companions.push('Greyl the Problem (telekinetic cat)');
-        if (getFlag('met_xylen')) companions.push('Xylen, Guardian of the Verdant Throne');
+        if (getFlag('met_lifeblood')) companions.push('The Great Oakmother, Voice of the Web');
         if (getFlag('met_boof')) companions.push('Boof, the Champion (golden-scarred dog)');
         if (getFlag('met_wavemother')) companions.push('The Wavemother Sariel');
         let companionHtml = companions.length > 0
@@ -3936,9 +3915,9 @@ SCENES['epilogue'] = {
             onChoose: () => {
                 state.flux = 0;
                 state.knowledge = 0;
-                state.items = [];
+                state.inventory = [];
                 state.flags = {};
-                state.rep = { singularity:0, lifeblood:0, sungrace:0, silence:0, splintergleam:0, phasetide:0 };
+                state.reputation = { singularity:0, lifeblood:0, sungrace:0, silence:0, splintergleam:0, phasetide:0 };
             },
             next: 'threshold_awaken'
         }
