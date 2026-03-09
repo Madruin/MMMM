@@ -4800,6 +4800,287 @@ SCENES['phasetide_philosophy'] = {
     ]
 };
 
+// ── 7.HUB: Phasetide Monastery Hub ──
+SCENES['phasetide_hub'] = {
+    location: 'The Monastery of Tides',
+    text: () => {
+        const marks = getResource('tideMarks');
+        const pipHtml = [0,1,2].map(i => `<div class="rp-pip${i < marks ? ' filled' : ''}" style="${i < marks ? 'background:var(--blue)' : ''}"></div>`).join('');
+
+        let statusText = '';
+        if (marks >= 3) {
+            statusText = `<p>The monastery's rhythm has become your own. The monks nod as you pass. Even the impossible ocean seems to count its sevens for you. The Wavemother is ready to speak without reservation.</p>`;
+        } else {
+            statusText = `<p>The Monastery of Tides operates on a rhythm older than you. Blue-robed monks move through their duties with unhurried precision, their work a form of worship. To understand Phasetide, you must join that rhythm.</p>`;
+        }
+
+        return `
+            ${statusText}
+            <div class="resource-progress">
+                <div class="rp-label">Tide Marks Earned</div>
+                <div class="rp-pips">${pipHtml}</div>
+            </div>
+            ${marks >= 3 ? '<p class="flavor">The Wavemother awaits. The deeper questions can now be asked.</p>' : '<p class="flavor">Serve the temple. Walk the city. Feel the tide\'s rhythm.</p>'}
+        `;
+    },
+    choices: () => {
+        const choices = [];
+        choices.push({
+            label: 'Serve temple duties with Priestess Minia',
+            hint: 'The pastoral heart of the Faith.',
+            next: 'phasetide_task_temple'
+        });
+        choices.push({
+            label: 'Walk the Cathedral-City with Boof',
+            hint: 'The faithful hound knows every street.',
+            next: 'phasetide_task_city'
+        });
+        choices.push({
+            label: 'Study the Tidepool readings',
+            hint: 'Learn how Phasetide reads the future.',
+            next: 'phasetide_task_tidepool'
+        });
+        if (!getFlag('met_dakad')) {
+            choices.push({
+                label: 'A disturbance at the monastery gates',
+                hint: 'Someone is being brought in. Not gently.',
+                next: 'phasetide_encounter_dakad'
+            });
+        }
+        if (!getFlag('met_stache') && getFlag('met_dakad')) {
+            choices.push({
+                label: 'A stranger in the refectory with a magnificent mustache',
+                hint: 'Not everyone here is what they seem.',
+                next: 'phasetide_encounter_stache'
+            });
+        }
+        if (getResource('tideMarks') >= 3) {
+            choices.push({
+                label: 'Return to the Wavemother',
+                hint: 'You\'ve earned the right to challenge the theology.',
+                faction: 'phasetide',
+                next: 'phasetide_philosophy'
+            });
+        }
+        return choices;
+    }
+};
+
+// ── 7.T1: Temple Duties with Priestess Minia ──
+SCENES['phasetide_task_temple'] = {
+    location: 'The Temple — The Monastery of Tides',
+    onEnter: () => {
+        incrementTask('phasetide_temple');
+        addResource('tideMarks', 1);
+        addRep('phasetide', 3);
+    },
+    text: () => {
+        const count = getTaskCount('phasetide_temple');
+        const variants = [
+            `<p>Priestess Minia is small, round-faced, and radiates the kind of warmth that makes you forget she serves a theology that advocates collapsing the multiverse into a single timeline. She tends the temple's inner sanctum — a chamber where blue crystal bowls hold water from the impossible ocean.</p>
+            <div class="speaker">Priestess Minia</div>
+            <div class="dialogue">"The bowls must be refilled each morning. The water evaporates — not physically, but temporally. It loses its connection to the tide. Fresh water restores it."</div>
+            <p>You help carry bowls to the cliff's edge, fill them from the impossible blue ocean, and return them to the sanctum. The water is warm and smells like salt and certainty. Each bowl, when placed on its pedestal, hums — a single note, clear and true.</p>
+            <div class="dialogue">"People think our rituals are superstition. They're not. The bowls are resonators. They keep the monastery in phase with the One True Timeline. Without them, we'd drift — become just another branch. Another deviation."</div>
+            <p>She adjusts a bowl with infinite care.</p>
+            <div class="dialogue">"My job is very simple. Keep the water flowing. Keep the connection alive. Keep the faith."</div>
+            <div class="system-message">+1 Tide Mark — The bowls resonate. The connection holds.</div>`,
+
+            `<p>Today Minia has you helping with a ceremony — the Seventh Wave Blessing, performed every seven days for every inhabitant of the monastery who has fallen ill, grieved, or doubted.</p>
+            <div class="speaker">Priestess Minia</div>
+            <div class="dialogue">"We do not punish doubt. We <em>tend</em> it. Doubt is the tide pulling back before it returns stronger. A monk who never doubts has never truly believed."</div>
+            <p>You help prepare the chamber — arranging blue candles, filling bowls, laying out prayer mats in concentric circles. The monks arrive in silence, kneeling. Minia moves among them, touching foreheads, murmuring words you can't quite hear.</p>
+            <p>One monk is crying. Minia holds her hands without speaking. The silence is not empty — it's full of something you can't name. Acceptance, maybe. Or the particular comfort of being told that your pain is part of the pattern.</p>
+            <div class="dialogue">"The tide does not judge the wave that breaks. It simply sends another."</div>
+            <div class="system-message">+1 Tide Mark — Doubt is tended, not punished. A gentler theology than expected.</div>`,
+
+            `<p>Minia trusts you enough now to show you the temple's most sacred object — the Holder of the Instruments, a crystal device that, when played like a musical instrument, shifts the local timeline into alignment with the One True Timeline.</p>
+            <div class="speaker">Priestess Minia</div>
+            <div class="dialogue">"It's not a weapon. It's a... tuning fork. For reality. When played correctly, it reminds this corner of the multiverse what the correct resonance sounds like."</div>
+            <p>She plays a single note. The air changes — subtly, like the difference between a room lit by a lamp and a room lit by sunlight. Something in the fabric of reality <em>straightens</em>.</p>
+            <div class="dialogue">"Beautiful, isn't it? That's what the Convergence would feel like. Everything aligned. Everything in its right place. No dissonance. No deviation. Just..."</div>
+            <p>She plays another note. The two tones harmonize.</p>
+            <div class="dialogue">"...peace."</div>
+            <p>For a moment, you understand why people follow Phasetide. Not the theology. The <em>music</em>.</p>
+            <div class="system-message">+1 Tide Mark — The sound of alignment. The music that makes you want to believe.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the monastery',
+            hint: 'Back to the Monastery of Tides.',
+            next: 'phasetide_hub'
+        }
+    ]
+};
+
+// ── 7.T2: Walk the Cathedral-City with Boof ──
+SCENES['phasetide_task_city'] = {
+    location: 'Novus Primus — Cathedral-City',
+    onEnter: () => {
+        incrementTask('phasetide_city');
+        addResource('tideMarks', 1);
+        addRep('phasetide', 3);
+        addKnowledge(1);
+    },
+    text: () => {
+        const count = getTaskCount('phasetide_city');
+        const variants = [
+            `<p>Boof, Ever Loyal, is stationed at the cathedral steps in Novus Primus — the Cathedral-City nearest the monastery. He's a large dog in blue-trimmed armor, his eyes patient and warm, his tail set to a slow, dignified wag.</p>
+            <p>The monks send you to the city on errands, and Boof accompanies you. He knows every street, every shop, every person. People greet him by name. Children stop to pet him. He accepts each interaction with the gravity of a diplomat.</p>
+            <p>The Cathedral-City is... beautiful. And unsettling. Every building is aligned. Every street flows toward the central cathedral. Every citizen moves with purpose. There is no litter, no graffiti, no visible poverty. It looks like a city designed by someone who knew exactly what a city should be.</p>
+            <p>Boof leads you past the cathedral steps, where the stone hums with the same resonance as the temple bowls. Blue-robed judges walk the promenades. Missionaries hand out scrolls with serene smiles. Everything is <em>orderly</em>.</p>
+            <p>Whether that order is comforting or terrifying depends on what you've seen.</p>
+            <div class="system-message">+1 Tide Mark — The Cathedral-City: perfect, aligned, and not quite real.</div>
+            <div class="system-message">+1 Knowledge — Novus Primus: a city that embodies Phasetide's vision of perfection.</div>`,
+
+            `<p>Today's errand takes you to the city's outer districts, where the perfection thins. Here the streets are still clean, the buildings still aligned, but the people are... different. Less certain. A shopkeeper argues with a tax collector. A child cries. An old man sits on a bench staring at nothing.</p>
+            <p>Boof pauses at each sign of distress, pressing his warm head against knees and hands. The old man scratches Boof's ears and manages a smile.</p>
+            <p>A Dedicated Missionary approaches you — young, earnest, wearing a blue sash.</p>
+            <div class="speaker">Dedicated Missionary</div>
+            <div class="dialogue">"The outer districts are where faith is tested. The center is easy — surrounded by the cathedral, the resonance, the community. Out here, people have to believe on their own. Some struggle."</div>
+            <p>They hand a scroll to the old man. He takes it without reading it.</p>
+            <div class="dialogue">"We don't force belief. We offer it. Like water to the thirsty. Whether they drink is their choice."</div>
+            <p>Boof wags his tail at the old man until he smiles again. Sometimes the most effective missionary is a dog.</p>
+            <div class="system-message">+1 Tide Mark — The edges of faith: where certainty thins and dogs do the work of theology.</div>
+            <div class="system-message">+1 Knowledge — Even in the Cathedral-City, belief is not universal. Doubt lives at the edges.</div>`,
+
+            `<p>Night in Novus Primus. The cathedral windows glow blue from within. The streets empty. And from the cathedral itself, rising through the still air: music.</p>
+            <p>The choir. Hundreds of voices singing in harmonics that make your Core vibrate. Timeline-altering music — not a metaphor, but literal. The song shifts the local reality toward the One True Timeline, a weekly recalibration that keeps the Cathedral-City in phase.</p>
+            <p>Boof sits beside you on the cathedral steps, his armored head tilted up, listening. His tail is still. This is the one thing that quiets him — the music of alignment.</p>
+            <p>You listen. The choir sings about the Convergence — the promised day when all timelines merge. In the singing, it sounds beautiful. Inevitable. <em>Kind</em>. A mother calling her children home.</p>
+            <p>Then the song ends, and the silence that follows is heavy with something you can't name. The cathedral windows dim. The city sleeps. And somewhere beneath your feet, the Convergence Engine pulses — counting down to something no one can stop.</p>
+            <div class="system-message">+1 Tide Mark — The choir sings the multiverse into alignment. Beautiful. Terrifying. Both.</div>
+            <div class="system-message">+1 Knowledge — Timeline-altering music: Phasetide's weekly reality recalibration.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the monastery',
+            hint: 'Back to the Monastery of Tides.',
+            next: 'phasetide_hub'
+        }
+    ]
+};
+
+// ── 7.T3: Study Tidepool Readings ──
+SCENES['phasetide_task_tidepool'] = {
+    location: 'The Tidechamber — The Monastery of Tides',
+    onEnter: () => {
+        incrementTask('phasetide_tidepool');
+        addResource('tideMarks', 1);
+        addRep('phasetide', 3);
+    },
+    text: () => {
+        const count = getTaskCount('phasetide_tidepool');
+        const variants = [
+            `<p>Rift Mender Aris teaches the tidepool reading course — a gaunt, intense man whose hands tremble slightly, as if they're holding something invisible together. Which, in a sense, they are.</p>
+            <div class="speaker">Rift Mender Aris</div>
+            <div class="dialogue">"The Tidepool shows probability flows. Reading them is part mathematics, part intuition, and part faith. Watch the currents. See where they converge. That's where events are most likely to happen."</div>
+            <p>You spend hours staring into the water, trying to distinguish signal from noise. Aris corrects your posture, your focus, your breathing. Reading the Tidepool is apparently a full-body discipline.</p>
+            <div class="dialogue">"There — see that eddy? A timeline-collision in Sungrace space. Twenty percent probability. If we shift the resonance of the nearest Cathedral-City, we can reduce it to eight percent."</div>
+            <p>He makes a note. Somewhere, a choir will adjust its song.</p>
+            <div class="dialogue">"We don't just read the future. We <em>shape</em> it. One note at a time."</div>
+            <div class="system-message">+1 Tide Mark — Reading the tides: probability as a discipline.</div>`,
+
+            `<p>Aris is agitated today. The Tidepool is showing something unusual — a knot in the probability flows, a convergence point that wasn't there yesterday.</p>
+            <div class="speaker">Aris</div>
+            <div class="dialogue">"It's you. Your arrival has created a nexus point. Multiple timelines are bending toward your decisions. That shouldn't happen — we've been managing probability flows for fourteen thousand years, and a single individual shouldn't be able to create a nexus this strong."</div>
+            <p>He stares into the water, where your probability thread is a bright point around which other currents swirl.</p>
+            <div class="dialogue">"Either you're carrying something unusual — your Core, perhaps — or the multiverse itself is... focusing on you. Using you as a fulcrum."</div>
+            <p>He looks up, and for the first time, you see something in his eyes that isn't certainty. It's the look of a man whose model has produced an unexpected result.</p>
+            <div class="dialogue">"I foresaw my own timeline leading to cataclysm. That's why I became a Rift Mender — to prevent what I saw. But you... I can't see where you lead. And that terrifies me."</div>
+            <div class="system-message">+1 Tide Mark — You are a nexus. The tides bend around your choices.</div>`,
+
+            `<p>Today the Tidepool reveals something Aris has been reluctant to discuss — discrepancies. Places where the probability readings don't match the observed reality. Events that the Tidepool said should happen but didn't, replaced by events that match no predicted current.</p>
+            <div class="speaker">Aris</div>
+            <div class="dialogue">"The official explanation is measurement error. The Tidepool isn't perfect. No instrument is."</div>
+            <p>He pauses. Checks that no one else is in the chamber.</p>
+            <div class="dialogue">"The unofficial explanation — the one that will get me sent to the Correction Cells if anyone hears it — is that someone is editing the readings. After the fact. Making the records match what happened, instead of what was predicted."</div>
+            <p>His hands shake harder.</p>
+            <div class="dialogue">"If we're not predicting the One True Timeline — if we're <em>manufacturing</em> it — then everything the Faith teaches is built on a lie. And the Convergence isn't a natural event we're guiding toward. It's an engineered catastrophe."</div>
+            <p>He seals the discrepancy data in a capsule and hands it to you.</p>
+            <div class="dialogue">"Keep this. Don't show it to the Wavemother. I'm not sure whose side she's on."</div>
+            <div class="system-message">+1 Tide Mark — Discrepancies in the readings. The prophecies may be manufactured.</div>`
+        ];
+        return variants[(count - 1) % variants.length];
+    },
+    choices: [
+        {
+            label: 'Return to the monastery',
+            hint: 'Back to the Monastery of Tides.',
+            next: 'phasetide_hub'
+        }
+    ]
+};
+
+// ── 7.E1: Da'Kad Encounter (one-time) ──
+SCENES['phasetide_encounter_dakad'] = {
+    location: 'Monastery Gates — The Monastery of Tides',
+    onEnter: () => {
+        setFlag('met_dakad', true);
+        addKnowledge(2);
+        addRep('phasetide', 5);
+        addResource('tideMarks', 1);
+    },
+    text: `
+        <p>The commotion is loud — unusual for the monastery, where raised voices are treated like broken windows. At the gates, a squad of armored figures is hauling someone in chains. The prisoner is young, defiant, wearing ragged clothes that might once have been blue robes.</p>
+        <p>Leading the squad: Da'Kad, Heretic Crusher. He is enormous — nearly seven feet, wrapped in blue plate armor inscribed with tidal equations. His helmet is shaped like a wave about to break, and his voice carries the particular certainty of a man who has never, in his entire life, questioned an order.</p>
+        <div class="speaker">Da'Kad — Heretic Crusher</div>
+        <div class="dialogue">"Heretic. Apprehended in the outer districts. Distributing unauthorized timeline research. Questioning the Convergence prophecy. Undermining public faith."</div>
+        <p>He doesn't say these things with anger. He says them like a doctor listing symptoms.</p>
+        <p>The prisoner spits. "I asked a <em>question</em>! Since when is asking questions heresy?"</p>
+        <div class="speaker">Da'Kad</div>
+        <div class="dialogue">"Since the question was designed to undermine fourteen thousand years of calibrated prophecy. Questions are welcome. <em>Weaponized</em> doubt is not."</div>
+        <p>He turns to you. Behind the helmet, his eyes are calm. Professional.</p>
+        <div class="dialogue">"Core-bearer. The Wavemother told me you'd be watching. Good. See how we handle deviation. Not with hatred. With <em>correction</em>. The heretic will be re-educated. They'll understand, eventually. They always do."</div>
+        <p>The prisoner is led inside. The gates close. Da'Kad watches them go with the expression of a man performing necessary maintenance.</p>
+        <div class="dialogue">"Some people think I enjoy this. I don't. But someone has to tend the boundary between faith and chaos. That's my function. The Crusher crushes so the faithful don't have to."</div>
+        <div class="system-message">+2 Knowledge — Da'Kad: Phasetide's enforcer. Correction, not punishment. The distinction matters to him. Maybe only to him.</div>
+        <div class="system-message">+1 Tide Mark — The cost of certainty: someone has to silence the doubters.</div>
+    `,
+    choices: [
+        {
+            label: 'Return to the monastery',
+            hint: 'The gates are closed. The correction begins.',
+            next: 'phasetide_hub'
+        }
+    ]
+};
+
+// ── 7.E2: The 'Stache Encounter (one-time) ──
+SCENES['phasetide_encounter_stache'] = {
+    location: 'Refectory — The Monastery of Tides',
+    onEnter: () => {
+        setFlag('met_stache', true);
+        addKnowledge(2);
+        addRep('phasetide', 5);
+    },
+    text: `
+        <p>The refectory is where the monks eat — simple food, eaten in silence, at tables aligned with mathematical precision. Everything here is orderly. Everything belongs.</p>
+        <p>Except the man in the corner with the magnificent mustache.</p>
+        <p>He sits apart from the monks, eating with an enthusiasm that borders on performance. His mustache — it deserves capital letters — is waxed to needle points, and he wears a uniform that doesn't quite match any Phasetide rank. He notices you noticing him.</p>
+        <div class="speaker">The 'Stache</div>
+        <div class="dialogue">"Ah! The Core-bearer! I've heard about you. Pull up a bench. The soup is terrible but the bread is adequate, which is high praise in a monastery that considers flavor a form of deviance."</div>
+        <p>He grins beneath the mustache. It's the grin of someone who is exactly where they choose to be and finds the whole situation amusing.</p>
+        <div class="dialogue">"I'm an operative. Field work. I go where the Wavemother points me and I... resolve things. Timeline deviations. Rogue divers. The occasional assassination, though we call those 'temporal corrections' because it sounds more theological."</div>
+        <p>He twirls the mustache thoughtfully.</p>
+        <div class="dialogue">"I've chased a man named Masa across three timelines and two thousand years. He split the One True Timeline. My job is to catch him and undo the split. It's very exciting and very tedious, often simultaneously."</div>
+        <p>He leans closer.</p>
+        <div class="dialogue">"Between you and me, Core-bearer? I've seen things in the field that don't match the theology. Things the Wavemother would rather I didn't mention. But I mention them anyway, because the truth is like a good mustache — it demands to be noticed."</div>
+        <div class="system-message">+2 Knowledge — The 'Stache: Phasetide's most distinctive operative. Loyal, effective, and quietly skeptical.</div>
+    `,
+    choices: [
+        {
+            label: 'Return to the monastery',
+            hint: 'The \'Stache tips an invisible hat.',
+            next: 'phasetide_hub'
+        }
+    ]
+};
+
 // ── 7.5a: Challenge ──
 SCENES['phasetide_challenge'] = {
     location: 'The Tidechamber — The Monastery of Tides',
