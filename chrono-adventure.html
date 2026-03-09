@@ -799,7 +799,7 @@ SCENES['threshold_briefing'] = {
             label: 'The Violet Path — Silence',
             hint: '"Can I make peace with being alone?"',
             faction: 'silence',
-            next: 'coming_soon_silence'
+            next: 'silence_arrival'
         }
     ]
 };
@@ -827,8 +827,7 @@ function comingSoonScene(faction, factionName, color) {
 
 SCENES['coming_soon_lifeblood'] = comingSoonScene('lifeblood', 'Lifeblood', 'green');
 SCENES['coming_soon_sungrace'] = comingSoonScene('sungrace', 'Sungrace', 'orange');
-SCENES['coming_soon_silence'] = comingSoonScene('silence', 'Silence', 'purple');
-SCENES['coming_soon_splintergleam'] = comingSoonScene('splintergleam', 'Splintergleam', 'gold');
+// Silence and Splintergleam scenes defined in Stage 5 and Stage 6 below
 SCENES['coming_soon_phasetide'] = comingSoonScene('phasetide', 'Phasetide', 'blue');
 
 
@@ -1337,13 +1336,13 @@ SCENES['threshold_return'] = {
             label: 'The Violet Path — Silence',
             hint: '"Can I make peace with being alone?"',
             faction: 'silence',
-            next: 'coming_soon_silence'
+            next: 'silence_arrival'
         });
         choices.push({
             label: 'The Golden Path — Splintergleam',
             hint: '"Can broken things find purpose?"',
             faction: 'splintergleam',
-            next: 'coming_soon_splintergleam'
+            next: 'splintergleam_arrival'
         });
         return choices;
     }
@@ -2160,14 +2159,885 @@ SCENES['threshold_return_2'] = {
             label: 'The Violet Path — Silence',
             hint: '"Can I make peace with being alone?"',
             faction: 'silence',
-            next: 'coming_soon_silence'
+            next: 'silence_arrival'
         });
         choices.push({
             label: 'The Golden Path — Splintergleam',
             hint: '"Can broken things find purpose?"',
             faction: 'splintergleam',
-            next: 'coming_soon_splintergleam'
+            next: 'splintergleam_arrival'
         });
+        choices.push({
+            label: 'The Blue Path — Phasetide',
+            hint: '"Can I find comfort in believing there\'s a right answer?"',
+            faction: 'phasetide',
+            next: 'coming_soon_phasetide'
+        });
+        return choices;
+    }
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SCENES — STAGE 5: SILENCE
+// ═══════════════════════════════════════════════════════════════
+
+// ── 5.1: Arrival ──
+SCENES['silence_arrival'] = {
+    location: 'Between — Liminal Space',
+    onEnter: () => {
+        setFlag('met_silence', true);
+        addFlux(1);
+    },
+    text: `
+        <p>The Violet Path doesn't take you anywhere. It takes you <em>between</em>.</p>
+        <p>The dive is different this time — no burning, no scattering. Instead, a slow subtraction. Sound drains away first. Then color. Then temperature. You are moving through the gaps in the weave of reality, the negative space between timelines, where nothing has ever happened and nothing ever will.</p>
+        <p>You arrive in darkness.</p>
+        <p>Not the darkness of an unlit room. The darkness of a place that has never known light and considers the concept vulgar. Gradually, shapes emerge — shelves. Endless shelves, stretching in every direction, stacked with scrolls and tomes and crystalline data-tablets that glow with faint violet light.</p>
+        <p>A Hidden Library.</p>
+        <p>The air smells of old paper, ozone, and the faintest trace of cat.</p>
+        <p class="flavor">"Knowledge preserved in silence outlasts all empires."</p>
+        <div class="lore-note">+1 Flux — Your dive left a trail of neutrino energy between the cracks in reality. Someone will notice.</div>
+    `,
+    choices: [
+        {
+            label: 'Explore the shelves',
+            hint: 'The knowledge here spans all timelines.',
+            next: 'silence_library'
+        },
+        {
+            label: 'Call out into the darkness',
+            hint: 'Someone must tend this place.',
+            next: 'silence_call_out'
+        }
+    ]
+};
+
+// ── 5.2a: Explore the library ──
+SCENES['silence_library'] = {
+    location: 'The Hidden Library',
+    onEnter: () => {
+        addKnowledge(2);
+        addRep('silence', 5);
+    },
+    text: `
+        <p>You walk between the shelves. Your footsteps make no sound — the floor absorbs them, hungry for quiet.</p>
+        <p>The collection is staggering. You see:</p>
+        <p>A scroll detailing the exact atmospheric composition of a planet that no longer exists. A tome bound in what appears to be fossilized lightning, its pages filled with equations that hurt to look at. A data-tablet replaying, on loop, the last words of a civilization that chose to erase itself from time.</p>
+        <p>Some shelves are labeled. Most are not. The organizational system seems to be "the Archivist who shelved it knew where it went, and that's sufficient."</p>
+        <p>You round a corner and freeze.</p>
+        <p>A cat is sitting on a reading desk.</p>
+        <p>It is a perfectly ordinary tabby cat, except for its eyes, which are violet, and the fact that it is holding a fragile crystal scroll six inches above the desk with nothing but its mind. As you watch, it rotates the scroll, studying it, then sets it down with telekinetic delicacy and picks up another.</p>
+        <div class="system-message">+2 Knowledge — The Hidden Libraries preserve what others destroy.</div>
+    `,
+    choices: [
+        {
+            label: 'Approach the cat',
+            hint: 'It seems to be the most competent person here.',
+            next: 'silence_greyl'
+        }
+    ]
+};
+
+// ── 5.2b: Call out ──
+SCENES['silence_call_out'] = {
+    location: 'The Hidden Library',
+    onEnter: () => { addRep('silence', -5); },
+    text: `
+        <p>"Hello?"</p>
+        <p>Your voice hits the shelves and <em>dies</em>. Not an echo — an execution. The library itself swallows the sound, compresses it, files it away somewhere between "Unwelcome Noises" and "Evidence of Poor Judgment."</p>
+        <p>From three aisles over, a sharp, disapproving <em>hiss</em>.</p>
+        <p>Then a cat rounds the corner.</p>
+        <p>It is a tabby. Its eyes are violet. It is levitating a quill pen behind its left ear with telekinesis, and it is looking at you the way a librarian looks at someone who has just sneezed on a first edition.</p>
+        <p>It sits. It stares. It radiates judgment so intense it's almost a physical force.</p>
+        <p>A small placard on the nearest shelf reads: <em>"GREYL — THE PROBLEM. Do not feed. Do not pet. Do not raise your voice."</em></p>
+        <div class="system-message">-5 Silence reputation — You were loud in a library.</div>
+    `,
+    choices: [
+        {
+            label: 'Approach quietly. Very quietly.',
+            hint: 'You\'ve learned your lesson.',
+            next: 'silence_greyl'
+        }
+    ]
+};
+
+// ── 5.3: Greyl the Problem ──
+SCENES['silence_greyl'] = {
+    location: 'The Hidden Library',
+    onEnter: () => {
+        addRep('silence', 5);
+        setFlag('met_greyl', true);
+    },
+    text: `
+        <p>You approach the cat — Greyl — with the reverence the moment demands. It watches you with those violet eyes. The telekinetic quill behind its ear bobs gently.</p>
+        <p>Greyl sniffs your hand. Its whiskers twitch. Then, with the air of a monarch granting an audience, it head-butts your palm once and leaps off the desk.</p>
+        <p>It pads away between the shelves, pausing to look back at you. <em>Follow.</em></p>
+        <p>The cat leads you deeper into the library — past the public collections, past a locked door that opens at Greyl's glare, past a section where the shelves are made of shadow and the books seem to whisper.</p>
+        <p>You emerge into a reading chamber. Stone walls. A single violet lamp. And seated at a circular desk covered in scrolls—</p>
+        <p>A figure in layered robes, face hidden beneath a deep cowl. Hands bare, pale, holding a quill that writes without ink. They do not look up.</p>
+        <div class="speaker">The Archivist — Dhali, Bearer of Memories</div>
+        <div class="dialogue">"The cat likes you. That's unfortunate. It means I have to talk to you."</div>
+        <p>Greyl jumps onto the desk and begins telekinetically rearranging Dhali's scrolls. Dhali ignores this with the weariness of long practice.</p>
+    `,
+    choices: [
+        {
+            label: '"What is this place?"',
+            hint: 'Ask about the Hidden Libraries.',
+            next: 'silence_dhali_library'
+        },
+        {
+            label: '"I\'m looking for answers about Soval."',
+            hint: 'Cut to the chase.',
+            next: 'silence_dhali_soval'
+        }
+    ]
+};
+
+// ── 5.4a: About the library ──
+SCENES['silence_dhali_library'] = {
+    location: 'Reading Chamber — The Hidden Library',
+    onEnter: () => { addKnowledge(2); },
+    text: `
+        <p>Dhali sets down her invisible-ink quill. Greyl knocks a scroll off the desk. Neither acknowledges this.</p>
+        <div class="speaker">Dhali</div>
+        <div class="dialogue">"A Hidden Library. One of... many. We don't count them. Counting implies we want others to know how many we have."</div>
+        <p>She gestures at the shelves beyond the chamber door.</p>
+        <div class="dialogue">"Every faction destroys knowledge that threatens them. Sungrace burns research that suggests entropy is necessary. Lifeblood dissolves records of species they drove to extinction. Singularity deletes simulations where she's the villain. Phasetide rewrites history weekly."</div>
+        <div class="dialogue">"We keep what they destroy. Every inconvenient truth. Every suppressed memory. Every name that someone paid to have erased."</div>
+        <p>She taps the desk. A holographic catalog blooms — millions of entries, categorized by what was erased and who erased it.</p>
+        <div class="dialogue">"The Archivists are neutral. We serve knowledge, not factions. But the Council of Silence..."</div>
+        <p>Her voice drops.</p>
+        <div class="dialogue">"The Council serves itself."</div>
+        <div class="system-message">+2 Knowledge — The Archivists preserve. The Council controls. They are not the same thing.</div>
+    `,
+    choices: [
+        {
+            label: '"Tell me about the Council."',
+            hint: 'The shadow government.',
+            next: 'silence_council'
+        },
+        {
+            label: '"What do the Archivists know about Soval?"',
+            hint: 'They keep everyone\'s secrets.',
+            next: 'silence_dhali_soval'
+        }
+    ]
+};
+
+// ── 5.4b: Soval directly ──
+SCENES['silence_dhali_soval'] = {
+    location: 'Reading Chamber — The Hidden Library',
+    onEnter: () => {
+        addKnowledge(3);
+        setFlag('lore_silence_intel', 'The Archivists secretly share Soval intelligence with both Sungrace and Singularity — who are enemies. They hold the only complete picture of the Devourer\'s growth. They play all sides.');
+    },
+    text: `
+        <p>Dhali goes still. Greyl stops mid-scroll-knock and sits very straight.</p>
+        <div class="speaker">Dhali</div>
+        <div class="dialogue">"Soval. You want to know about Soval."</div>
+        <p>She pulls a scroll from beneath the desk — this one is old, its edges singed, its text written in a language that seems to shift as you look at it.</p>
+        <div class="dialogue">"The Archivists maintain the most complete record of Soval's growth in the multiverse. We have data from every syndicate — some given freely, most stolen. We know the rate of expansion. We know the frequency of Devourer Spawn appearances. We know the timeline."</div>
+        <p>She unrolls the scroll. A chart. A curve. Rising.</p>
+        <div class="dialogue">"At current Flux generation rates, Soval reaches critical mass in approximately four hundred years. Give or take a war."</div>
+        <p>She rolls the scroll back up.</p>
+        <div class="dialogue">"We share this data with Sungrace and Singularity. Separately. Each believes they are our only contact. Neither knows the other receives the same intelligence."</div>
+        <p>A thin smile under the cowl.</p>
+        <div class="dialogue">"Lifeblood's telepathic web has been eavesdropping on both channels for decades. They think we don't know. We know."</div>
+        <div class="system-message">+3 Knowledge — The Soval Intelligence Network: everyone spying on everyone, the Archivists in the center.</div>
+    `,
+    choices: [
+        {
+            label: '"Why play all sides?"',
+            hint: 'Challenge the double-dealing.',
+            next: 'silence_dhali_sides'
+        },
+        {
+            label: '"What is the Council doing about it?"',
+            hint: 'The Council must have its own plans.',
+            next: 'silence_council'
+        }
+    ]
+};
+
+// ── 5.5: Why play all sides ──
+SCENES['silence_dhali_sides'] = {
+    location: 'Reading Chamber — The Hidden Library',
+    onEnter: () => { addKnowledge(1); },
+    text: `
+        <div class="speaker">Dhali</div>
+        <div class="dialogue">"Because knowledge shared is knowledge that exists in more than one place. If Sungrace falls, Singularity still has the data. If Singularity falls, Sungrace has a copy. If both fall..."</div>
+        <p>She pats the scroll.</p>
+        <div class="dialogue">"We still have the original."</div>
+        <p>Greyl purrs. It sounds like a very small motor made of smugness.</p>
+        <div class="dialogue">"Neutrality is not passivity. Neutrality is the only position from which you can see the entire board. The moment you choose a side, you become blind to everything the other sides can see."</div>
+        <p>She fixes you with eyes that gleam violet beneath the cowl.</p>
+        <div class="dialogue">"You, Core-bearer. You've been walking paths. Collecting perspectives. You are doing what we do — seeing the whole board. The question is whether you will choose a side, or whether you have the courage to remain between."</div>
+        <div class="system-message">+1 Knowledge — Silence's philosophy: neutrality as the ultimate vantage point.</div>
+    `,
+    choices: [
+        {
+            label: '"Tell me about the Council."',
+            hint: 'The Archivists and the Council are different.',
+            next: 'silence_council'
+        },
+        {
+            label: '"What about Shae\'Fan?"',
+            hint: 'The prisoner at the center of the Outer Shore.',
+            condition: () => getFlag('lore_soval') || getFlag('lore_silence_intel'),
+            next: 'silence_shaefan'
+        }
+    ]
+};
+
+// ── 5.6: The Council ──
+SCENES['silence_council'] = {
+    location: 'Reading Chamber — The Hidden Library',
+    onEnter: () => {
+        addKnowledge(2);
+        setFlag('lore_silence_council', 'The Council of Silence — Shadow government whose members\' identities are hidden even from most Silence members. They rule through espionage, memory erasure, and historical redaction.');
+    },
+    text: `
+        <p>Dhali's quill stops writing. Greyl's purr cuts off. The temperature in the room drops — not physically, but <em>informationally</em>. The air thickens with the weight of things unsaid.</p>
+        <div class="speaker">Dhali</div>
+        <div class="dialogue">"The Council of Silence."</div>
+        <p>She speaks carefully, each word placed like a foot on thin ice.</p>
+        <div class="dialogue">"Their identities are hidden. Not from outsiders — from <em>us</em>. Even Archivists don't know who sits on the Council. We receive directives. We obey them. We do not ask why."</div>
+        <p>She glances at the shadows. The shadows do not glance back, but you're not entirely sure.</p>
+        <div class="dialogue">"They rule through redaction. History is a story, and stories can be edited. The Council decides which memories survive and which are erased. Which names persist and which are scoured from every record across every timeline."</div>
+        <div class="dialogue">"They have their own plans for Soval. I do not know them. I know only that the Council considers cessation — the end of all things — a <em>viable outcome</em>. Not one they prefer, necessarily. But one they have not ruled out."</div>
+        <p>Greyl presses against Dhali's arm. The Archivist strokes the cat absently.</p>
+        <div class="dialogue">"That is why some of us keep the Libraries. Insurance. Against our own leadership."</div>
+        <div class="system-message">+2 Knowledge — The Council of Silence: even Silence's own people fear them.</div>
+    `,
+    choices: [
+        {
+            label: '"Who is Shae\'Fan?"',
+            hint: 'The name the Council tried to erase.',
+            next: 'silence_shaefan'
+        },
+        {
+            label: '"What is Silence\'s secret project?"',
+            hint: 'Every syndicate has one.',
+            next: 'silence_project'
+        }
+    ]
+};
+
+// ── 5.7: Shae'Fan ──
+SCENES['silence_shaefan'] = {
+    location: 'Reading Chamber — The Hidden Library',
+    onEnter: () => {
+        addKnowledge(2);
+        setFlag('lore_shaefan', 'Shae\'Fan — a telepath of extraordinary power who offered an alternative to violence. Branded a heretic, imprisoned at the center of the Outer Shore for 250 years. His name was erased from memory. He is awake.');
+    },
+    text: `
+        <p>Dhali flinches. Actually flinches — a physical recoil, as if the name were a slap.</p>
+        <div class="speaker">Dhali</div>
+        <div class="dialogue">"How do you know that name?"</div>
+        <p>Before you can answer, she shakes her head.</p>
+        <div class="dialogue">"It doesn't matter. You're here. You're asking. Perhaps it's time someone outside these walls heard."</div>
+        <p>She pulls a scroll from a drawer — this one sealed with violet wax that cracks reluctantly at her touch.</p>
+        <div class="dialogue">"Shae'Fan was a telepath. The most powerful we have ever produced. Two hundred and fifty years ago, he offered the Council an alternative — a way to contain minds without destroying them, to heal rather than to erase. He said he could end the Great Conflict without a single death."</div>
+        <p>Her voice goes flat.</p>
+        <div class="dialogue">"They called him a heretic. They built a prison — the Outer Shore, a space station, a wheel of metal and magic — and they put him at its center. His power was siphoned into the walls. His knowledge was ripped away. His name was erased from every record in every timeline."</div>
+        <div class="dialogue">"Except ours."</div>
+        <p>She holds up the scroll.</p>
+        <div class="dialogue">"And recently... a new prisoner spoke his name. By accident. The political tides had shifted; the Council had forgotten why his cell mattered. When that prisoner said 'Shae'Fan,' his eyes opened."</div>
+        <p>A long pause.</p>
+        <div class="dialogue">"He is awake. And the Council is terrified."</div>
+        <div class="system-message">+2 Knowledge — Shae'Fan, the Chained Savior. 250 years of silence. And now: vengeance.</div>
+    `,
+    choices: [
+        {
+            label: '"Could he still end the conflict?"',
+            hint: 'If his original offer was genuine...',
+            next: 'silence_shaefan_hope'
+        },
+        {
+            label: '"What is the Council\'s secret project?"',
+            hint: 'The dampening field.',
+            next: 'silence_project'
+        }
+    ]
+};
+
+// ── 5.7b: Shae'Fan hope ──
+SCENES['silence_shaefan_hope'] = {
+    location: 'Reading Chamber — The Hidden Library',
+    onEnter: () => { addKnowledge(1); addRep('silence', 5); },
+    text: `
+        <p>Dhali is quiet for a long time. Greyl watches you, tail perfectly still.</p>
+        <div class="speaker">Dhali</div>
+        <div class="dialogue">"That is the question the Council does not want anyone to ask."</div>
+        <p>She stands. Paces. Her robes whisper against the stone.</p>
+        <div class="dialogue">"If Shae'Fan's method works — if minds can be contained without destruction, if the Great Conflict can be unwound through telepathic healing rather than force — then the Council's entire philosophy collapses. Everything they've built. Every mind they've erased. Every name they've scoured."</div>
+        <p>She stops.</p>
+        <div class="dialogue">"It would mean they imprisoned the one person who could have saved everyone. For two hundred and fifty years. Because he was <em>inconvenient</em>."</div>
+        <p>Greyl meows. It's a small, sad sound.</p>
+        <div class="dialogue">"I don't know if he'll seek justice or vengeance. Perhaps he doesn't know either. But someone should find him. Someone who isn't the Council."</div>
+        <div class="system-message">+1 Knowledge — Shae'Fan may hold the key to peace. If he hasn't become the key to war instead.</div>
+    `,
+    choices: [
+        {
+            label: '"Where is the Outer Shore?"',
+            hint: 'You might go there.',
+            onChoose: () => { addItem('Outer Shore Coordinates'); setFlag('has_outer_shore_coords', true); },
+            next: 'silence_project'
+        },
+        {
+            label: '"Tell me about the dampening field."',
+            hint: 'Silence\'s secret project.',
+            next: 'silence_project'
+        }
+    ]
+};
+
+// ── 5.8: The dampening field ──
+SCENES['silence_project'] = {
+    location: 'Reading Chamber — The Hidden Library',
+    onEnter: () => {
+        addKnowledge(2);
+        setFlag('lore_silence_project', 'Silence\'s secret project: a psychic dampening field that would disable every Chrono Core in the multiverse simultaneously. It would end the Flux Paradox — but also strand every Diver in whatever timeline they occupied.');
+    },
+    text: `
+        <div class="speaker">Dhali</div>
+        <div class="dialogue">"Every syndicate has a solution. Ours is the most elegant. And the most terrible."</div>
+        <p>She pulls a crystalline data-tablet from a locked drawer. Its surface shimmers with violet equations.</p>
+        <div class="dialogue">"A psychic dampening field. Broadcast from every telepath in our network simultaneously. It would disable every Chrono Core in the multiverse. All of them. At once."</div>
+        <p>She lets that sink in.</p>
+        <div class="dialogue">"No more Cores means no more dives. No more dives means no more Flux. No more Flux means Soval stops growing. Problem solved."</div>
+        <p>The "but" is so heavy you can feel it coming.</p>
+        <div class="dialogue">"But. Every Diver in transit would be stranded. Every syndicate would lose its ability to operate across timelines. Civilizations that depend on temporal trade would collapse. Millions — perhaps billions — would be trapped in timelines that aren't their own, forever."</div>
+        <p>She sets the tablet down.</p>
+        <div class="dialogue">"It's the nuclear option. We save the multiverse by breaking it. The Council considers it... acceptable. The Archivists consider it monstrous. And I..."</div>
+        <p>She strokes Greyl.</p>
+        <div class="dialogue">"I keep the data and hope no one ever uses it."</div>
+        <div class="system-message">+2 Knowledge — The psychic dampening field: salvation through annihilation of temporal travel.</div>
+    `,
+    choices: [
+        {
+            label: '"That\'s Singularity\'s solution too — deactivate all Cores."',
+            hint: 'Draw the parallel.',
+            condition: () => getFlag('lore_pretheft') || getFlag('accepted_singularity_mission'),
+            next: 'silence_parallel'
+        },
+        {
+            label: '"I\'ve seen enough. I need to keep moving."',
+            hint: 'Return to the Threshold.',
+            next: 'silence_departure'
+        }
+    ]
+};
+
+// ── 5.8b: Parallel to Singularity ──
+SCENES['silence_parallel'] = {
+    location: 'Reading Chamber — The Hidden Library',
+    onEnter: () => { addKnowledge(1); addRep('silence', 10); },
+    text: `
+        <p>Dhali's cowl tilts sharply.</p>
+        <div class="speaker">Dhali</div>
+        <div class="dialogue">"You've spoken to the Machine."</div>
+        <p>Not a question.</p>
+        <div class="dialogue">"Yes. Singularity's simulation: deactivate all Cores simultaneously through voluntary compliance. Our field: deactivate all Cores simultaneously through force. Same goal. Different ethics."</div>
+        <p>She stands, and for the first time you sense the full weight of an Archivist's mind — a consciousness that has memorized entire civilizations.</p>
+        <div class="dialogue">"Singularity believes cooperation is possible. We know it isn't. That's not cynicism — it's data. We have fourteen thousand years of records proving that no six factions have ever voluntarily disarmed at the same time. Ever."</div>
+        <div class="dialogue">"But if someone were to combine our field with Singularity's simulation models — to <em>target</em> the dampening rather than broadcast it — you might deactivate the Cores without stranding every Diver in transit. You might thread the needle."</div>
+        <p>She looks at you.</p>
+        <div class="dialogue">"You would need both datasets. Ours and hers. And you would need to be trusted by both sides. Is there anyone in the multiverse who could manage that?"</div>
+        <div class="system-message">+1 Knowledge — The solutions are converging. Silence + Singularity might thread the needle.</div>
+    `,
+    choices: [
+        {
+            label: 'Say nothing. Let the implication hang.',
+            hint: 'She already knows.',
+            onChoose: () => { addItem('Silence Dampening Specs'); addRep('silence', 5); },
+            next: 'silence_departure'
+        }
+    ]
+};
+
+// ── 5.9: Departure ──
+SCENES['silence_departure'] = {
+    location: 'The Hidden Library — Exit',
+    onEnter: () => {
+        addFlux(1);
+        setFlag('completed_silence', true);
+    },
+    text: () => {
+        const hasSpecs = hasItem('Silence Dampening Specs');
+        const hasOuterShore = hasItem('Outer Shore Coordinates');
+        let extras = '';
+        if (hasSpecs) extras += `<p>Dhali's data-tablet weighs almost nothing in your pack. The equations on its surface pulse with quiet violet light — the blueprint for ending all temporal travel. A gift, or a weapon.</p>`;
+        if (hasOuterShore) extras += `<p>And somewhere in the back of your mind, coordinates burn: the Outer Shore. Shae'Fan. Awake after two hundred and fifty years, waiting.</p>`;
+
+        return `
+            <p>Greyl leads you back through the library — a different path than the one you came in. This one is shorter, or longer, or exactly the same length experienced differently. In a place between timelines, distance is a suggestion.</p>
+            ${extras}
+            <p>At the exit — a door that opens onto grey mist — Dhali's voice follows you, bodiless:</p>
+            <div class="speaker">Dhali</div>
+            <div class="dialogue">"The Archivists remember everything. Including this conversation. Make sure it was worth remembering."</div>
+            <p>Greyl butts your ankle once, purring. Then the door closes and the library is gone, as if it never existed.</p>
+            <p>Which, in a sense, is exactly the point.</p>
+            <div class="lore-note">+1 Flux — The dive out leaves ripples in the space between spaces. Silence notices everything.</div>
+        `;
+    },
+    choices: [
+        {
+            label: 'Return to the Threshold',
+            hint: 'Choose your next path.',
+            next: 'threshold_return_3'
+        }
+    ]
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SCENES — STAGE 6: SPLINTERGLEAM
+// ═══════════════════════════════════════════════════════════════
+
+// ── 6.1: Arrival ──
+SCENES['splintergleam_arrival'] = {
+    location: 'The Arena — Splintergleam Territory',
+    onEnter: () => {
+        setFlag('met_splintergleam', true);
+        addFlux(1);
+    },
+    text: `
+        <p>The Golden Path <em>breaks</em> you through.</p>
+        <p>No subtlety. No gentle transition. The dive is a fist through a wall — your Core screams, the timeline shatters like stained glass, and you tumble out the other side into heat and noise and the roar of ten thousand voices.</p>
+        <p>You're standing on sand. Red sand, stained darker in patches. Above you, a stadium rises — tiered seating carved from rock and scrap metal, packed with the most diverse crowd you've ever seen. Humans in patchwork armor. Reptilian Saurians with golden-scaled faces. Enormous figures with skin like cooled lava. Mechanical constructs missing half their parts. All of them screaming, stamping, alive with bloodlust and joy.</p>
+        <p>The Arena.</p>
+        <p>The sand beneath your feet is warm. The air smells like iron, sweat, and something sweeter — a metallic honey scent that makes your teeth tingle.</p>
+        <p class="flavor">"BREAK AND SHATTER!"</p>
+        <p>The crowd chants it in unison, a war-hymn that shakes the ground. In the center of the arena floor, two fighters circle each other — one wreathed in flame, the other wielding a chain that drips with molten gold.</p>
+        <div class="lore-note">+1 Flux — Your violent arrival scattered temporal energy across the Arena. The golden veins in the sand pulse brighter.</div>
+    `,
+    choices: [
+        {
+            label: 'Watch the fight',
+            hint: 'Understand before you act.',
+            next: 'splintergleam_fight'
+        },
+        {
+            label: 'Look for whoever\'s in charge',
+            hint: 'Someone must run this place.',
+            next: 'splintergleam_master'
+        }
+    ]
+};
+
+// ── 6.2a: Watch the fight ──
+SCENES['splintergleam_fight'] = {
+    location: 'The Arena — Ringside',
+    onEnter: () => {
+        addKnowledge(1);
+        addRep('splintergleam', 5);
+    },
+    text: `
+        <p>You find a seat — or rather, a piece of metal bolted to a slab of volcanic rock — and watch.</p>
+        <p>The fighter with the chain moves like water — fluid, precise, each swing trailing an arc of molten gold that sizzles where it strikes the sand. Her opponent, the one wreathed in flame, is all force — a Lavaborn, his skin cracked and glowing, shrugging off blows that would kill anything mortal.</p>
+        <p>The chain-fighter whips low. The Lavaborn catches the chain in his bare hand — it burns, but he doesn't care. He <em>pulls</em>. She skids forward through the sand, and for a moment they're face to face.</p>
+        <p>Then she headbutts him.</p>
+        <p>The crowd erupts. The Lavaborn staggers. The chain-fighter is bleeding from the forehead, but the blood runs into a crack in her skin that glows gold — a Kintsu scar, old and deep. She's been broken before. She got stronger.</p>
+        <p>The fight ends when the Lavaborn yields — a fist raised, palm open. No shame in it. The crowd cheers both fighters. The chain-fighter helps the Lavaborn to his feet. They clasp forearms, gold and magma, and walk out together.</p>
+        <div class="system-message">+1 Knowledge — Splintergleam combat: not death, but breaking. Both fighters leave stronger.</div>
+    `,
+    choices: [
+        {
+            label: 'Find the person who runs the Arena',
+            hint: 'You need context.',
+            next: 'splintergleam_master'
+        }
+    ]
+};
+
+// ── 6.2b: Find who's in charge ──
+SCENES['splintergleam_master'] = {
+    location: 'The Arena — Champion\'s Terrace',
+    onEnter: () => { addRep('splintergleam', 5); },
+    text: `
+        <p>You climb. Past rows of howling spectators, past vendors selling fried meat on skewers of golden metal, past a section where the seats are replaced by cages containing creatures you'd rather not examine too closely.</p>
+        <p>At the top of the Arena, a terrace of black stone overlooking everything. A throne made of welded weapons — swords, chains, a hammer, an axe — all joined with rivers of golden Kintsu.</p>
+        <p>On the throne: a dog.</p>
+        <p>A scruffy, barrel-chested, indeterminate-breed mongrel with torn ears, a missing eye, and — running through every scar on her body like veins of precious ore — lines of gleaming gold. Kintsu. Every wound she's ever taken, filled with molten metal until she shines like a living trophy.</p>
+        <p>A placard on the throne reads: <strong>BOOF, THE CHAMPION</strong>.</p>
+        <p>Boof thumps her tail. The crowd below chants: <em>"GOOD DOG! GOOD DOG! GOOD DOG!"</em></p>
+        <p>Next to the throne, a man in a ringmaster's coat embroidered with golden thread leans against the railing. He has a voice that carries without effort.</p>
+        <div class="speaker">The Master of Ceremonies</div>
+        <div class="dialogue">"Well, well. A Core-bearer. Haven't had one of those crash our show in... what, a month? Boof, what do we do with uninvited guests?"</div>
+        <p>Boof thumps her tail harder.</p>
+        <div class="dialogue">"That's right. We give them a <em>show</em>."</div>
+    `,
+    choices: [
+        {
+            label: '"I\'m not here to fight."',
+            hint: 'Establish boundaries.',
+            next: 'splintergleam_no_fight'
+        },
+        {
+            label: '"What kind of show?"',
+            hint: 'Play along.',
+            next: 'splintergleam_show'
+        }
+    ]
+};
+
+// ── 6.3a: Refuse fight ──
+SCENES['splintergleam_no_fight'] = {
+    location: 'Champion\'s Terrace — The Arena',
+    onEnter: () => { addKnowledge(1); },
+    text: `
+        <p>The Master of Ceremonies raises an eyebrow. Boof tilts her head — the intact ear swiveling toward you.</p>
+        <div class="speaker">Master of Ceremonies</div>
+        <div class="dialogue">"Not here to fight. That's... unusual. Most people who arrive uninvited either want to prove something or steal something."</div>
+        <p>He studies you. His eyes are sharp behind the showmanship.</p>
+        <div class="dialogue">"Alright, Core-bearer. No fight. But in Splintergleam, everything has a price. You want to walk through our territory, you pay with knowledge. Tell me something I don't know."</div>
+        <p>He leans forward.</p>
+        <div class="dialogue">"Tell me about the other syndicates. What are they <em>really</em> doing? The scavengers bring us rumors, but rumors are cheap. I want truth."</div>
+    `,
+    choices: () => {
+        const choices = [];
+        if (getFlag('met_singularity')) {
+            choices.push({
+                label: 'Tell him about Singularity\'s anomaly',
+                hint: 'The Pre-Theft Core signature.',
+                faction: 'singularity',
+                onChoose: () => { addRep('splintergleam', 10); addRep('singularity', -5); },
+                next: 'splintergleam_kintsu_talk'
+            });
+        }
+        if (getFlag('completed_sungrace')) {
+            choices.push({
+                label: 'Tell him about Sungrace\'s weapon',
+                hint: 'The anti-entropic projector.',
+                faction: 'sungrace',
+                onChoose: () => { addRep('splintergleam', 10); addRep('sungrace', -5); },
+                next: 'splintergleam_kintsu_talk'
+            });
+        }
+        choices.push({
+            label: '"I\'ll trade knowledge for knowledge."',
+            hint: 'Counter-offer.',
+            next: 'splintergleam_kintsu_talk'
+        });
+        return choices;
+    }
+};
+
+// ── 6.3b: Play along ──
+SCENES['splintergleam_show'] = {
+    location: 'Champion\'s Terrace — The Arena',
+    onEnter: () => { addRep('splintergleam', 10); },
+    text: `
+        <p>The Master grins. Boof's tail accelerates to a blur.</p>
+        <div class="speaker">Master of Ceremonies</div>
+        <div class="dialogue">"The right answer! In Splintergleam, we don't talk first. We <em>do</em> first. Talking comes after, when you're bleeding and honest."</div>
+        <p>He gestures to the Arena floor, where the sand is being raked by a team of creatures — half-mechanical, half-organic, moving in coordinated patterns.</p>
+        <div class="dialogue">"Relax. I'm not throwing you in the pit. Not yet. The <em>show</em> is simpler than that."</div>
+        <p>He reaches into his coat and produces a small hammer and a flat piece of golden metal — Kintsu, gleaming with inner light.</p>
+        <div class="dialogue">"Break it."</div>
+        <p>You take the metal. It's warm. It hums against your palm, resonating with your Core. You bring the hammer down.</p>
+        <p>The Kintsu shatters — and immediately the pieces begin crawling toward each other, golden filaments reaching across the gaps, reconnecting. Within seconds, the metal is whole again. But different. The fracture lines glow brighter. The metal is <em>stronger</em>.</p>
+        <div class="dialogue">"That's us. That's our whole thing. Break, mend, grow. Now sit. Let's talk about why you're really here."</div>
+        <div class="system-message">+10 Splintergleam reputation — You broke something. They respect that.</div>
+    `,
+    choices: [
+        {
+            label: '"Tell me about Kintsu."',
+            hint: 'The golden metal that heals wounds.',
+            next: 'splintergleam_kintsu_talk'
+        }
+    ]
+};
+
+// ── 6.4: Kintsu ──
+SCENES['splintergleam_kintsu_talk'] = {
+    location: 'Champion\'s Terrace — The Arena',
+    onEnter: () => {
+        addKnowledge(2);
+        setFlag('lore_kintsu', 'Kintsu — a rare alloy of Chrono Crystal and volcanic minerals. Found naturally only at Mount Veraki. It responds to Flux, heals wounds with golden scarring, and accumulates in places of conflict. Splintergleam grows stronger from war — a tragic irony they don\'t fully understand.');
+    },
+    text: `
+        <p>The Master settles into a seat beside Boof's throne. Boof puts her golden-scarred head on his knee. He scratches behind her remaining ear.</p>
+        <div class="speaker">Master of Ceremonies</div>
+        <div class="dialogue">"Kintsu. Heart of Splintergleam. Alloy of Chrono Crystal and the volcanic minerals from Mount Veraki — the only place in the multiverse where it forms naturally."</div>
+        <p>He holds up a vial of molten gold that swirls with its own inner light.</p>
+        <div class="dialogue">"It responds to Flux. Pour it into a wound and it heals the flesh — not back to what it was, but into something stronger. Golden scars. Living metal. The Japanese called the principle <em>kintsugi</em> — repairing broken things with gold, because the breaking is part of the history, and history should be beautiful."</div>
+        <p>He looks at Boof. Every scar on her body gleams.</p>
+        <div class="dialogue">"Boof was a stray. A pit dog. Nothing. She lost every fight for a year. But she never stayed down. Every wound filled with Kintsu. Every scar made her tougher. Now?"</div>
+        <p>The crowd below begins chanting again: <em>GOOD DOG! GOOD DOG!</em></p>
+        <div class="dialogue">"Now she's the Champion. Now she's the purest proof that broken things can find purpose."</div>
+        <div class="system-message">+2 Knowledge — Kintsu: the material philosophy of Splintergleam.</div>
+    `,
+    choices: [
+        {
+            label: '"But where does Kintsu come from? Really?"',
+            hint: 'The accumulation in conflict zones.',
+            next: 'splintergleam_irony'
+        },
+        {
+            label: '"Tell me about Vera. The Original Proof."',
+            hint: 'The first being to survive Kintsu.',
+            next: 'splintergleam_vera'
+        }
+    ]
+};
+
+// ── 6.5: The tragic irony ──
+SCENES['splintergleam_irony'] = {
+    location: 'Champion\'s Terrace — The Arena',
+    onEnter: () => {
+        addKnowledge(2);
+        setFlag('lore_kintsu_irony', 'Kintsu accumulates in places of intense conflict. The more war Splintergleam wages, the more Kintsu they harvest — and the more Flux feeds Soval. Their strength is Soval\'s dinner.');
+    },
+    text: `
+        <p>The Master's easy grin fades. Not entirely — he's too much a showman for that — but the edges go serious.</p>
+        <div class="speaker">Master of Ceremonies</div>
+        <div class="dialogue">"Veraki. The mountain. That's where it forms naturally. But..."</div>
+        <p>He looks out over the Arena. The sand glows with faint golden veins — Kintsu, threaded through the ground of the Arena itself.</p>
+        <div class="dialogue">"It also shows up in places where there's been fighting. Battlefields. Warzones. Places where a lot of temporal energy — Flux — gets discharged all at once. The more violent the conflict, the more Kintsu we find in the rubble afterward."</div>
+        <p>He's quiet for a beat.</p>
+        <div class="dialogue">"We don't talk about what that means. The scavengers — the Nostradans — they just see treasure in the wreckage. The Arena sees better fights. The Kintsu-Kai see more material for their runes."</div>
+        <div class="dialogue">"But if you think about it — really think about it — we're the only syndicate that gets <em>stronger</em> every time there's a war. Every battle grows our supply. Every conflict fuels our power."</div>
+        <p>He meets your eyes.</p>
+        <div class="dialogue">"And every dive, every fight, every spark of Flux feeds the thing at the end. Soval. We know about it. We're not stupid. We just..."</div>
+        <p>He doesn't finish.</p>
+        <div class="system-message">+2 Knowledge — Splintergleam's tragic irony: their strength is the Devourer's dinner.</div>
+    `,
+    choices: [
+        {
+            label: '"Is that why you\'re looking for Flux-free time travel?"',
+            hint: 'Their secret project.',
+            next: 'splintergleam_project'
+        },
+        {
+            label: '"Tell me about the derelict."',
+            hint: 'The pre-BT structure they found.',
+            condition: () => getFlag('lore_pretheft') || getFlag('accepted_singularity_mission'),
+            next: 'splintergleam_derelict'
+        }
+    ]
+};
+
+// ── 6.5b: Vera ──
+SCENES['splintergleam_vera'] = {
+    location: 'Champion\'s Terrace — The Arena',
+    onEnter: () => {
+        addKnowledge(2);
+    },
+    text: `
+        <p>The Master leans back. Even Boof seems to settle deeper into the throne, as if preparing for a story she's heard many times and never tired of.</p>
+        <div class="speaker">Master of Ceremonies</div>
+        <div class="dialogue">"Vera. The Original Proof. The first living thing to survive Kintsu."</div>
+        <p>His voice shifts — less showman, more storyteller.</p>
+        <div class="dialogue">"Two brothers — rune-magicians — went to Mount Veraki and used forbidden runes to tear a consciousness from the mountain itself. A woman made of molten rock, born screaming, trapped in a golden circle."</div>
+        <div class="dialogue">"They gave her a choice: cool and die within the hour, or drink liquid Kintsu. She chose the gold."</div>
+        <p>He holds up the vial of Kintsu. It glows fiercely.</p>
+        <div class="dialogue">"It flooded her. Bound her cracking magma with golden veins. But instead of staying contained, she pulled the circle's power into herself. Shattered the prison. The world caught fire."</div>
+        <div class="dialogue">"That's the First Proof. That a living being can <em>consume</em> Kintsu and become something greater. That brokenness isn't a death sentence — it's a starting line."</div>
+        <p>He looks at Boof's golden scars.</p>
+        <div class="dialogue">"We're all Vera's children. Every scar is her legacy."</div>
+        <div class="system-message">+2 Knowledge — Vera's origin: the birth of Splintergleam's philosophy.</div>
+    `,
+    choices: [
+        {
+            label: '"Where does Kintsu really come from?"',
+            hint: 'The uncomfortable question.',
+            next: 'splintergleam_irony'
+        },
+        {
+            label: '"I should keep moving."',
+            hint: 'Return to the Threshold.',
+            next: 'splintergleam_departure'
+        }
+    ]
+};
+
+// ── 6.6: Flux-free time travel ──
+SCENES['splintergleam_project'] = {
+    location: 'Champion\'s Terrace — The Arena',
+    onEnter: () => {
+        addKnowledge(2);
+        setFlag('lore_splintergleam_project', 'Splintergleam\'s secret: Flux-free time travel. If they can dive without generating Flux, they break the paradox — they can fight without feeding Soval. The Kintsu-Kai rune-magicians are close.');
+        addRep('splintergleam', 10);
+    },
+    text: `
+        <p>The Master glances around. The crowd is too loud to overhear, but he lowers his voice anyway.</p>
+        <div class="speaker">Master of Ceremonies</div>
+        <div class="dialogue">"You're sharper than you look, Core-bearer."</div>
+        <p>He pulls Boof closer. She grumbles contentedly.</p>
+        <div class="dialogue">"The Kintsu-Kai — our rune-magicians — have been working on something. Deep in Mount Veraki, away from the Arena, away from the Nostradans, away from everyone. Blood rituals. Kintsu-inscribed runes that open pathways between timelines without using Chrono Cores."</div>
+        <div class="dialogue">"Without Cores means without Flux. Without Flux means we can dive, fight, live — without feeding the Devourer."</div>
+        <p>He holds up the vial of Kintsu again. The liquid gold swirls faster.</p>
+        <div class="dialogue">"The Opener of the Way achieved it once. For three seconds. A portal, stable, no Flux signature. Then it collapsed and took half a laboratory with it. But for three seconds..."</div>
+        <p>He grins — the real grin, not the showman's mask.</p>
+        <div class="dialogue">"Three seconds is enough to prove it's possible. Give us time. We'll break through. We always do."</div>
+        <div class="system-message">+2 Knowledge — Flux-free time travel: Splintergleam's answer to the paradox.</div>
+    `,
+    choices: [
+        {
+            label: '"What about the derelict?"',
+            hint: 'The pre-BT structure.',
+            condition: () => getFlag('lore_pretheft') || getFlag('accepted_singularity_mission'),
+            next: 'splintergleam_derelict'
+        },
+        {
+            label: '"I should keep moving."',
+            hint: 'Return to the Threshold.',
+            next: 'splintergleam_departure'
+        }
+    ]
+};
+
+// ── 6.7: The derelict ──
+SCENES['splintergleam_derelict'] = {
+    location: 'Champion\'s Terrace — The Arena',
+    onEnter: () => {
+        addKnowledge(2);
+        setFlag('lore_derelict', 'Splintergleam found a derelict structure predating the Theft. Technology that shouldn\'t exist. Someone was traveling through time before Singularity built the Origination Engine.');
+        addRep('splintergleam', 5);
+    },
+    text: `
+        <p>The Master goes very still. Boof's tail stops wagging.</p>
+        <div class="speaker">Master of Ceremonies</div>
+        <div class="dialogue">"Who told you about that?"</div>
+        <p>He studies you. The showman's mask is completely off now. Beneath it is someone harder, sharper, and deeply unsettled.</p>
+        <div class="dialogue">"We found it on a scavenge run. Deep in a timeline so old the stars hadn't formed yet. A structure. Not Sungrace. Not Singularity. Not anyone's. Made of materials we can't identify, using technology that doesn't match any known syndicate."</div>
+        <p>He stands. Paces.</p>
+        <div class="dialogue">"It had a Core dock. Empty. But the dock itself was operational — it reacted to our Cores, tried to interface with them. The architecture was temporal — it was designed for time travel. But it predates the Origination Engine. It predates <em>everything</em>."</div>
+        <div class="dialogue">"The Kintsu-Kai are studying it. They think the rune-magic for Flux-free travel might have originated there. That the derelict is a <em>prototype</em> — a first-generation time machine from before Singularity, before Zel, before the Theft."</div>
+        <p>He looks at your Core.</p>
+        <div class="dialogue">"If time travel existed before Singularity invented it... then everything we've been told about the origin of the Great Conflict is wrong."</div>
+        <div class="system-message">+2 Knowledge — The derelict: pre-BT temporal technology. The origin story is a lie.</div>
+    `,
+    choices: [
+        {
+            label: '"Singularity found the same thing."',
+            hint: 'Connect the dots.',
+            onChoose: () => { addRep('splintergleam', 5); addKnowledge(1); },
+            next: 'splintergleam_departure'
+        },
+        {
+            label: '"I need to think about this."',
+            hint: 'Return to the Threshold.',
+            next: 'splintergleam_departure'
+        }
+    ]
+};
+
+// ── 6.8: Departure ──
+SCENES['splintergleam_departure'] = {
+    location: 'The Arena — Exit',
+    onEnter: () => {
+        addFlux(1);
+        setFlag('completed_splintergleam', true);
+    },
+    text: () => {
+        const toldSingularity = getFlag('lore_derelict') && getFlag('lore_pretheft');
+        const connectionLine = toldSingularity
+            ? `<p>Two independent discoveries. Singularity's anomalous Core signature. Splintergleam's derelict structure. Two pieces of the same puzzle — someone was diving through time before history began. And no one is sharing notes.</p>`
+            : '';
+
+        return `
+            <p>The Master of Ceremonies walks you to the Arena's outer gate — a massive arch of fused weapons, dripping with golden Kintsu. Beyond it, the red sand gives way to grey mist. The Threshold, waiting.</p>
+            ${connectionLine}
+            <p>Boof trots alongside you to the gate. At the boundary, she sits, golden scars gleaming, and barks once.</p>
+            <div class="speaker">Master of Ceremonies</div>
+            <div class="dialogue">"Come back when you're ready to break something important, Core-bearer. We'll be here. We're always here."</div>
+            <p>He gestures at the Arena behind him — the noise, the heat, the golden sand.</p>
+            <div class="dialogue">"Broken things are the most honest things in the multiverse. Remember that."</div>
+            <p>Your Core activates. The Arena's roar fades into the silence of the dive.</p>
+            <div class="lore-note">+1 Flux — Leaving the Arena. The golden veins in the sand pulse one last time, drinking the energy of your departure.</div>
+        `;
+    },
+    choices: [
+        {
+            label: 'Return to the Threshold',
+            hint: 'One path remains.',
+            next: 'threshold_return_3'
+        }
+    ]
+};
+
+// ── Hub: Threshold Return 3 (post Silence/Splintergleam) ──
+SCENES['threshold_return_3'] = {
+    location: 'The Threshold',
+    onEnter: () => { addFlux(1); },
+    text: () => {
+        const completed = ['completed_lifeblood', 'completed_sungrace', 'completed_silence', 'completed_splintergleam'].filter(f => getFlag(f)).length;
+        const metSing = getFlag('met_singularity') ? 1 : 0;
+        const total = completed + metSing;
+
+        let archivistLine = '';
+        if (total >= 5) {
+            archivistLine = `
+                <div class="speaker">The Archivist</div>
+                <div class="dialogue">"Five paths walked. One remains. The Blue Path — Phasetide. The faithful. The certain."</div>
+                <p>The Archivist's cowl tilts.</p>
+                <div class="dialogue">"I should warn you: Phasetide is the most complete of the six. And the most dangerous. Their certainty is built on a secret that, if you discovered it, would change everything you think you know about the Great Conflict."</div>
+                <div class="dialogue">"But then, that's why you're going. Isn't it."</div>
+            `;
+        } else if (total >= 3) {
+            archivistLine = `
+                <div class="speaker">The Archivist</div>
+                <div class="dialogue">"More paths walked. More truths collected. You're beginning to see how the pieces fit — and how they refuse to fit. That's progress. That's the only kind of progress there is."</div>
+            `;
+        } else {
+            archivistLine = `
+                <div class="speaker">The Archivist</div>
+                <div class="dialogue">"Back again. The crossroads remembers you now."</div>
+            `;
+        }
+
+        return `
+            <p>The Threshold coalesces around you. The crystal pillars hum their six-note chord. The grey mist breathes.</p>
+            ${archivistLine}
+            <div class="lore-note">+1 Flux — The Threshold exacts its toll. Even neutral ground feeds the paradox.</div>
+        `;
+    },
+    choices: () => {
+        const choices = [];
+        if (!getFlag('met_singularity')) {
+            choices.push({
+                label: 'The Chrome Path — Singularity',
+                hint: '"Can I let go of self to become something greater?"',
+                faction: 'singularity',
+                next: 'singularity_arrival'
+            });
+        }
+        if (!getFlag('completed_lifeblood')) {
+            choices.push({
+                label: 'The Green Path — Lifeblood',
+                hint: '"Can I find peace in impermanence?"',
+                faction: 'lifeblood',
+                next: 'lifeblood_arrival'
+            });
+        }
+        if (!getFlag('completed_sungrace')) {
+            choices.push({
+                label: 'The Amber Path — Sungrace',
+                hint: '"Can human ingenuity triumph over the inevitable?"',
+                faction: 'sungrace',
+                next: 'sungrace_arrival'
+            });
+        }
+        if (!getFlag('completed_silence')) {
+            choices.push({
+                label: 'The Violet Path — Silence',
+                hint: '"Can I make peace with being alone?"',
+                faction: 'silence',
+                next: 'silence_arrival'
+            });
+        }
+        if (!getFlag('completed_splintergleam')) {
+            choices.push({
+                label: 'The Golden Path — Splintergleam',
+                hint: '"Can broken things find purpose?"',
+                faction: 'splintergleam',
+                next: 'splintergleam_arrival'
+            });
+        }
         choices.push({
             label: 'The Blue Path — Phasetide',
             hint: '"Can I find comfort in believing there\'s a right answer?"',
