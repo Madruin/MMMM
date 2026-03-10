@@ -633,9 +633,9 @@
 //  CORE ENGINE
 // ═══════════════════════════════════════════════════════════════
 
-const MAX_FLUX = 30;
-const FLUX_WARN_THRESHOLD = 8;
-const FLUX_CRITICAL_THRESHOLD = 4;
+const MAX_FLUX = 50;
+const FLUX_WARN_THRESHOLD = 10;
+const FLUX_CRITICAL_THRESHOLD = 5;
 
 const GameState = {
     currentScene: 'threshold_awaken',
@@ -744,7 +744,7 @@ function spendFlux(n) {
 }
 function diveFlux() {
     // Each dive generates flux — you're punching holes in causality
-    const baseGain = 5;
+    const baseGain = 20;
     state.diveCount = (state.diveCount || 0) + 1;
     addFlux(baseGain);
     return baseGain;
@@ -758,8 +758,22 @@ function checkOutOfTime() {
         renderScene('ending_out_of_time');
     }
 }
-function addKnowledge(n) { state.knowledge += n; }
-function addTrust(n) { state.trust = (state.trust || 0) + n; }
+function addKnowledge(n) {
+    const prev = state.knowledge;
+    state.knowledge += n;
+    // Milestone feedback
+    if (prev < 5 && state.knowledge >= 5) showToast('Knowledge 5 — New insights unlock hidden options on timelines.');
+    else if (prev < 10 && state.knowledge >= 10) showToast('Knowledge 10 — Your understanding deepens. The Archivist notices.');
+    else if (prev < 20 && state.knowledge >= 20) showToast('Knowledge 20 — A seventh path reveals itself at the end...');
+}
+function addTrust(n) {
+    const prev = state.trust || 0;
+    state.trust = prev + n;
+    // Milestone feedback
+    if (prev < 3 && state.trust >= 3) showToast('Trust 3 — People confide in you. New conversations unlock on timelines.');
+    else if (prev < 6 && state.trust >= 6) showToast('Trust 6 — Your reputation precedes you. Deeper alliances form.');
+    else if (prev < 10 && state.trust >= 10) showToast('Trust 10 — They trust you with everything. The endings shift.');
+}
 function addRep(faction, n) {
     state.reputation[faction] = Math.max(0, Math.min(100, (state.reputation[faction] || 0) + n));
 }
@@ -858,9 +872,14 @@ function renderInventory() {
 
     // Stats
     html += '<h3>Status</h3>';
-    html += `<div class="inv-item">Flux: <span style="color:var(--flux-color)">${state.flux}/${state.maxFlux || MAX_FLUX}</span> &nbsp; Knowledge: <span style="color:var(--accent)">${state.knowledge}</span>${state.trust > 0 ? ` &nbsp; Trust: <span style="color:var(--green)">${state.trust}</span>` : ''}</div>`;
+    html += `<div class="inv-item">Flux: <span style="color:var(--flux-color)">${state.flux}/${state.maxFlux || MAX_FLUX}</span></div>`;
+    html += `<div class="inv-item" style="font-size:0.7rem; color:var(--text-dim)">Temporal energy. Spent by actions on timelines. Earned by diving. Reach 0 = stranded.</div>`;
+    html += `<div class="inv-item">Knowledge: <span style="color:var(--accent)">${state.knowledge}</span></div>`;
+    html += `<div class="inv-item" style="font-size:0.7rem; color:var(--text-dim)">Understanding of the multiverse. At 5: unlocks hidden insights on timelines. At 20: reveals a secret ending. Spent to unlock deep lore.</div>`;
+    html += `<div class="inv-item">Trust: <span style="color:var(--green)">${state.trust || 0}</span></div>`;
+    html += `<div class="inv-item" style="font-size:0.7rem; color:var(--text-dim)">How much people confide in you. At 3: unlocks private conversations on timelines. At 10: shifts the tone of endings. Spent for deeper bonds.</div>`;
     if (state.diveCount > 0) {
-        html += `<div class="inv-item" style="font-size:0.72rem; color:var(--text-dim)">Dives: ${state.diveCount} &nbsp; Chrono Shards: <span style="color:var(--gold)">${getResource('chronoShards')}</span></div>`;
+        html += `<div class="inv-item" style="font-size:0.72rem; color:var(--text-dim)">Dives: ${state.diveCount} &nbsp; Chrono Shards: <span style="color:var(--gold)">${getResource('chronoShards')}</span> <span style="font-size:0.65rem">(Convert 2→Flux at Threshold)</span></div>`;
     }
 
     // Items
@@ -872,13 +891,23 @@ function renderInventory() {
     }
 
     // Resources
+    const RESOURCE_HINTS = {
+        dataFragments: 'Collect 3 to unlock Singularity\'s inner sanctum.',
+        rootTokens: 'Collect 3 to earn the Oakmother\'s deepest trust.',
+        energyCells: 'Collect 3 to access Sungrace command briefings.',
+        memoryShards: 'Collect 3 to enter the restricted archives.',
+        kintsuShards: 'Collect 3 to learn Kintsu\'s true secret.',
+        tideMarks: 'Collect 3 to challenge the Wavemother\'s theology.',
+        chronoShards: 'Convert 2 to Flux at the Threshold\'s Crystal Forge.'
+    };
     const anyRes = state.resources && Object.values(state.resources).some(v => v > 0);
     if (anyRes) {
         html += '<h3>Resources</h3>';
         for (const [key, info] of Object.entries(RESOURCE_NAMES)) {
             const val = getResource(key);
             if (val > 0) {
-                html += `<div class="inv-item"><span style="color:${info.color}">${info.label}:</span> ${val}</div>`;
+                html += `<div class="inv-item"><span style="color:${info.color}">${info.label}:</span> ${val}${key !== 'chronoShards' ? '/3' : ''}</div>`;
+                if (RESOURCE_HINTS[key]) html += `<div class="inv-item" style="font-size:0.65rem; color:var(--text-dim); margin-top:-4px">${RESOURCE_HINTS[key]}</div>`;
             }
         }
     }
@@ -960,7 +989,7 @@ function renderStatusBar() {
     bar.innerHTML = `
         <span class="stat stat-flux">Flux: <span class="stat-value">${state.flux}/${state.maxFlux || MAX_FLUX}</span></span>
         <span class="stat stat-knowledge">Knowledge: <span class="stat-value">${state.knowledge}</span></span>
-        ${state.trust > 0 ? `<span class="stat">Trust: <span class="stat-value" style="color:var(--green)">${state.trust}</span></span>` : ''}
+        <span class="stat">Trust: <span class="stat-value" style="color:var(--green)">${state.trust || 0}</span></span>
         ${resourceHtml}
     `;
 
@@ -1063,6 +1092,8 @@ function renderScene(sceneId) {
                 if (c.amount >= 0) return true; // gains always affordable
                 if (c.resource === 'flux') return state.flux >= Math.abs(c.amount);
                 if (c.resource === 'knowledge') return state.knowledge >= Math.abs(c.amount);
+                if (c.resource === 'trust') return (state.trust || 0) >= Math.abs(c.amount);
+                if (RESOURCE_NAMES[c.resource]) return getResource(c.resource) >= Math.abs(c.amount);
                 return true;
             });
 
@@ -1184,7 +1215,7 @@ SCENES['threshold_core'] = {
         <p>The moment you hold it, the humming stops.</p>
         <p>The silence is enormous. Then the Core shivers in your palm and projects a single image into the air between you and the nearest pillar: a branching tree of light, splitting and splitting and splitting, each branch a different color, each one a different <em>when</em>.</p>
         <div class="lore-note">Chrono Core — A portable time-displacement device. Each dive punches a hole through causality, generating neutrino-scale energy called Flux. Cores are the most dangerous and most coveted technology in the braided multiverse.</div>
-        <div class="lore-note" style="color:var(--flux-color);">WARNING: Every dive generates Flux — temporal displacement energy. You'll need Flux to navigate timelines, make choices, and survive. But Flux is finite. If your reserves reach zero while on a timeline, you may be stranded there forever. Manage your Flux carefully.</div>
+        <div class="lore-note" style="color:var(--flux-color);">Every dive generates Flux — temporal displacement energy. You'll need Flux to navigate timelines, make choices, and survive. Each dive generates plenty of Flux, and you'll find hidden caches throughout the timelines. But beware: reckless spending on every optional task will eventually drain you dry.</div>
         <p>The tree of light fades. The Core's glow settles to a steady, patient pulse, synchronized to your heartbeat.</p>
         <p>From somewhere — everywhere — a voice. Not sound exactly. More like words pressed into the still air, arriving fully formed in your mind:</p>
         <div class="speaker">The Archivist</div>
@@ -1305,9 +1336,9 @@ SCENES['threshold_shard_conversion'] = {
         const shards = getResource('chronoShards');
         if (shards >= 2) {
             addResource('chronoShards', -2);
-            addFlux(5);
+            addFlux(10);
             trackDelta('Chrono Shards', -2);
-            trackDelta('Flux', 5);
+            trackDelta('Flux', 10);
         }
     },
     text: () => {
@@ -1317,7 +1348,7 @@ SCENES['threshold_shard_conversion'] = {
             <div class="speaker">The Archivist</div>
             <div class="dialogue">"Clever. The shards are crystallized potential — temporal energy that never committed to a timeline. By dissolving them here, at the nexus, you're reclaiming that uncommitted energy as Flux."</div>
             <div class="dialogue">"Most divers never figure that out. They just spend and spend until the Core goes dark."</div>
-            <div class="system-message">-2 Chrono Shards → +5 Flux — Temporal potential converted.</div>
+            <div class="system-message">-2 Chrono Shards → +10 Flux — Temporal potential converted.</div>
         `;
     },
     choices: [
@@ -1357,7 +1388,7 @@ SCENES['threshold_briefing'] = {
             label: 'The Chrome Path — Singularity',
             hint: '"Can I let go of self to become something greater?"',
             faction: 'singularity',
-            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            costs: [{ label: 'Flux (dive)', amount: 20 }],
             onChoose: () => { diveFlux(); },
             next: 'singularity_arrival'
         },
@@ -1365,7 +1396,7 @@ SCENES['threshold_briefing'] = {
             label: 'The Green Path — Lifeblood',
             hint: '"Can I find peace in impermanence?"',
             faction: 'lifeblood',
-            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            costs: [{ label: 'Flux (dive)', amount: 20 }],
             onChoose: () => { setFlag('chose_lifeblood_first', true); diveFlux(); },
             next: 'lifeblood_arrival'
         },
@@ -1373,7 +1404,7 @@ SCENES['threshold_briefing'] = {
             label: 'The Amber Path — Sungrace',
             hint: '"Can human ingenuity triumph over the inevitable?"',
             faction: 'sungrace',
-            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            costs: [{ label: 'Flux (dive)', amount: 20 }],
             onChoose: () => { setFlag('chose_sungrace_first', true); diveFlux(); },
             next: 'sungrace_arrival'
         },
@@ -1381,7 +1412,7 @@ SCENES['threshold_briefing'] = {
             label: 'The Violet Path — Silence',
             hint: '"Can I make peace with being alone?"',
             faction: 'silence',
-            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            costs: [{ label: 'Flux (dive)', amount: 20 }],
             onChoose: () => { diveFlux(); },
             next: 'silence_arrival'
         }
@@ -1932,6 +1963,39 @@ SCENES['singularity_hub'] = {
             costs: [{ label: 'Flux', amount: -1, resource: 'flux' }, { label: 'Chrono Shard', amount: 1, resource: 'chronoShards' }],
             next: 'singularity_hub'
         });
+        // Trust-gated: Raiz confides in you
+        if (!getFlag('singularity_trust_bonus') && (state.trust || 0) >= 3) {
+            choices.push({
+                label: 'Ask Raiz what he really thinks about Singularity',
+                hint: 'He trusts you enough to speak honestly now.',
+                costs: [{ label: 'Trust', amount: -3, resource: 'trust' }, { label: 'Data Fragment', amount: 1 }, { label: 'Knowledge', amount: 2 }],
+                onChoose: () => {
+                    setFlag('singularity_trust_bonus');
+                    addResource('dataFragments', 1);
+                    addKnowledge(2);
+                    addRep('singularity', 5);
+                    trackDelta('Data Fragment', 1);
+                    trackDelta('Knowledge', 2);
+                },
+                next: 'singularity_hub'
+            });
+        }
+        // Knowledge-gated: decode hidden signal
+        if (!getFlag('singularity_knowledge_bonus') && state.knowledge >= 5) {
+            choices.push({
+                label: 'Decode the encrypted frequency beneath the city hum',
+                hint: 'Your accumulated knowledge lets you hear what others can\'t.',
+                costs: [{ label: 'Knowledge', amount: -3, resource: 'knowledge' }, { label: 'Flux', amount: 4 }, { label: 'Trust', amount: 2 }],
+                onChoose: () => {
+                    setFlag('singularity_knowledge_bonus');
+                    addFlux(4);
+                    addTrust(2);
+                    trackDelta('Flux', 4);
+                    trackDelta('Trust', 2);
+                },
+                next: 'singularity_hub'
+            });
+        }
         if (getResource('dataFragments') >= 3) {
             choices.push({
                 label: 'Go to the Erudite Beacon',
@@ -2003,6 +2067,12 @@ SCENES['singularity_task_foundry'] = {
         addResource('dataFragments', 1);
         addRep('singularity', 3);
         addKnowledge(1);
+        // Hidden Flux cache — the Foundries leak temporal energy
+        if (!getFlag('foundry_flux_cache')) {
+            setFlag('foundry_flux_cache');
+            addFlux(3);
+            trackDelta('Flux (temporal leak)', 3);
+        }
     },
     text: () => {
         const count = getTaskCount('singularity_foundry');
@@ -2169,8 +2239,8 @@ SCENES['singularity_encounter_herald'] = {
 SCENES['threshold_return'] = {
     location: 'The Threshold',
     onEnter: () => {
-        addFlux(2); // returning to threshold recovers some flux
-        trackDelta('Flux (threshold recovery)', 2);
+        addFlux(5); // returning to threshold recovers some flux
+        trackDelta('Flux (threshold recovery)', 5);
     },
     text: () => {
         const accepted = getFlag('accepted_singularity_mission');
@@ -2196,7 +2266,7 @@ SCENES['threshold_return'] = {
             label: 'The Green Path — Lifeblood',
             hint: '"Can I find peace in impermanence?"',
             faction: 'lifeblood',
-            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            costs: [{ label: 'Flux (dive)', amount: 20 }],
             onChoose: () => { diveFlux(); },
             next: 'lifeblood_arrival'
         });
@@ -2204,7 +2274,7 @@ SCENES['threshold_return'] = {
             label: 'The Amber Path — Sungrace',
             hint: '"Can human ingenuity triumph over the inevitable?"',
             faction: 'sungrace',
-            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            costs: [{ label: 'Flux (dive)', amount: 20 }],
             onChoose: () => { diveFlux(); },
             next: 'sungrace_arrival'
         });
@@ -2212,7 +2282,7 @@ SCENES['threshold_return'] = {
             label: 'The Violet Path — Silence',
             hint: '"Can I make peace with being alone?"',
             faction: 'silence',
-            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            costs: [{ label: 'Flux (dive)', amount: 20 }],
             onChoose: () => { diveFlux(); },
             next: 'silence_arrival'
         });
@@ -2220,7 +2290,7 @@ SCENES['threshold_return'] = {
             label: 'The Golden Path — Splintergleam',
             hint: '"Can broken things find purpose?"',
             faction: 'splintergleam',
-            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            costs: [{ label: 'Flux (dive)', amount: 20 }],
             onChoose: () => { diveFlux(); },
             next: 'splintergleam_arrival'
         });
@@ -2228,7 +2298,7 @@ SCENES['threshold_return'] = {
             choices.push({
                 label: 'Convert Chrono Shards to Flux',
                 hint: 'Dissolve 2 shards at the nexus point to recharge your Core.',
-                costs: [{ label: 'Chrono Shards', amount: -2 }, { label: 'Flux', amount: 5 }],
+                costs: [{ label: 'Chrono Shards', amount: -2 }, { label: 'Flux', amount: 10 }],
                 next: 'threshold_shard_conversion'
             });
         }
@@ -2640,6 +2710,39 @@ SCENES['lifeblood_hub'] = {
             costs: [{ label: 'Flux', amount: -1, resource: 'flux' }, { label: 'Chrono Shard', amount: 1, resource: 'chronoShards' }],
             next: 'lifeblood_hub'
         });
+        // Trust-gated: Jenny shares the Heart's secret
+        if (!getFlag('lifeblood_trust_bonus') && (state.trust || 0) >= 3) {
+            choices.push({
+                label: 'Ask Jenny what the Heart whispers at night',
+                hint: 'She trusts you enough to share what the mycelia carry.',
+                costs: [{ label: 'Trust', amount: -3, resource: 'trust' }, { label: 'Root Token', amount: 1 }, { label: 'Knowledge', amount: 2 }],
+                onChoose: () => {
+                    setFlag('lifeblood_trust_bonus');
+                    addResource('rootTokens', 1);
+                    addKnowledge(2);
+                    addRep('lifeblood', 5);
+                    trackDelta('Root Token', 1);
+                    trackDelta('Knowledge', 2);
+                },
+                next: 'lifeblood_hub'
+            });
+        }
+        // Knowledge-gated: read the root network
+        if (!getFlag('lifeblood_knowledge_bonus') && state.knowledge >= 5) {
+            choices.push({
+                label: 'Interpret the bioluminescent patterns in the root web',
+                hint: 'Your knowledge lets you read what the mycelium is saying.',
+                costs: [{ label: 'Knowledge', amount: -3, resource: 'knowledge' }, { label: 'Flux', amount: 4 }, { label: 'Trust', amount: 2 }],
+                onChoose: () => {
+                    setFlag('lifeblood_knowledge_bonus');
+                    addFlux(4);
+                    addTrust(2);
+                    trackDelta('Flux', 4);
+                    trackDelta('Trust', 2);
+                },
+                next: 'lifeblood_hub'
+            });
+        }
         if (getResource('rootTokens') >= 3) {
             choices.push({
                 label: 'Return to the Oakmother',
@@ -2708,6 +2811,12 @@ SCENES['lifeblood_task_saurian'] = {
         incrementTask('lifeblood_saurian');
         addResource('rootTokens', 1);
         addRep('lifeblood', 3);
+        // Hidden Flux cache — the Heart's roots absorb stray temporal energy
+        if (!getFlag('saurian_flux_cache')) {
+            setFlag('saurian_flux_cache');
+            addFlux(3);
+            trackDelta('Flux (root absorption)', 3);
+        }
     },
     text: () => {
         const count = getTaskCount('lifeblood_saurian');
@@ -3171,6 +3280,39 @@ SCENES['sungrace_hub'] = {
             costs: [{ label: 'Flux', amount: -1, resource: 'flux' }, { label: 'Chrono Shard', amount: 1, resource: 'chronoShards' }],
             next: 'sungrace_hub'
         });
+        // Trust-gated: Boltz reveals the station's weakness
+        if (!getFlag('sungrace_trust_bonus') && (state.trust || 0) >= 3) {
+            choices.push({
+                label: 'Share a drink with Boltz after hours',
+                hint: 'He trusts you enough to show you the real engine room.',
+                costs: [{ label: 'Trust', amount: -3, resource: 'trust' }, { label: 'Energy Cell', amount: 1 }, { label: 'Knowledge', amount: 2 }],
+                onChoose: () => {
+                    setFlag('sungrace_trust_bonus');
+                    addResource('energyCells', 1);
+                    addKnowledge(2);
+                    addRep('sungrace', 5);
+                    trackDelta('Energy Cell', 1);
+                    trackDelta('Knowledge', 2);
+                },
+                next: 'sungrace_hub'
+            });
+        }
+        // Knowledge-gated: recalibrate the solar array
+        if (!getFlag('sungrace_knowledge_bonus') && state.knowledge >= 5) {
+            choices.push({
+                label: 'Recalibrate the solar array using your temporal insights',
+                hint: 'Your knowledge reveals an efficiency the crew missed.',
+                costs: [{ label: 'Knowledge', amount: -3, resource: 'knowledge' }, { label: 'Flux', amount: 4 }, { label: 'Trust', amount: 2 }],
+                onChoose: () => {
+                    setFlag('sungrace_knowledge_bonus');
+                    addFlux(4);
+                    addTrust(2);
+                    trackDelta('Flux', 4);
+                    trackDelta('Trust', 2);
+                },
+                next: 'sungrace_hub'
+            });
+        }
         if (getResource('energyCells') >= 3) {
             choices.push({
                 label: 'Report to Khaela',
@@ -3242,6 +3384,12 @@ SCENES['sungrace_task_gardens'] = {
         addResource('energyCells', 1);
         addRep('sungrace', 3);
         addKnowledge(1);
+        // Hidden Flux cache — solar collectors trap temporal radiation
+        if (!getFlag('gardens_flux_cache')) {
+            setFlag('gardens_flux_cache');
+            addFlux(3);
+            trackDelta('Flux (solar trap)', 3);
+        }
     },
     text: () => {
         const count = getTaskCount('sungrace_gardens');
@@ -3594,7 +3742,7 @@ SCENES['sungrace_departure'] = {
 // ── Hub: Threshold Return 2 (post Lifeblood/Sungrace) ──
 SCENES['threshold_return_2'] = {
     location: 'The Threshold',
-    onEnter: () => { addFlux(2); trackDelta('Flux (threshold recovery)', 2); },
+    onEnter: () => { addFlux(5); trackDelta('Flux (threshold recovery)', 5); },
     text: () => {
         const completedLB = getFlag('completed_lifeblood');
         const completedSG = getFlag('completed_sungrace');
@@ -3628,7 +3776,7 @@ SCENES['threshold_return_2'] = {
                 label: 'The Chrome Path — Singularity',
                 hint: '"Can I let go of self to become something greater?"',
                 faction: 'singularity',
-                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                costs: [{ label: 'Flux', amount: 20, resource: 'flux' }],
                 onChoose: () => { diveFlux(); },
                 next: 'singularity_arrival'
             });
@@ -3638,7 +3786,7 @@ SCENES['threshold_return_2'] = {
                 label: 'The Green Path — Lifeblood',
                 hint: '"Can I find peace in impermanence?"',
                 faction: 'lifeblood',
-                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                costs: [{ label: 'Flux', amount: 20, resource: 'flux' }],
                 onChoose: () => { diveFlux(); },
                 next: 'lifeblood_arrival'
             });
@@ -3648,7 +3796,7 @@ SCENES['threshold_return_2'] = {
                 label: 'The Amber Path — Sungrace',
                 hint: '"Can human ingenuity triumph over the inevitable?"',
                 faction: 'sungrace',
-                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                costs: [{ label: 'Flux', amount: 20, resource: 'flux' }],
                 onChoose: () => { diveFlux(); },
                 next: 'sungrace_arrival'
             });
@@ -3657,7 +3805,7 @@ SCENES['threshold_return_2'] = {
             label: 'The Violet Path — Silence',
             hint: '"Can I make peace with being alone?"',
             faction: 'silence',
-            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            costs: [{ label: 'Flux (dive)', amount: 20 }],
             onChoose: () => { diveFlux(); },
             next: 'silence_arrival'
         });
@@ -3665,7 +3813,7 @@ SCENES['threshold_return_2'] = {
             label: 'The Golden Path — Splintergleam',
             hint: '"Can broken things find purpose?"',
             faction: 'splintergleam',
-            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            costs: [{ label: 'Flux (dive)', amount: 20 }],
             onChoose: () => { diveFlux(); },
             next: 'splintergleam_arrival'
         });
@@ -3673,7 +3821,7 @@ SCENES['threshold_return_2'] = {
             label: 'The Blue Path — Phasetide',
             hint: '"Can I find comfort in believing there\'s a right answer?"',
             faction: 'phasetide',
-            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            costs: [{ label: 'Flux (dive)', amount: 20 }],
             onChoose: () => { diveFlux(); },
             next: 'phasetide_arrival'
         });
@@ -3681,12 +3829,66 @@ SCENES['threshold_return_2'] = {
             choices.push({
                 label: 'Convert Chrono Shards to Flux',
                 hint: 'Dissolve 2 shards at the nexus point to recharge your Core.',
-                costs: [{ label: 'Chrono Shards', amount: -2 }, { label: 'Flux', amount: 5 }],
+                costs: [{ label: 'Chrono Shards', amount: -2 }, { label: 'Flux', amount: 10 }],
                 next: 'threshold_shard_conversion'
             });
         }
+        // Compound unlock: Cross-Faction Synthesis
+        // Requires resources from 2+ factions + Knowledge >= 8 + Trust >= 4
+        if (!getFlag('cross_faction_synthesis')) {
+            const factionResKeys = ['dataFragments','rootTokens','energyCells','memoryShards','kintsuShards','tideMarks'];
+            const factionsWithRes = factionResKeys.filter(k => getResource(k) >= 1).length;
+            if (factionsWithRes >= 2 && state.knowledge >= 8 && (state.trust || 0) >= 4) {
+                choices.push({
+                    label: 'Synthesize cross-faction insights at the nexus',
+                    hint: 'Your Trust and Knowledge let you see connections between syndicates no one else can.',
+                    costs: [
+                        { label: 'Knowledge', amount: -5, resource: 'knowledge' },
+                        { label: 'Trust', amount: -4, resource: 'trust' },
+                        { label: 'Flux', amount: 8 },
+                        { label: 'Knowledge', amount: 5 },
+                        { label: 'Trust', amount: 3 }
+                    ],
+                    onChoose: () => {
+                        setFlag('cross_faction_synthesis');
+                        addFlux(8);
+                        addKnowledge(5);
+                        addTrust(3);
+                        addResource('chronoShards', 1);
+                        trackDelta('Flux (synthesis)', 8);
+                        trackDelta('Knowledge (synthesis)', 5);
+                        trackDelta('Trust (synthesis)', 3);
+                        trackDelta('Chrono Shard', 1);
+                    },
+                    next: 'threshold_synthesis'
+                });
+            }
+        }
         return choices;
     }
+};
+
+// ── Cross-Faction Synthesis Scene ──
+SCENES['threshold_synthesis'] = {
+    location: 'The Threshold — Nexus Point',
+    text: () => {
+        return `
+            <p>You stand at the exact center of the Threshold — the point where all six paths converge. You close your eyes and let the connections form.</p>
+            <p>Chrome logic meets green growth. Solar fury meets violet silence. Golden scars meet blue certainty. Every perspective you've gathered, every relationship you've built — they're not contradictions. They're <em>facets</em>.</p>
+            <div class="speaker">The Archivist</div>
+            <div class="dialogue">"Fascinating. You're doing something no diver has done before — not choosing a side, but holding all sides simultaneously. The stress should shatter a mind. Instead, yours is... synthesizing."</div>
+            <p>Your Core blazes white — all six faction colors merging into pure light. The energy surge fills your reserves. Understanding floods in: not answers, but the <em>shapes of answers</em>. How each syndicate's solution complements another's weakness.</p>
+            <div class="dialogue">"The multiverse rewards those who listen to everyone and belong to no one. Remember that."</div>
+            <div class="system-message">Cross-Faction Synthesis complete — +8 Flux, +5 Knowledge, +3 Trust, +1 Chrono Shard. Your understanding transcends faction boundaries.</div>
+        `;
+    },
+    choices: [
+        {
+            label: 'Continue — the paths await',
+            hint: 'Carry this understanding forward.',
+            next: 'threshold_return_2'
+        }
+    ]
 };
 
 
@@ -3878,6 +4080,39 @@ SCENES['silence_hub'] = {
             costs: [{ label: 'Flux', amount: -1, resource: 'flux' }, { label: 'Chrono Shard', amount: 1, resource: 'chronoShards' }],
             next: 'silence_hub'
         });
+        // Trust-gated: Greyl shows you a hidden room
+        if (!getFlag('silence_trust_bonus') && (state.trust || 0) >= 3) {
+            choices.push({
+                label: 'Follow Greyl through a door only cats can see',
+                hint: 'The cat trusts you. That means something here.',
+                costs: [{ label: 'Trust', amount: -3, resource: 'trust' }, { label: 'Memory Shard', amount: 1 }, { label: 'Knowledge', amount: 2 }],
+                onChoose: () => {
+                    setFlag('silence_trust_bonus');
+                    addResource('memoryShards', 1);
+                    addKnowledge(2);
+                    addRep('silence', 5);
+                    trackDelta('Memory Shard', 1);
+                    trackDelta('Knowledge', 2);
+                },
+                next: 'silence_hub'
+            });
+        }
+        // Knowledge-gated: translate the forbidden index
+        if (!getFlag('silence_knowledge_bonus') && state.knowledge >= 5) {
+            choices.push({
+                label: 'Translate the cipher on the forbidden catalog index',
+                hint: 'Your accumulated knowledge cracks what others couldn\'t.',
+                costs: [{ label: 'Knowledge', amount: -3, resource: 'knowledge' }, { label: 'Flux', amount: 4 }, { label: 'Trust', amount: 2 }],
+                onChoose: () => {
+                    setFlag('silence_knowledge_bonus');
+                    addFlux(4);
+                    addTrust(2);
+                    trackDelta('Flux', 4);
+                    trackDelta('Trust', 2);
+                },
+                next: 'silence_hub'
+            });
+        }
         if (getResource('memoryShards') >= 3) {
             choices.push({
                 label: 'Return to Dhali\'s chamber',
@@ -3947,6 +4182,12 @@ SCENES['silence_task_graves'] = {
         addResource('memoryShards', 1);
         addRep('silence', 3);
         addKnowledge(1);
+        // Hidden Flux cache — memories of the dead release trapped time
+        if (!getFlag('graves_flux_cache')) {
+            setFlag('graves_flux_cache');
+            addFlux(3);
+            trackDelta('Flux (memory echo)', 3);
+        }
     },
     text: () => {
         const count = getTaskCount('silence_graves');
@@ -4669,6 +4910,39 @@ SCENES['splintergleam_hub'] = {
             costs: [{ label: 'Flux', amount: -1, resource: 'flux' }, { label: 'Chrono Shard', amount: 1, resource: 'chronoShards' }],
             next: 'splintergleam_hub'
         });
+        // Trust-gated: Brant shares the warrior's code
+        if (!getFlag('splintergleam_trust_bonus') && (state.trust || 0) >= 3) {
+            choices.push({
+                label: 'Spar with Brant after hours — no audience',
+                hint: 'He only teaches the real techniques to those he trusts.',
+                costs: [{ label: 'Trust', amount: -3, resource: 'trust' }, { label: 'Kintsu Shard', amount: 1 }, { label: 'Knowledge', amount: 2 }],
+                onChoose: () => {
+                    setFlag('splintergleam_trust_bonus');
+                    addResource('kintsuShards', 1);
+                    addKnowledge(2);
+                    addRep('splintergleam', 5);
+                    trackDelta('Kintsu Shard', 1);
+                    trackDelta('Knowledge', 2);
+                },
+                next: 'splintergleam_hub'
+            });
+        }
+        // Knowledge-gated: read the Arena's founding runes
+        if (!getFlag('splintergleam_knowledge_bonus') && state.knowledge >= 5) {
+            choices.push({
+                label: 'Decipher the founding runes beneath the Arena floor',
+                hint: 'Your knowledge reveals the Arena\'s true purpose.',
+                costs: [{ label: 'Knowledge', amount: -3, resource: 'knowledge' }, { label: 'Flux', amount: 4 }, { label: 'Trust', amount: 2 }],
+                onChoose: () => {
+                    setFlag('splintergleam_knowledge_bonus');
+                    addFlux(4);
+                    addTrust(2);
+                    trackDelta('Flux', 4);
+                    trackDelta('Trust', 2);
+                },
+                next: 'splintergleam_hub'
+            });
+        }
         if (getResource('kintsuShards') >= 3) {
             choices.push({
                 label: 'Return to the Champion\'s Terrace',
@@ -4740,6 +5014,12 @@ SCENES['splintergleam_task_scavenge'] = {
         addResource('kintsuShards', 1);
         addRep('splintergleam', 3);
         addKnowledge(1);
+        // Hidden Flux cache — broken timelines leak raw Flux
+        if (!getFlag('wastes_flux_cache')) {
+            setFlag('wastes_flux_cache');
+            addFlux(3);
+            trackDelta('Flux (timeline bleed)', 3);
+        }
     },
     text: () => {
         const count = getTaskCount('splintergleam_scavenge');
@@ -5071,7 +5351,7 @@ SCENES['splintergleam_departure'] = {
 // ── Hub: Threshold Return 3 (post Silence/Splintergleam) ──
 SCENES['threshold_return_3'] = {
     location: 'The Threshold',
-    onEnter: () => { addFlux(2); trackDelta('Flux (threshold recovery)', 2); },
+    onEnter: () => { addFlux(5); trackDelta('Flux (threshold recovery)', 5); },
     text: () => {
         const completed = ['completed_lifeblood', 'completed_sungrace', 'completed_silence', 'completed_splintergleam'].filter(f => getFlag(f)).length;
         const metSing = getFlag('met_singularity') ? 1 : 0;
@@ -5111,7 +5391,7 @@ SCENES['threshold_return_3'] = {
                 label: 'The Chrome Path — Singularity',
                 hint: '"Can I let go of self to become something greater?"',
                 faction: 'singularity',
-                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                costs: [{ label: 'Flux', amount: 20, resource: 'flux' }],
                 onChoose: () => { diveFlux(); },
                 next: 'singularity_arrival'
             });
@@ -5121,7 +5401,7 @@ SCENES['threshold_return_3'] = {
                 label: 'The Green Path — Lifeblood',
                 hint: '"Can I find peace in impermanence?"',
                 faction: 'lifeblood',
-                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                costs: [{ label: 'Flux', amount: 20, resource: 'flux' }],
                 onChoose: () => { diveFlux(); },
                 next: 'lifeblood_arrival'
             });
@@ -5131,7 +5411,7 @@ SCENES['threshold_return_3'] = {
                 label: 'The Amber Path — Sungrace',
                 hint: '"Can human ingenuity triumph over the inevitable?"',
                 faction: 'sungrace',
-                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                costs: [{ label: 'Flux', amount: 20, resource: 'flux' }],
                 onChoose: () => { diveFlux(); },
                 next: 'sungrace_arrival'
             });
@@ -5141,7 +5421,7 @@ SCENES['threshold_return_3'] = {
                 label: 'The Violet Path — Silence',
                 hint: '"Can I make peace with being alone?"',
                 faction: 'silence',
-                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                costs: [{ label: 'Flux', amount: 20, resource: 'flux' }],
                 onChoose: () => { diveFlux(); },
                 next: 'silence_arrival'
             });
@@ -5151,7 +5431,7 @@ SCENES['threshold_return_3'] = {
                 label: 'The Golden Path — Splintergleam',
                 hint: '"Can broken things find purpose?"',
                 faction: 'splintergleam',
-                costs: [{ label: 'Flux', amount: 5, resource: 'flux' }],
+                costs: [{ label: 'Flux', amount: 20, resource: 'flux' }],
                 onChoose: () => { diveFlux(); },
                 next: 'splintergleam_arrival'
             });
@@ -5160,7 +5440,7 @@ SCENES['threshold_return_3'] = {
             label: 'The Blue Path — Phasetide',
             hint: '"Can I find comfort in believing there\'s a right answer?"',
             faction: 'phasetide',
-            costs: [{ label: 'Flux (dive)', amount: 5 }],
+            costs: [{ label: 'Flux (dive)', amount: 20 }],
             onChoose: () => { diveFlux(); },
             next: 'phasetide_arrival'
         });
@@ -5168,9 +5448,39 @@ SCENES['threshold_return_3'] = {
             choices.push({
                 label: 'Convert Chrono Shards to Flux',
                 hint: 'Dissolve 2 shards at the nexus point to recharge your Core.',
-                costs: [{ label: 'Chrono Shards', amount: -2 }, { label: 'Flux', amount: 5 }],
+                costs: [{ label: 'Chrono Shards', amount: -2 }, { label: 'Flux', amount: 10 }],
                 next: 'threshold_shard_conversion'
             });
+        }
+        // Compound unlock: Cross-Faction Synthesis (also available here)
+        if (!getFlag('cross_faction_synthesis')) {
+            const factionResKeys = ['dataFragments','rootTokens','energyCells','memoryShards','kintsuShards','tideMarks'];
+            const factionsWithRes = factionResKeys.filter(k => getResource(k) >= 1).length;
+            if (factionsWithRes >= 2 && state.knowledge >= 8 && (state.trust || 0) >= 4) {
+                choices.push({
+                    label: 'Synthesize cross-faction insights at the nexus',
+                    hint: 'Your Trust and Knowledge let you see connections between syndicates no one else can.',
+                    costs: [
+                        { label: 'Knowledge', amount: -5, resource: 'knowledge' },
+                        { label: 'Trust', amount: -4, resource: 'trust' },
+                        { label: 'Flux', amount: 8 },
+                        { label: 'Knowledge', amount: 5 },
+                        { label: 'Trust', amount: 3 }
+                    ],
+                    onChoose: () => {
+                        setFlag('cross_faction_synthesis');
+                        addFlux(8);
+                        addKnowledge(5);
+                        addTrust(3);
+                        addResource('chronoShards', 1);
+                        trackDelta('Flux (synthesis)', 8);
+                        trackDelta('Knowledge (synthesis)', 5);
+                        trackDelta('Trust (synthesis)', 3);
+                        trackDelta('Chrono Shard', 1);
+                    },
+                    next: 'threshold_synthesis'
+                });
+            }
         }
         return choices;
     }
@@ -5444,6 +5754,39 @@ SCENES['phasetide_hub'] = {
             costs: [{ label: 'Flux', amount: -1, resource: 'flux' }, { label: 'Chrono Shard', amount: 1, resource: 'chronoShards' }],
             next: 'phasetide_hub'
         });
+        // Trust-gated: Minia confides the heresy
+        if (!getFlag('phasetide_trust_bonus') && (state.trust || 0) >= 3) {
+            choices.push({
+                label: 'Join Minia for evening prayer — she has something to confess',
+                hint: 'She trusts you with a dangerous doubt.',
+                costs: [{ label: 'Trust', amount: -3, resource: 'trust' }, { label: 'Tide Mark', amount: 1 }, { label: 'Knowledge', amount: 2 }],
+                onChoose: () => {
+                    setFlag('phasetide_trust_bonus');
+                    addResource('tideMarks', 1);
+                    addKnowledge(2);
+                    addRep('phasetide', 5);
+                    trackDelta('Tide Mark', 1);
+                    trackDelta('Knowledge', 2);
+                },
+                next: 'phasetide_hub'
+            });
+        }
+        // Knowledge-gated: read the forbidden tidal charts
+        if (!getFlag('phasetide_knowledge_bonus') && state.knowledge >= 5) {
+            choices.push({
+                label: 'Cross-reference the tidal charts with what you know',
+                hint: 'Your knowledge reveals a flaw in the Convergence model.',
+                costs: [{ label: 'Knowledge', amount: -3, resource: 'knowledge' }, { label: 'Flux', amount: 4 }, { label: 'Trust', amount: 2 }],
+                onChoose: () => {
+                    setFlag('phasetide_knowledge_bonus');
+                    addFlux(4);
+                    addTrust(2);
+                    trackDelta('Flux', 4);
+                    trackDelta('Trust', 2);
+                },
+                next: 'phasetide_hub'
+            });
+        }
         if (getResource('tideMarks') >= 3) {
             choices.push({
                 label: 'Return to the Wavemother',
@@ -5516,6 +5859,12 @@ SCENES['phasetide_task_city'] = {
         addResource('tideMarks', 1);
         addRep('phasetide', 3);
         addKnowledge(1);
+        // Hidden Flux cache — Cathedral resonance traps Flux in stonework
+        if (!getFlag('cathedral_flux_cache')) {
+            setFlag('cathedral_flux_cache');
+            addFlux(3);
+            trackDelta('Flux (cathedral resonance)', 3);
+        }
     },
     text: () => {
         const count = getTaskCount('phasetide_city');
@@ -5996,7 +6345,7 @@ SCENES['phasetide_departure'] = {
 // ── 8.1: The Final Threshold ──
 SCENES['final_threshold'] = {
     location: 'The Threshold — Endgame',
-    onEnter: () => { addFlux(3); trackDelta('Flux (endgame surge)', 3); },
+    onEnter: () => { addFlux(10); trackDelta('Flux (endgame surge)', 10); },
     text: () => {
         const flux = state.flux;
         const knowledge = state.knowledge;
@@ -6021,7 +6370,7 @@ SCENES['final_threshold'] = {
             <div class="speaker">The Archivist</div>
             <div class="dialogue">"Six paths. Six truths. And now the Convergence Engine nears completion. Soval grows. The Great Conflict accelerates. Something must break."</div>
             <p>The pillars' light converges on you. Your Core blazes.</p>
-            <div class="dialogue">"You carry ${knowledge} pieces of knowledge. You trail ${flux} units of Flux behind you like a comet's tail. Your strongest allegiance is to <strong>${factionNames[topFaction]}</strong>."</div>
+            <div class="dialogue">"You carry ${knowledge} pieces of knowledge. ${(state.trust || 0) >= 10 ? 'Those you\'ve met across the timelines trust you deeply. ' : (state.trust || 0) >= 5 ? 'Some across the timelines have learned to trust you. ' : ''}You trail ${flux} units of Flux behind you like a comet's tail. Your strongest allegiance is to <strong>${factionNames[topFaction]}</strong>."</div>
             <div class="dialogue">"The multiverse does not care about your intentions. It cares about your choices. Choose."</div>
             <div class="lore-note">+2 Flux — The Threshold itself is fracturing. The endgame generates its own paradox.</div>
         `;
@@ -6068,8 +6417,8 @@ SCENES['final_threshold'] = {
         // Secret seventh option
         choices.push({
             label: 'Refuse to choose',
-            hint: '"I reject every solution. Including this one."',
-            condition: () => state.knowledge >= 20,
+            hint: '"I reject every solution. Including this one." (Requires Knowledge 20+ and Trust 6+)',
+            condition: () => state.knowledge >= 20 && (state.trust || 0) >= 6,
             next: 'ending_refuse'
         });
 
@@ -6385,7 +6734,8 @@ SCENES['epilogue'] = {
 
             <div style="border: 1px solid #444; padding: 1.5em; margin: 1em 0; background: rgba(0,0,0,0.3); border-radius: 8px;">
                 <h3 style="color: #88ccff; margin-top:0;">◇ Final Statistics</h3>
-                <p><strong>Knowledge Gathered:</strong> ${knowledge}</p>
+                <p><strong>Knowledge Gathered:</strong> ${knowledge} ${knowledge >= 20 ? '— Scholar of the Multiverse' : knowledge >= 10 ? '— Well-Informed Diver' : knowledge >= 5 ? '— Curious Explorer' : '— Casual Observer'}</p>
+                <p><strong>Trust Earned:</strong> ${state.trust || 0} ${(state.trust || 0) >= 10 ? '— Trusted by All' : (state.trust || 0) >= 6 ? '— Respected Ally' : (state.trust || 0) >= 3 ? '— Emerging Confidant' : '— Unknown Stranger'}</p>
                 <p><strong>Flux Trail:</strong> ${flux} (the energy you left behind for Soval)</p>
                 <p><strong>Ending:</strong> ${endingTitles[ending]}</p>
             </div>
@@ -6419,7 +6769,7 @@ SCENES['epilogue'] = {
                 <p style="font-style:italic; color:#aaa;">— Dhali, Bearer of Memories</p>
                 <br>
                 <p style="color:#888; font-size:0.9em;">Thank you for playing <strong>The Braided Path</strong>.</p>
-                <p style="color:#888; font-size:0.9em;">There are <strong>8 endings</strong> (including the fail state), each with <strong>2 variants</strong> based on your choices and reputation.</p>
+                <p style="color:#888; font-size:0.9em;">There are <strong>8 endings</strong> (including the fail state), each with <strong>2 variants</strong> based on your choices, reputation, Trust, and Knowledge.</p>
                 <p style="color:#888; font-size:0.9em;">Try again. Walk different paths. Manage your Flux. Break different things.</p>
             </div>
 
